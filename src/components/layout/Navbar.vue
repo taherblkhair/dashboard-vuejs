@@ -45,10 +45,10 @@
           >
             <img
               class="w-8 h-8 rounded-full"
-              src="https://via.placeholder.com/32"
+              :src="userAvatar"
               alt="User"
             />
-            <span class="hidden md:block text-sm font-medium">أحمد محمد</span>
+            <span class="hidden md:block text-sm font-medium">{{ displayName }}</span>
           </button>
 
           <!-- Dropdown Menu -->
@@ -59,7 +59,7 @@
             <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">الملف الشخصي</a>
             <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">الإعدادات</a>
             <div class="border-t border-gray-200 my-1"></div>
-            <a class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">تسجيل الخروج</a>
+            <button @click="handleLogout" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">تسجيل الخروج</button>
           </div>
         </div>
       </div>
@@ -69,12 +69,14 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuth } from '../../store'
 
 // declare emits in an array form (supports hyphenated event names)
 const emit = defineEmits(['toggle-sidebar'] as const)
 
 const route = useRoute()
+const router = useRouter()
 const userMenuOpen = ref(false)
 
 const currentPageTitle = computed(() => {
@@ -89,6 +91,18 @@ const currentPageTitle = computed(() => {
   return titles[route.path] || 'نظام المبيعات'
 })
 
-// إغلاق القائمة عند النقر خارجها
-// (function removed — keep the file minimal; can add onClickOutside if needed)
+const { state, logout } = useAuth()
+
+const displayName = computed(() => {
+  return state.user?.name || state.user?.username || state.user?.email || 'مستخدم'
+})
+
+const userAvatar = computed(() => state.user?.avatar || 'https://via.placeholder.com/32')
+
+function handleLogout() {
+  logout()
+  userMenuOpen.value = false
+  router.push({ name: 'Login' })   
+}
+
 </script>
