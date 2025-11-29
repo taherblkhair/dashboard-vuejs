@@ -27,7 +27,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
-      </div>
+      </div> // end of logo and title
 
       <!-- Navigation Links -->
       <nav class="flex-1 flex flex-col gap-1 p-4">
