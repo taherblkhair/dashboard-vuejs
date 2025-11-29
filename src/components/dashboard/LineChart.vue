@@ -23,15 +23,25 @@ const props = defineProps({
 const chartHeight = 200
 const chartWidth = 600
 
-const maxValue = computed(() => Math.max(...props.data) * 1.2)
+const hasData = computed(() => props.data && props.data.length > 0)
+
+const maxValue = computed(() => {
+  if (!hasData.value) return 100
+  return Math.max(...props.data) * 1.2
+})
 
 const points = computed(() => {
-  const xStep = chartWidth / (props.data.length - 1)
+  if (!hasData.value) return []
+  const xStep = chartWidth / Math.max(props.data.length - 1, 1)
   return props.data.map((value, index) => {
     const x = index * xStep
     const y = chartHeight - (value / maxValue.value) * chartHeight
     return { x, y, value }
   })
+})
+
+const displayLabels = computed(() => {
+  return props.labels.slice(0, props.data.length)
 })
 
 const linePath = computed(() => {
@@ -41,6 +51,7 @@ const linePath = computed(() => {
 })
 
 const areaPath = computed(() => {
+  if (points.value.length === 0) return ''
   const path = points.value
     .map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
     .join(' ')
@@ -90,9 +101,9 @@ const areaPath = computed(() => {
         <!-- Labels -->
         <g class="x-labels">
           <text
-            v-for="(label, index) in labels"
+            v-for="(label, index) in displayLabels"
             :key="index"
-            :x="points[index]?.x || 0"
+            :x="points[index]?.x ?? 0"
             :y="chartHeight + 20"
             text-anchor="middle"
             fill="#6b7280"

@@ -8,13 +8,23 @@ const settings = ref({
   language: 'en'
 })
 
+const showSuccessMessage = ref(false)
+
 const handleSave = () => {
-  alert('Settings saved successfully!')
+  showSuccessMessage.value = true
+  setTimeout(() => {
+    showSuccessMessage.value = false
+  }, 3000)
 }
 </script>
 
 <template>
   <div class="settings">
+    <!-- Success notification -->
+    <div v-if="showSuccessMessage" class="success-notification" role="alert">
+      ✓ Settings saved successfully!
+    </div>
+    
     <div class="settings-card">
       <h2 class="settings-title">General Settings</h2>
       
@@ -76,6 +86,27 @@ const handleSave = () => {
 <style scoped>
 .settings {
   max-width: 800px;
+}
+
+.success-notification {
+  background-color: #d1fae5;
+  color: #059669;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .settings-card {
