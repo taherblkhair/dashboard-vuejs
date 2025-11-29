@@ -1,0 +1,20 @@
+/* stylelint-disable at-rule-no-unknown */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* دعم RTL */
+:root { direction: rtl; }
+
+body {
+  font-family: "Cairo", sans-serif;
+  background-color: #f4f6f9;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* اترك هنا قواعد global التي تستخدم @apply بدل استخدامها داخل style scoped */
+.sidebar-link {
+  @apply px-4 py-2 rounded-lg hover:bg-slate-700 transition cursor-pointer;
+}
