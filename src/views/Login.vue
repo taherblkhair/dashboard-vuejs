@@ -36,7 +36,7 @@ const password = ref('password')
 const error = ref<string | null>(null)
 
 const router = useRouter()
-const { state, login } = useAuth()
+const { login } = useAuth()
 
 const loading = ref(false)
 

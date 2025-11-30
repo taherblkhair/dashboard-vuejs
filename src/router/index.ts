@@ -29,7 +29,7 @@ const router = createRouter({
 })
 
 // Global guard: require token for protected routes; allow guest routes like /login
-router.beforeEach((to: any, from: any, next: any) => {
+router.beforeEach((to: any, _from: any, next: any) => {
   const token = localStorage.getItem('token')
 
   if (!token && !to.meta?.guest) {

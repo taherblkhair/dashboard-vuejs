@@ -99,10 +99,17 @@ const displayName = computed(() => {
 
 const userAvatar = computed(() => state.user?.avatar || 'https://via.placeholder.com/32')
 
-function handleLogout() {
-  logout()
-  userMenuOpen.value = false
-  router.push({ name: 'Login' })   
+async function handleLogout() {
+  try {
+    // wait for logout to finish so token is removed before navigation
+    await logout()
+  } catch (e) {
+    // ignore errors from logout API, still navigate to login
+    // could log e if needed
+  } finally {
+    userMenuOpen.value = false
+    router.push({ name: 'Login' })
+  }
 }
 
 </script>

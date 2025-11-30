@@ -1,5 +1,3 @@
-
-
 <template>
   <div>
     <!-- Overlay for mobile -->
@@ -27,29 +25,86 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
-      </div> // end of logo and title
+      </div>
 
       <!-- Navigation Links -->
-      <nav class="flex-1 flex flex-col gap-1 p-4">
-        <router-link
-          v-for="item in menuItems"
-          :key="item.name"
-          :to="item.route"
-          class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg transition-colors"
-          :class="{ 
-            'bg-blue-600 text-white': route.path === item.route,
-            'hover:bg-slate-700': route.path !== item.route
-          }"
-          @click="$emit('navigate')"
-        >
-          <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"/>
-          </svg>
-          <span class="flex-1">{{ item.name }}</span>
-          <span v-if="item.badge" class="bg-red-500 text-xs px-2 py-1 rounded-full">
-            {{ item.badge }}
-          </span>
-        </router-link>
+      <nav class="flex-1 flex flex-col gap-1 p-4 overflow-y-auto">
+        <div v-for="item in menuItems" :key="item.name">
+          <!-- Main Menu Items -->
+          <div v-if="!item.children" class="mb-1">
+            <router-link
+              v-if="item.route"
+              :to="item.route"
+              class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg transition-colors"
+              :class="{ 
+                'bg-blue-600 text-white': isActiveRoute(item.route),
+                'hover:bg-slate-700': !isActiveRoute(item.route)
+              }"
+              @click="handleNavigate(item)"
+            >
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"/>
+              </svg>
+              <span class="flex-1">{{ item.name }}</span>
+              <span v-if="item.badge" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-5 h-5 flex items-center justify-center">
+                {{ item.badge }}
+              </span>
+            </router-link>
+          </div>
+
+          <!-- Menu Items with Children -->
+          <div v-else class="mb-1">
+            <button
+              class="w-full sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg transition-colors hover:bg-slate-700"
+              :class="{ 'bg-slate-700': openMenus[item.name] }"
+              @click="toggleMenu(item.name)"
+            >
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"/>
+              </svg>
+              <span class="flex-1 text-right">{{ item.name }}</span>
+              <span v-if="item.badge" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full min-w-5 h-5 flex items-center justify-center">
+                {{ item.badge }}
+              </span>
+              <svg 
+                class="w-4 h-4 transition-transform duration-200 flex-shrink-0" 
+                :class="{ 'rotate-180': openMenus[item.name] }"
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <!-- Submenu -->
+            <div 
+              v-show="openMenus[item.name]"
+              class="mt-1 ml-4 space-y-1 overflow-hidden transition-all duration-200"
+            >
+              <template v-for="child in item.children" :key="child.name">
+                <router-link
+                  v-if="child.route"
+                  :to="child.route"
+                  class="submenu-link flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm"
+                  :class="{ 
+                    'bg-blue-600 text-white': isActiveRoute(child.route),
+                    'hover:bg-slate-700': !isActiveRoute(child.route)
+                  }"
+                  @click="handleNavigate(child)"
+                >
+                  <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="child.icon"/>
+                  </svg>
+                  <span class="flex-1">{{ child.name }}</span>
+                  <span v-if="child.badge" class="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-4 h-4 flex items-center justify-center">
+                    {{ child.badge }}
+                  </span>
+                </router-link>
+              </template>
+            </div>
+          </div>
+        </div>
       </nav>
 
       <!-- User Section -->
@@ -76,8 +131,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, reactive } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const props = defineProps<{ isOpen: boolean }>()
 const emit = defineEmits<{
@@ -86,6 +141,41 @@ const emit = defineEmits<{
 }>()
 
 const route = useRoute()
+const router = useRouter()
+
+// تعريف الأنواع
+interface MenuItem {
+  name: string
+  route?: string
+  icon: string
+  badge?: string | number
+  children?: MenuItem[]
+}
+
+// حالة القوائم المفتوحة
+const openMenus = reactive<{ [key: string]: boolean }>({
+  'المبيعات': false,
+  'المشتريات': false,
+  'المخزون': false
+})
+
+// دالة لفتح/إغلاق القوائم
+const toggleMenu = (menuName: string) => {
+  openMenus[menuName] = !openMenus[menuName]
+}
+
+// دالة للتحقق من المسار النشط
+const isActiveRoute = (routePath?: string) => {
+  return routePath && route.path === routePath
+}
+
+// دالة للتنقل
+const handleNavigate = (item: MenuItem) => {
+  if (item.route) {
+    router.push(item.route)
+    emit('navigate')
+  }
+}
 
 // compute classes for aside
 const asideClasses = computed(() => [
@@ -94,29 +184,90 @@ const asideClasses = computed(() => [
   'md:relative md:translate-x-0 md:h-screen'
 ].join(' '))
 
-// قائمة القوائم مع الأيقونات
-const menuItems = ref([
+// قائمة القوائم مع القوائم الفرعية
+const menuItems = ref<MenuItem[]>([
   {
     name: 'لوحة التحكم',
     route: '/',
     icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
   },
   {
-    name: 'المنتجات',
-    route: '/products',
-    icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
-    badge: '5'
+    name: 'المبيعات',
+    children: [
+      {
+        name: 'فواتير المبيعات',
+        route: '/sales/invoices',
+        icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+        badge: '3'
+      },
+      {
+        name: 'طلبات المبيعات',
+        route: '/sales/orders',
+        icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+        badge: '12'
+      },
+      {
+        name: 'عملاء المبيعات',
+        route: '/sales/customers',
+        icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
+      },
+      {
+        name: 'تقارير المبيعات',
+        route: '/sales/reports',
+        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
+      }
+    ],
+    icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
+    badge: '15'
   },
   {
-    name: 'الطلبات',
-    route: '/orders',
-    icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
-    badge: '12'
+    name: 'المشتريات',
+    children: [
+      {
+        name: 'فواتير المشتريات',
+        route: '/purchases/invoices',
+        icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+        badge: '5'
+      },
+      {
+        name: 'طلبات الشراء',
+        route: '/purchases/orders',
+        icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'
+      },
+      {
+        name: 'الموردون',
+        route: '/purchases/suppliers',
+        icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+      }
+    ],
+    icon: 'M3 3h18v18H3V3zm16 16V5H5v14h14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z'
   },
   {
-    name: 'العملاء',
-    route: '/customers',
-    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
+    name: 'المخزون',
+    children: [
+      {
+        name: 'الأصناف',
+        route: '/inventory/items',
+        icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+        badge: '45'
+      },
+      {
+        name: 'الفئات',
+        route: '/inventory/categories',
+        icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
+      },
+      {
+        name: 'حركة المخزون',
+        route: '/inventory/movements',
+        icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'
+      },
+      {
+        name: 'جرد المخزون',
+        route: '/inventory/stocktaking',
+        icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'
+      }
+    ],
+    icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'
   },
   {
     name: 'التقارير',
@@ -136,7 +287,29 @@ const menuItems = ref([
   @apply flex items-center gap-3 px-3 py-3 rounded-lg transition-colors duration-200;
 }
 
+.submenu-link {
+  @apply flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 text-sm;
+}
+
 .router-link-active {
   @apply bg-blue-600 text-white;
+}
+
+/* Scrollbar styling for sidebar */
+nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+nav::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+nav::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 2px;
+}
+
+nav::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 </style>
