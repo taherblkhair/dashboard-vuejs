@@ -63,3 +63,8 @@ export async function deleteProduct(id: number): Promise<{ message?: string } | 
   // expect API to respond with a success message or empty body
   return request(`/products/${id}`, { method: 'DELETE' })
 }
+
+export async function fetchProductStock(productId: number): Promise<any> {
+  // returns { data: { total_stock, total_reserved_stock, total_available_stock, variants: [...] } }
+  return request(`/products/${productId}/stock`)
+}
