@@ -174,355 +174,6 @@
       <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)" class="px-3 py-1 border rounded disabled:opacity-50">التالي</button>
     </div>
 
-  <!-- Modal (view details) -->
-  <!-- Modal for viewing product details -->
-<div v-if="showModal && selectedProduct" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-  <!-- Backdrop -->
-  <div class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm transition-opacity" @click="closeModal"></div>
-
-  <!-- Modal container -->
-  <div class="flex min-h-screen items-center justify-center p-4">
-    <!-- Modal content -->
-    <div class="relative w-full max-w-5xl transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all">
-      <!-- Modal header -->
-      <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
-        <div class="flex items-start justify-between">
-          <div class="flex items-center gap-4">
-            <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-              <span class="text-2xl font-bold text-white">{{ selectedProduct.name.charAt(0).toUpperCase() }}</span>
-            </div>
-            <div>
-              <h2 class="text-2xl font-bold text-white" id="modal-title">{{ selectedProduct.name }}</h2>
-              <div class="mt-2 flex items-center gap-4">
-                <span class="rounded-full bg-white/20 px-3 py-1 text-sm text-white backdrop-blur-sm">
-                  {{ selectedProduct.sku }}
-                </span>
-                <span :class="selectedProduct.is_active ? 'bg-green-500/30 text-green-100' : 'bg-red-500/30 text-red-100'" 
-                      class="rounded-full px-3 py-1 text-sm font-medium">
-                  {{ selectedProduct.is_active ? 'نشط' : 'غير نشط' }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <button @click="closeModal" class="rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Modal body -->
-      <div class="max-h-[70vh] overflow-y-auto p-8">
-        <!-- Loading state -->
-        <div v-if="modalLoading" class="flex flex-col items-center justify-center py-12">
-          <div class="h-16 w-16 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
-          <p class="mt-4 text-lg font-medium text-gray-600">جاري تحميل تفاصيل المنتج...</p>
-          <p class="mt-2 text-sm text-gray-400">يرجى الانتظار</p>
-        </div>
-
-        <!-- Content -->
-        <div v-else>
-          <!-- Quick info cards -->
-          <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <!-- Category card -->
-            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div class="flex items-center gap-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
-                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-500">الفئة</p>
-                  <p class="text-lg font-semibold text-gray-800">{{ selectedProduct.category?.name || 'غير محدد' }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Price range card -->
-            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div class="flex items-center gap-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
-                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-500">نطاق السعر</p>
-                  <p class="text-lg font-semibold text-gray-800">{{ getMinPrice(selectedProduct.variants) }}$ - {{ getMaxPrice(selectedProduct.variants) }}$</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Variants count card -->
-            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div class="flex items-center gap-3">
-                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
-                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-500">عدد المتغيرات</p>
-                  <p class="text-lg font-semibold text-gray-800">{{ selectedProduct.variants.length }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Description -->
-          <div class="mb-8 rounded-xl border border-gray-200 bg-gray-50 p-6">
-            <h3 class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-800">
-              <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              الوصف
-            </h3>
-            <p class="text-gray-600 leading-relaxed">{{ selectedProduct.description || 'لا يوجد وصف' }}</p>
-          </div>
-
-          <!-- Product Stock Section -->
-          <div class="mb-8">
-            <div class="mb-4 flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-800">مخزون المنتج</h3>
-              <span class="text-sm text-gray-500">آخر تحديث: الآن</span>
-            </div>
-
-            <!-- Stock loading -->
-            <div v-if="productStockLoading" class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 py-8">
-              <div class="flex items-center gap-3">
-                <div class="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
-                <span class="text-gray-600">جاري تحميل بيانات المخزون...</span>
-              </div>
-            </div>
-
-            <!-- Stock content -->
-            <div v-else>
-              <!-- Stock summary -->
-              <div v-if="productStock && productStock.data" class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-                <div class="rounded-xl border border-blue-200 bg-blue-50 p-5">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-medium text-blue-700">إجمالي المخزون</p>
-                      <p class="mt-1 text-2xl font-bold text-blue-900">{{ productStock.data.total_stock }}</p>
-                    </div>
-                    <div class="rounded-lg bg-blue-100 p-3">
-                      <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="rounded-xl border border-orange-200 bg-orange-50 p-5">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-medium text-orange-700">المخزون المحجوز</p>
-                      <p class="mt-1 text-2xl font-bold text-orange-900">{{ productStock.data.total_reserved_stock }}</p>
-                    </div>
-                    <div class="rounded-lg bg-orange-100 p-3">
-                      <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="rounded-xl border border-green-200 bg-green-50 p-5">
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-medium text-green-700">المخزون المتاح</p>
-                      <p class="mt-1 text-2xl font-bold text-green-900">{{ productStock.data.total_available_stock }}</p>
-                    </div>
-                    <div class="rounded-lg bg-green-100 p-3">
-                      <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Stock by variants table -->
-              <div v-if="productStock && productStock.data && productStock.data.variants.length > 0" class="mb-8">
-                <div class="mb-4 flex items-center gap-2">
-                  <h4 class="text-md font-semibold text-gray-700">تفاصيل المخزون حسب المتغير</h4>
-                  <span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">{{ productStock.data.variants.length }} متغير</span>
-                </div>
-                <div class="overflow-hidden rounded-xl border border-gray-200">
-                  <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                      <tr>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">المتغير</th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">SKU</th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">المخزون الكلي</th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">المحجوز</th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">المتاح</th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">الحالة</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 bg-white">
-                      <tr v-for="v in productStock.data.variants" :key="v.id" class="hover:bg-gray-50">
-                        <td class="whitespace-nowrap px-6 py-4">
-                          <div class="flex flex-wrap gap-1 justify-end">
-                            <span v-for="(val, key) in v.attributes" :key="key" 
-                                  class="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                              <span class="text-gray-500">{{ key }}:</span>
-                              <span class="font-medium">{{ val }}</span>
-                            </span>
-                          </div>
-                        </td>
-                        <td class="whitespace-nowrap px-6 py-4">
-                          <code class="rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-700">{{ v.sku_variant }}</code>
-                        </td>
-                        <td class="whitespace-nowrap px-6 py-4 text-center text-lg font-semibold text-gray-900">{{ v.total_stock }}</td>
-                        <td class="whitespace-nowrap px-6 py-4 text-center text-lg font-medium text-orange-600">{{ v.total_reserved_stock }}</td>
-                        <td class="whitespace-nowrap px-6 py-4 text-center">
-                          <span :class="v.total_available_stock > 0 ? 'text-green-600' : 'text-red-600'" 
-                                class="text-lg font-bold">
-                            {{ v.total_available_stock }}
-                          </span>
-                        </td>
-                        <td class="whitespace-nowrap px-6 py-4">
-                          <span :class="v.total_available_stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
-                                class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium">
-                            <span :class="v.total_available_stock > 0 ? 'bg-green-500' : 'bg-red-500'" 
-                                  class="h-2 w-2 rounded-full"></span>
-                            {{ v.total_available_stock > 0 ? 'متوفر' : 'نفذ' }}
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div v-else-if="productStock && !productStock.data" class="rounded-xl border border-gray-200 bg-gray-50 p-8 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900">لا توجد بيانات مخزون</h3>
-                <p class="mt-2 text-sm text-gray-500">لم يتم تسجيل بيانات مخزون لهذا المنتج بعد</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Variants Section -->
-          <div>
-            <div class="mb-4 flex items-center justify-between">
-              <h3 class="text-lg font-semibold text-gray-800">المتغيرات</h3>
-              <div class="flex items-center gap-3">
-                <span class="text-sm text-gray-500">{{ selectedProduct.variants.length }} متغير</span>
-                <div class="h-6 w-px bg-gray-300"></div>
-                <button @click="exportVariants" class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700">
-                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  تصدير
-                </button>
-              </div>
-            </div>
-
-            <div class="overflow-hidden rounded-xl border border-gray-200">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">المتغير</th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">سعر الشراء</th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">سعر البيع</th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">تاريخ الانتهاء</th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">الحالة</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                  <tr v-for="v in selectedProduct.variants" :key="v.id" class="hover:bg-gray-50">
-                    <td class="px-6 py-4">
-                      <div class="flex items-center justify-between">
-                        <div class="flex flex-col items-end">
-                          <code class="mb-2 rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-700">{{ v.sku_variant }}</code>
-                          <div class="flex flex-wrap gap-1 justify-end">
-                            <span v-for="(val, key) in v.attributes" :key="key" 
-                                  class="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs text-blue-700">
-                              <span class="text-blue-500">{{ key }}:</span>
-                              <span class="font-medium">{{ val }}</span>
-                            </span>
-                          </div>
-                        </div>
-                        <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200"></div>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <div class="text-right">
-                        <span class="text-lg font-bold text-gray-900">{{ v.purchase_price }}$</span>
-                        <div class="mt-1 text-xs text-gray-500">تكلفة الوحدة</div>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <div class="text-right">
-                        <span class="text-lg font-bold text-green-600">{{ v.sale_price }}$</span>
-                        <div class="mt-1 text-xs text-gray-500">سعر البيع</div>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <div class="text-right">
-                        <span :class="isExpiringSoon(v.expiry_date) ? 'text-red-600' : 'text-gray-700'" 
-                              class="font-medium">
-                          {{ formatDate(v.expiry_date) }}
-                        </span>
-                        <div v-if="isExpiringSoon(v.expiry_date)" class="mt-1 flex items-center gap-1 text-xs text-red-500">
-                          <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                          </svg>
-                          ينتهي قريباً
-                        </div>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <span :class="v.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
-                            class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium">
-                        <span :class="v.is_active ? 'bg-green-500' : 'bg-red-500'" 
-                              class="h-2 w-2 rounded-full"></span>
-                        {{ v.is_active ? 'نشط' : 'غير نشط' }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modal footer -->
-      <div class="border-t border-gray-200 bg-gray-50 px-8 py-6">
-        <div class="flex items-center justify-between">
-          <!-- <div class="text-sm text-gray-500">
-            <span class="font-medium">تاريخ الإنشاء:</span> {{ formatDate(selectedProduct.created_at) }}
-            <span v-if="selectedProduct.updated_at" class="mr-4">
-              • <span class="font-medium">آخر تحديث:</span> {{ formatDate(selectedProduct.updated_at) }}
-            </span>
-          </div> -->
-          <div class="flex items-center gap-3">
-            <button @click="closeModal" type="button" 
-                    class="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-              إغلاق
-            </button>
-            <!-- <button @click="editProduct(selectedProduct)" type="button"
-                    class="rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-2.5 text-sm font-medium text-white hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-              <div class="flex items-center gap-2">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                تعديل المنتج
-              </div>
-            </button> -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
   </div>
 
   <!-- Modal (create product) -->
@@ -547,9 +198,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { fetchProducts as apiFetchProducts, fetchCategories } from '../../api/products'
-import { fetchProduct as apiFetchProduct, createProduct as apiCreateProduct, deleteProduct as apiDeleteProduct, fetchProductStock as apiFetchProductStock } from '../../api/products'
+import { createProduct as apiCreateProduct, deleteProduct as apiDeleteProduct } from '../../api/products'
 import ProductForm from './ProductForm.vue'
 // example payload used for pre-fill (can be moved to .env or fetched)
 const examplePayload: Partial<Product> = {
@@ -617,45 +269,7 @@ const totalVariants = computed(() =>
 )
 
 
-// دوال مساعدة إضافية
-const isExpiringSoon = (dateString: string) => {
-  if (!dateString) return false
-  const expiryDate = new Date(dateString)
-  const today = new Date()
-  const diffTime = expiryDate.getTime() - today.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return diffDays <= 30 && diffDays > 0
-}
-
-const exportVariants = () => {
-  if (!selectedProduct.value) return
-  
-  const data = selectedProduct.value.variants.map(variant => ({
-    'SKU المتغير': variant.sku_variant,
-    'الخصائص': Object.entries(variant.attributes || {}).map(([k, v]) => `${k}: ${v}`).join(', '),
-    'سعر الشراء': variant.purchase_price,
-    'سعر البيع': variant.sale_price,
-    'تاريخ الانتهاء': formatDate(variant.expiry_date),
-    'الحالة': variant.is_active ? 'نشط' : 'غير نشط'
-  }))
-  
-  const csv = convertToCSV(data)
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(blob)
-  link.download = `متغيرات_${selectedProduct.value.sku}_${new Date().toISOString().split('T')[0]}.csv`
-  link.click()
-  
-  showToastMessage('تم التصدير', 'تم تصدير بيانات المتغيرات بنجاح')
-}
-
-const convertToCSV = (data: any[]) => {
-  const headers = Object.keys(data[0])
-  const rows = data.map(row => 
-    headers.map(header => `"${row[header]}"`).join(',')
-  )
-  return [headers.join(','), ...rows].join('\n')
-}
+// (removed modal-only helpers: exportVariants, convertToCSV, isExpiringSoon)
 
 const showToastMessage = (title: string, description: string) => {
   // يمكن استبدال هذا بتنفيذ toast حقيقي
@@ -692,12 +306,9 @@ const getMaxPrice = (variants: Variant[]) => {
 }
 
 // الإجراءات
-const selectedProduct = ref<Product | null>(null)
-const showModal = ref(false)
-const modalLoading = ref(false)
-const productStock = ref<any | null>(null)
-const productStockLoading = ref(false)
 const showCreateModal = ref(false)
+
+const router = useRouter()
 
 const openCreateModal = () => { showCreateModal.value = true }
 const closeCreateModal = () => { showCreateModal.value = false }
@@ -727,60 +338,16 @@ const handleCreateProduct = async (payload: Partial<Product>) => {
   }
 }
 
-const formatDate = (dateString: string) => {
-  try {
-    return new Date(dateString).toLocaleDateString('ar-EG')
-  } catch (e) {
-    return dateString
-  }
-}
+// formatDate removed (was used only by modal/export helpers)
 
-const viewProductDetails = async (product: Product) => {
-  selectedProduct.value = product
-  showModal.value = true
-  modalLoading.value = true
-  try {
-    const res = await apiFetchProduct(product.id)
-    const payload = (res && (res as any).data) ? (res as any).data : res
-    selectedProduct.value = payload as Product
-    // fetch product stock
-    try {
-      productStockLoading.value = true
-      const stockRes = await apiFetchProductStock(product.id)
-      // normalize so template can always use productStock.data
-      productStock.value = stockRes && (stockRes as any).data ? stockRes : { data: stockRes }
-    } catch (e) {
-      console.error('Error fetching product stock:', e)
-      productStock.value = { data: null }
-    } finally {
-      productStockLoading.value = false
-    }
-  } catch (e) {
-    console.error('Error fetching product details:', e)
-  } finally {
-    modalLoading.value = false
-  }
-}
-
-const closeModal = () => {
-  showModal.value = false
-  selectedProduct.value = null
-  productStock.value = null
-}
-
-// close on Escape
-const onKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && showModal.value) closeModal()
+const viewProductDetails = (product: Product) => {
+  // navigate to the dedicated product details page
+  router.push({ name: 'ProductDetails', params: { id: String(product.id) } })
 }
 
 onMounted(() => {
   fetchProducts()
   fetchAllCategories()
-  document.addEventListener('keydown', onKeyDown)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', onKeyDown)
 })
 
 const deleteProduct = async (product: Product) => {
@@ -821,43 +388,7 @@ const changePage = (page: number) => {
   padding: 1.5rem;
 }
 
-/* Modal styles */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 60;
-}
-
-.modal {
-  width: 90%;
-  max-width: 900px;
-  background: white;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:1rem 1.25rem;
-  border-bottom:1px solid #eef2f7;
-}
-
-.modal-body { padding:1rem 1.25rem; max-height:60vh; overflow:auto }
-.modal-footer { padding:0.75rem 1.25rem; border-top:1px solid #eef2f7; text-align:right }
-.modal-close { background:transparent; border:none; font-size:1.25rem; cursor:pointer }
-.modal-row { display:flex; gap:1rem; justify-content:space-between; margin-bottom:0.75rem }
-.modal-description { color:#374151; margin-bottom:1rem }
-.modal-section h4 { margin:0 0 0.5rem 0 }
-.modal-table { width:100%; border-collapse:collapse }
-.modal-table th, .modal-table td { padding:0.5rem; border:1px solid #e6eef5; text-align:right }
-.modal-loading { display:flex; flex-direction:column; align-items:center; gap:0.5rem; padding:2rem }
+/* (modal styles removed) */
 
 /* رأس الصفحة */
 .page-header {
