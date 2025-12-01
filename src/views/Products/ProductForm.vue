@@ -55,8 +55,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label class="text-xs text-gray-700">SKU المتغير</label>
+            <!-- SKU يتم توليده تلقائياً: SKU-1, SKU-2, ... ولا يمكن للمستخدم تغييره -->
             <input v-model="v.sku_variant" type="text"
-                   class="w-full px-3 py-2 border rounded-lg" />
+                   readonly
+                   class="w-full px-3 py-2 border rounded-lg bg-gray-100 cursor-not-allowed" />
           </div>
 
           <div>
@@ -143,7 +145,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, watch } from 'vue'
 
 interface Category { id: number; name: string }
 
@@ -161,11 +163,26 @@ const form = reactive({
   variants: [] as any[]
 })
 
+// counter to generate incremental SKUs for variants (SKU-1, SKU-2, ...)
+let variantCounter = 1
+
+// if the product SKU changes, update existing variant SKUs to follow the new base
+watch(() => form.sku, (newSku) => {
+  const base = newSku && newSku.toString().trim() !== '' ? newSku.toString().trim() : 'SKU'
+  form.variants.forEach((v, idx) => {
+    v.sku_variant = `${base}-${idx + 1}`
+  })
+  // next counter should continue after existing variants
+  variantCounter = form.variants.length + 1
+})
+
 /* إضافة متغير جديد */
 const addVariant = () => {
+  const base = form.sku && form.sku.toString().trim() !== '' ? form.sku.toString().trim() : 'SKU'
   form.variants.push({
     id: `v-${Date.now()}`,
-    sku_variant: '',
+    // generate SKU using product SKU as base (e.g. PROD-44422-1)
+    sku_variant: `${base}-${variantCounter++}`,
     purchase_price: 0,
     sale_price: 0,
     expiry_date: '',

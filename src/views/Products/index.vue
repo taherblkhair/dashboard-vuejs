@@ -258,7 +258,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { fetchProducts as apiFetchProducts, fetchCategories } from '../../api/products'
-import { fetchProduct as apiFetchProduct, createProduct as apiCreateProduct } from '../../api/products'
+import { fetchProduct as apiFetchProduct, createProduct as apiCreateProduct, deleteProduct as apiDeleteProduct } from '../../api/products'
 import ProductForm from './ProductForm.vue'
 // example payload used for pre-fill (can be moved to .env or fetched)
 const examplePayload: Partial<Product> = {
@@ -431,9 +431,24 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', onKeyDown)
 })
 
-const deleteProduct = (product: Product) => {
-  if (confirm(`هل أنت متأكد من حذف المنتج "${product.name}"؟`)) {
-    console.log('حذف المنتج:', product)
+const deleteProduct = async (product: Product) => {
+  if (!confirm(`هل أنت متأكد من حذف المنتج "${product.name}"؟`)) return
+
+  // optimistic UI: mark loading or remove after success
+  try {
+    // Optionally, you could set a local loading state per-product here
+    const res = await apiDeleteProduct(product.id)
+    // If deletion succeeded, remove from local list
+    products.value = products.value.filter(p => p.id !== product.id)
+
+    // Optionally show success to user
+    const msg = (res && (res as any).message) ? (res as any).message : 'تم حذف المنتج'
+    // Use alert for now; replace with toast/notification if available
+    alert(msg)
+  } catch (e) {
+    console.error('خطأ عند حذف المنتج:', e)
+    // show friendly message
+    alert('حدث خطأ أثناء حذف المنتج. حاول مرة أخرى.')
   }
 }
 

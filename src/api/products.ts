@@ -58,3 +58,8 @@ export async function createProduct(payload: Partial<Product>): Promise<{ data: 
   // Expect API to return shape: { data: Product }
   return request(`/products`, { method: 'POST', body: JSON.stringify(payload) }) as Promise<{ data: Product }>
 }
+
+export async function deleteProduct(id: number): Promise<{ message?: string } | any> {
+  // expect API to respond with a success message or empty body
+  return request(`/products/${id}`, { method: 'DELETE' })
+}
