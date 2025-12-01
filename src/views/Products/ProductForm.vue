@@ -57,7 +57,7 @@
             <label class="text-xs text-gray-700">SKU المتغير</label>
             <!-- SKU يتم توليده تلقائياً: SKU-1, SKU-2, ... ولا يمكن للمستخدم تغييره -->
             <input v-model="v.sku_variant" type="text"
-                   readonly
+                   
                    class="w-full px-3 py-2 border rounded-lg bg-gray-100 cursor-not-allowed" />
           </div>
 
