@@ -747,11 +747,11 @@ const viewProductDetails = async (product: Product) => {
     try {
       productStockLoading.value = true
       const stockRes = await apiFetchProductStock(product.id)
-      // keep the raw response (api returns { data: { ... } })
-      productStock.value = stockRes && (stockRes as any).data ? (stockRes as any) : stockRes
+      // normalize so template can always use productStock.data
+      productStock.value = stockRes && (stockRes as any).data ? stockRes : { data: stockRes }
     } catch (e) {
       console.error('Error fetching product stock:', e)
-      productStock.value = null
+      productStock.value = { data: null }
     } finally {
       productStockLoading.value = false
     }
@@ -793,14 +793,13 @@ const deleteProduct = async (product: Product) => {
     // If deletion succeeded, remove from local list
     products.value = products.value.filter(p => p.id !== product.id)
 
-    // Optionally show success to user
+    // show success using toast helper
     const msg = (res && (res as any).message) ? (res as any).message : 'تم حذف المنتج'
-    // Use alert for now; replace with toast/notification if available
-    alert(msg)
+    showToastMessage('تم الحذف', msg)
   } catch (e) {
     console.error('خطأ عند حذف المنتج:', e)
     // show friendly message
-    alert('حدث خطأ أثناء حذف المنتج. حاول مرة أخرى.')
+    showToastMessage('خطأ', 'حدث خطأ أثناء حذف المنتج. حاول مرة أخرى.')
   }
 }
 
@@ -811,11 +810,7 @@ const changePage = (page: number) => {
   }
 }
 
-// جلب البيانات عند التحميل
-onMounted(() => {
-  fetchProducts()
-  fetchAllCategories()
-})
+// جلب البيانات عند التحميل (handled earlier to attach event listener as well)
 </script>
 
 <!-- Styles are handled by Tailwind utilities; no local scoped CSS required -->
