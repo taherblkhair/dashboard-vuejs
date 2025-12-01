@@ -1,13 +1,17 @@
 <template>
-  <div class="products-page">
-    <!-- رأس الصفحة -->
-    <div class="page-header">
-      <div class="header-content">
-        <h1 class="page-title">إدارة المنتجات</h1>
-        <p class="page-description">عرض وإدارة جميع المنتجات في النظام</p>
+  <div dir="rtl" class="min-h-screen bg-gray-50 p-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">إدارة المنتجات</h1>
+        <p class="text-sm text-gray-500">عرض وإدارة جميع المنتجات في النظام</p>
       </div>
-      <div class="header-actions">
-        <button class="btn btn-primary">
+
+      <div class="flex items-center gap-3">
+        <button
+          @click="openCreateModal"
+          class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
+        >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
           </svg>
@@ -16,277 +20,267 @@
       </div>
     </div>
 
-    <!-- إحصائيات سريعة -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon bg-blue-500">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div class="bg-white rounded-lg p-4 shadow flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
           </svg>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ totalProducts }}</h3>
-          <p class="stat-label">إجمالي المنتجات</p>
+        <div>
+          <div class="text-xl font-semibold text-gray-800">{{ totalProducts }}</div>
+          <div class="text-sm text-gray-500">إجمالي المنتجات</div>
         </div>
       </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon bg-green-500">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+      <div class="bg-white rounded-lg p-4 shadow flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ activeProducts }}</h3>
-          <p class="stat-label">منتجات نشطة</p>
+        <div>
+          <div class="text-xl font-semibold text-gray-800">{{ activeProducts }}</div>
+          <div class="text-sm text-gray-500">منتجات نشطة</div>
         </div>
       </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon bg-purple-500">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+      <div class="bg-white rounded-lg p-4 shadow flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
           </svg>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ totalVariants }}</h3>
-          <p class="stat-label">إجمالي المتغيرات</p>
+        <div>
+          <div class="text-xl font-semibold text-gray-800">{{ totalVariants }}</div>
+          <div class="text-sm text-gray-500">إجمالي المتغيرات</div>
         </div>
       </div>
     </div>
 
-    <!-- شريط البحث والتصفية -->
-    <div class="filters-bar">
-      <div class="search-box">
-        <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- Filters -->
+    <div class="flex flex-wrap items-center gap-4 mb-6">
+      <div class="flex-1 min-w-[220px] relative">
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="ابحث عن منتج..."
+          class="w-full pr-10 pl-4 py-2 border border-gray-200 rounded-lg bg-white text-sm"
+        />
+        <svg class="w-5 h-5 absolute top-1/2 left-3 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        <input 
-          v-model="searchQuery"
-          type="text" 
-          placeholder="ابحث عن منتج..."
-          class="search-input"
-        >
       </div>
-      
-      <div class="filter-group">
-        <select v-model="categoryFilter" class="filter-select">
-          <option value="">جميع الفئات</option>
-          <option v-for="category in categories" :key="category.id" :value="category.id">
-            {{ category.name }}
-          </option>
-        </select>
-        
-        <select v-model="statusFilter" class="filter-select">
-          <option value="">جميع الحالات</option>
-          <option value="active">نشط</option>
-          <option value="inactive">غير نشط</option>
-        </select>
+
+      <select v-model="categoryFilter" class="px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm">
+        <option value="">جميع الفئات</option>
+        <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+      </select>
+
+      <select v-model="statusFilter" class="px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm">
+        <option value="">جميع الحالات</option>
+        <option value="active">نشط</option>
+        <option value="inactive">غير نشط</option>
+      </select>
+    </div>
+
+    <!-- Products table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+      <div class="overflow-x-auto">
+        <table class="w-full table-auto min-w-[800px]">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="text-right px-6 py-3 text-sm font-medium text-gray-700">المعلومات الأساسية</th>
+              <th class="text-right px-6 py-3 text-sm font-medium text-gray-700">الفئة</th>
+              <th class="text-right px-6 py-3 text-sm font-medium text-gray-700">المتغيرات</th>
+              <th class="text-right px-6 py-3 text-sm font-medium text-gray-700">السعر</th>
+              <th class="text-right px-6 py-3 text-sm font-medium text-gray-700">الحالة</th>
+              <th class="text-right px-6 py-3 text-sm font-medium text-gray-700">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <tr v-for="product in filteredProducts" :key="product.id" class="hover:bg-gray-50">
+              <td class="px-6 py-4 align-top">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-md bg-blue-500 text-white flex items-center justify-center font-bold text-lg">{{ product.name.charAt(0) }}</div>
+                  <div>
+                    <div class="font-semibold text-gray-800">{{ product.name }}</div>
+                    <div class="text-xs text-gray-500">{{ product.sku }}</div>
+                    <div class="text-sm text-gray-500 mt-1">{{ product.description }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <span class="inline-block bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm">{{ product.category?.name || '-' }}</span>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <div class="text-sm text-gray-600">{{ product.variants.length }} متغير</div>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span v-for="variant in product.variants.slice(0,3)" :key="variant.id" class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">{{ getVariantLabel(variant) }}</span>
+                  <span v-if="product.variants.length > 3" class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded">+{{ product.variants.length - 3 }}</span>
+                </div>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <div class="text-sm text-gray-800">من {{ getMinPrice(product.variants) }} $</div>
+                <div class="text-sm text-gray-500">إلى {{ getMaxPrice(product.variants) }} $</div>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <span :class="product.is_active ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'" class="px-3 py-1 rounded-full text-sm font-medium">
+                  {{ product.is_active ? 'نشط' : 'غير نشط' }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center gap-2 justify-end">
+                  <button class="p-2 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100" title="تعديل">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                  </button>
+                  <button @click="viewProductDetails(product)" class="p-2 rounded-md bg-green-50 text-green-600 hover:bg-green-100" title="عرض التفاصيل">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                  </button>
+                  <button @click="deleteProduct(product)" class="p-2 rounded-md bg-red-50 text-red-600 hover:bg-red-100" title="حذف">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Loading / Empty states -->
+      <div v-if="loading" class="p-6 flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-gray-600">جاري تحميل المنتجات...</p>
+      </div>
+
+      <div v-if="!loading && products.length === 0" class="p-8 text-center">
+        <svg class="mx-auto w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        <h3 class="text-lg font-semibold text-gray-800">لا توجد منتجات</h3>
+        <p class="text-sm text-gray-500 mb-4">لم يتم العثور على أي منتجات في النظام</p>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg">إضافة منتج جديد</button>
       </div>
     </div>
 
-    <!-- جدول المنتجات -->
-    <div class="products-table-container">
-      <table class="products-table">
-        <thead>
-          <tr>
-            <th class="table-header">المعلومات الأساسية</th>
-            <th class="table-header">الفئة</th>
-            <th class="table-header">المتغيرات</th>
-            <th class="table-header">السعر</th>
-            <th class="table-header">الحالة</th>
-            <th class="table-header">الإجراءات</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="product in filteredProducts" :key="product.id" class="table-row">
-            <td class="table-cell">
-              <div class="product-info">
-                <div class="product-avatar">
-                  {{ product.name.charAt(0) }}
-                </div>
-                <div class="product-details">
-                  <h4 class="product-name">{{ product.name }}</h4>
-                  <p class="product-sku">{{ product.sku }}</p>
-                  <p class="product-description">{{ product.description }}</p>
-                </div>
-              </div>
-            </td>
-            
-            <td class="table-cell">
-              <span class="category-badge">{{ product.category?.name || '-' }}</span>
-            </td>
-            
-            <td class="table-cell">
-              <div class="variants-info">
-                <span class="variants-count">{{ product.variants.length }} متغير</span>
-                <div class="variants-preview">
-                  <span 
-                    v-for="variant in product.variants.slice(0, 3)" 
-                    :key="variant.id"
-                    class="variant-tag"
-                  >
-                    {{ getVariantLabel(variant) }}
-                  </span>
-                  <span v-if="product.variants.length > 3" class="more-variants">
-                    +{{ product.variants.length - 3 }}
-                  </span>
-                </div>
-              </div>
-            </td>
-            
-            <td class="table-cell">
-              <div class="price-info">
-                <div class="price-range">
-                  من {{ getMinPrice(product.variants) }} $
-                </div>
-                <div class="price-range">
-                  إلى {{ getMaxPrice(product.variants) }} $
-                </div>
-              </div>
-            </td>
-            
-            <td class="table-cell">
-              <span 
-                class="status-badge"
-                :class="product.is_active ? 'status-active' : 'status-inactive'"
-              >
-                {{ product.is_active ? 'نشط' : 'غير نشط' }}
-              </span>
-            </td>
-            
-            <td class="table-cell">
-              <div class="actions">
-                <button class="btn-action btn-edit" title="تعديل">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                  </svg>
-                </button>
-                <button class="btn-action btn-view" title="عرض التفاصيل" @click="viewProductDetails(product)">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                  </svg>
-                </button>
-                <button 
-                  class="btn-action btn-delete" 
-                  title="حذف"
-                  @click="deleteProduct(product)"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- حالة التحميل -->
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner"></div>
-        <p>جاري تحميل المنتجات...</p>
-      </div>
-
-      <!-- حالة عدم وجود بيانات -->
-      <div v-if="!loading && products.length === 0" class="empty-state">
-        <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        <h3>لا توجد منتجات</h3>
-        <p>لم يتم العثور على أي منتجات في النظام</p>
-        <button class="btn btn-primary">إضافة منتج جديد</button>
-      </div>
+    <!-- Pagination -->
+    <div v-if="products.length > 0" class="flex items-center justify-center gap-4 mb-6">
+      <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)" class="px-3 py-1 border rounded disabled:opacity-50">السابق</button>
+      <div class="text-sm text-gray-600">الصفحة {{ currentPage }} من {{ totalPages }}</div>
+      <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)" class="px-3 py-1 border rounded disabled:opacity-50">التالي</button>
     </div>
 
-    <!-- التصفح -->
-    <div v-if="products.length > 0" class="pagination">
-      <button 
-        class="pagination-btn"
-        :disabled="currentPage === 1"
-        @click="changePage(currentPage - 1)"
-      >
-        السابق
-      </button>
-      
-      <div class="pagination-info">
-        الصفحة {{ currentPage }} من {{ totalPages }}
-      </div>
-      
-      <button 
-        class="pagination-btn"
-        :disabled="currentPage === totalPages"
-        @click="changePage(currentPage + 1)"
-      >
-        التالي
-      </button>
-    </div>
-
-    <!-- تفاصيل المنتج (مودال) -->
-    <div v-if="showModal && selectedProduct" class="modal-backdrop" @click.self="closeModal">
-      <div class="modal" role="dialog" aria-modal="true">
-        <header class="modal-header">
-          <h3>{{ selectedProduct.name }}</h3>
-          <button class="modal-close" @click="closeModal">×</button>
+  <!-- Modal (view details) -->
+  <div v-if="showModal && selectedProduct" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="closeModal">
+      <div class="bg-white rounded-lg w-full max-w-3xl mx-4 overflow-auto">
+        <header class="flex items-center justify-between p-4 border-b">
+          <h3 class="font-semibold text-lg">{{ selectedProduct.name }}</h3>
+          <button class="text-gray-500 hover:text-gray-700" @click="closeModal">×</button>
         </header>
 
-        <div class="modal-body">
-          <div v-if="modalLoading" class="modal-loading">
-            <div class="loading-spinner" style="width:2rem;height:2rem;border-width:3px"></div>
-            <p>جاري جلب تفاصيل المنتج...</p>
+        <div class="p-4">
+          <div v-if="modalLoading" class="flex flex-col items-center gap-3 p-6">
+            <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
+            <p class="text-gray-600">جاري جلب تفاصيل المنتج...</p>
           </div>
+
           <div v-else>
-          <div class="modal-row">
-            <div><strong>SKU:</strong> {{ selectedProduct.sku }}</div>
-            <div><strong>الفئة:</strong> {{ selectedProduct.category?.name || '-' }}</div>
-          </div>
+            <div class="flex flex-col gap-3 mb-4">
+              <div class="flex justify-between text-sm text-gray-600">
+                <div><strong>SKU:</strong> {{ selectedProduct.sku }}</div>
+                <div><strong>الفئة:</strong> {{ selectedProduct.category?.name || '-' }}</div>
+              </div>
+              <p class="text-gray-700">{{ selectedProduct.description }}</p>
+            </div>
 
-          <p class="modal-description">{{ selectedProduct.description }}</p>
-
-          <section class="modal-section">
-            <h4>المتغيرات (Variants)</h4>
-            <table class="modal-table">
-              <thead>
-                <tr>
-                  <th>SKU متغير</th>
-                  <th>الخصائص</th>
-                  <th>سعر الشراء</th>
-                  <th>سعر البيع</th>
-                  <th>تاريخ الانتهاء</th>
-                  <th>الحالة</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="v in selectedProduct.variants" :key="v.id">
-                  <td>{{ v.sku_variant }}</td>
-                  <td>
-                    <span v-for="(val, key) in v.attributes" :key="key">{{ key }}: {{ val }} </span>
-                  </td>
-                  <td>{{ v.purchase_price }}</td>
-                  <td>{{ v.sale_price }}</td>
-                  <td>{{ formatDate(v.expiry_date) }}</td>
-                  <td>{{ v.is_active ? 'نشط' : 'غير نشط' }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
+            <section>
+              <h4 class="font-semibold mb-2">المتغيرات (Variants)</h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm text-right">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-3 py-2">SKU متغير</th>
+                      <th class="px-3 py-2">الخصائص</th>
+                      <th class="px-3 py-2">سعر الشراء</th>
+                      <th class="px-3 py-2">سعر البيع</th>
+                      <th class="px-3 py-2">تاريخ الانتهاء</th>
+                      <th class="px-3 py-2">الحالة</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <tr v-for="v in selectedProduct.variants" :key="v.id">
+                      <td class="px-3 py-2">{{ v.sku_variant }}</td>
+                      <td class="px-3 py-2"><span v-for="(val, key) in v.attributes" :key="key" class="text-xs text-gray-700">{{ key }}: {{ val }} </span></td>
+                      <td class="px-3 py-2">{{ v.purchase_price }}</td>
+                      <td class="px-3 py-2">{{ v.sale_price }}</td>
+                      <td class="px-3 py-2">{{ formatDate(v.expiry_date) }}</td>
+                      <td class="px-3 py-2">{{ v.is_active ? 'نشط' : 'غير نشط' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
           </div>
         </div>
 
-        <footer class="modal-footer">
-          <button class="btn btn-primary" @click="closeModal">إغلاق</button>
+        <footer class="p-4 border-t text-right">
+          <button class="bg-blue-600 text-white px-4 py-2 rounded" @click="closeModal">إغلاق</button>
         </footer>
       </div>
     </div>
   </div>
-  
+
+  <!-- Modal (create product) -->
+  <div v-if="showCreateModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="closeCreateModal">
+    <div class="bg-white rounded-lg w-full max-w-2xl mx-4 overflow-auto">
+      <header class="flex items-center justify-between p-4 border-b">
+        <h3 class="font-semibold text-lg">إضافة منتج جديد</h3>
+        <button class="text-gray-500 hover:text-gray-700" @click="closeCreateModal">×</button>
+      </header>
+
+      <div class="p-4">
+          <ProductForm
+            :categories="categories"
+            :loading="createLoading"
+            :example="examplePayload"
+            @save="handleCreateProduct"
+            @close="closeCreateModal"
+          />
+        </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { fetchProducts as apiFetchProducts, fetchCategories } from '../../api/products'
-import { fetchProduct as apiFetchProduct } from '../../api/products'
+import { fetchProduct as apiFetchProduct, createProduct as apiCreateProduct } from '../../api/products'
+import ProductForm from './ProductForm.vue'
+// example payload used for pre-fill (can be moved to .env or fetched)
+const examplePayload: Partial<Product> = {
+  sku: 'PROD-4442',
+  name: 'Smartphone Xm',
+  description: 'Latest smartphone with advanced features',
+  category_id: 1,
+  is_active: true,
+  variants: [
+    {
+      // backend may fill id/product_id
+      id: Date.now(),
+      product_id: 0,
+      sku_variant: 'PROD-4442-1',
+      attributes: { color: 'Black', storage: '128GB' },
+      purchase_price: String(500),
+      sale_price: String(699),
+      expiry_date: '2026-12-31',
+      is_active: true,
+    }
+  ] as any
+}
 import type { Product, Category, Variant } from '../../api/products'
 
 // البيانات التفاعلية
@@ -331,45 +325,68 @@ const totalVariants = computed(() =>
   products.value.reduce((total, product) => total + product.variants.length, 0)
 )
 
-// الفئات (من API)
-// `categories` ref مُعبّأ من endpoint /categories
-
 // المنتجات المصفاة
 const filteredProducts = computed(() => {
   return products.value.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                         product.sku.toLowerCase().includes(searchQuery.value.toLowerCase())
-    
-  const matchesCategory = !categoryFilter.value || (product.category && product.category.id.toString() === categoryFilter.value)
-    
+    const q = searchQuery.value.toLowerCase()
+    const matchesSearch = product.name.toLowerCase().includes(q) || product.sku.toLowerCase().includes(q)
+    const matchesCategory = !categoryFilter.value || (product.category && product.category.id.toString() === categoryFilter.value)
     const matchesStatus = !statusFilter.value || 
                          (statusFilter.value === 'active' && product.is_active) ||
                          (statusFilter.value === 'inactive' && !product.is_active)
-    
+
     return matchesSearch && matchesCategory && matchesStatus
   })
 })
 
 // دوال مساعدة
 const getVariantLabel = (variant: Variant) => {
-  return `${variant.attributes.color}-${variant.attributes.size}`
+  return `${variant.attributes?.color || ''}-${variant.attributes?.size || ''}`
 }
 
 const getMinPrice = (variants: Variant[]) => {
-  return Math.min(...variants.map(v => parseFloat(v.sale_price)))
+  if (!variants || variants.length === 0) return 0
+  return Math.min(...variants.map(v => parseFloat(String(v.sale_price) || '0')))
 }
 
 const getMaxPrice = (variants: Variant[]) => {
-  return Math.max(...variants.map(v => parseFloat(v.sale_price)))
+  if (!variants || variants.length === 0) return 0
+  return Math.max(...variants.map(v => parseFloat(String(v.sale_price) || '0')))
 }
 
-// date formatting helper removed (unused)
-
 // الإجراءات
-// حالة المودال والمنتج المحدد
 const selectedProduct = ref<Product | null>(null)
 const showModal = ref(false)
 const modalLoading = ref(false)
+const showCreateModal = ref(false)
+
+const openCreateModal = () => { showCreateModal.value = true }
+const closeCreateModal = () => { showCreateModal.value = false }
+
+const createLoading = ref(false)
+
+const handleCreateProduct = async (payload: Partial<Product>) => {
+  createLoading.value = true
+  try {
+    // call API to create product
+    const res = await apiCreateProduct(payload)
+    const created = res.data as Product
+
+    // ensure category object is present (optional)
+    if (created && created.category_id && !created.category) {
+      created.category = categories.value.find(c => c.id === created.category_id)
+    }
+
+    // prepend to products list
+    products.value.unshift(created)
+    closeCreateModal()
+  } catch (e) {
+    console.error('Error creating product:', e)
+    alert('حدث خطأ عند إنشاء المنتج. تحقق من الاتصال أو سجلات الخادم.')
+  } finally {
+    createLoading.value = false
+  }
+}
 
 const formatDate = (dateString: string) => {
   try {
@@ -380,18 +397,15 @@ const formatDate = (dateString: string) => {
 }
 
 const viewProductDetails = async (product: Product) => {
-  // open modal immediately with the provided product (optimistic), then fetch latest
   selectedProduct.value = product
   showModal.value = true
   modalLoading.value = true
   try {
     const res = await apiFetchProduct(product.id)
-    // API might return { data: Product } or Product directly
     const payload = (res && (res as any).data) ? (res as any).data : res
     selectedProduct.value = payload as Product
   } catch (e) {
     console.error('Error fetching product details:', e)
-    // keep optimistic product in case fetch fails
   } finally {
     modalLoading.value = false
   }
@@ -420,7 +434,6 @@ onBeforeUnmount(() => {
 const deleteProduct = (product: Product) => {
   if (confirm(`هل أنت متأكد من حذف المنتج "${product.name}"؟`)) {
     console.log('حذف المنتج:', product)
-    // يمكنك إضافة منطق الحذف هنا
   }
 }
 
@@ -437,6 +450,8 @@ onMounted(() => {
   fetchAllCategories()
 })
 </script>
+
+<!-- Styles are handled by Tailwind utilities; no local scoped CSS required -->
 
 <style scoped>
 .products-page {

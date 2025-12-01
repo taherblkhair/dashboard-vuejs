@@ -53,3 +53,8 @@ export async function fetchCategories(): Promise<{ data: Category[] }>
 export async function fetchProduct(id: number): Promise<{ data: Product } | Product> {
   return request(`/products/${id}`)
 }
+
+export async function createProduct(payload: Partial<Product>): Promise<{ data: Product }> {
+  // Expect API to return shape: { data: Product }
+  return request(`/products`, { method: 'POST', body: JSON.stringify(payload) }) as Promise<{ data: Product }>
+}
