@@ -242,7 +242,7 @@
         <button class="text-gray-500 hover:text-gray-700" @click="closeCreateModal">×</button>
       </header>
 
-      <div class="p-4">
+<div class="p-4 max-h-[70vh] overflow-y-auto">
           <ProductForm
             :categories="categories"
             :loading="createLoading"
@@ -518,6 +518,19 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+}
+/* scroll-bar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
 .page-title {

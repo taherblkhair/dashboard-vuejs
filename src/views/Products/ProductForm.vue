@@ -2,7 +2,7 @@
   <form @submit.prevent="onSubmit" class="space-y-4">
 
     <!-- البيانات الأساسية -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 ">
       <div>
         <label class="block text-sm text-gray-700 mb-1">اسم المنتج</label>
         <input v-model="form.name" type="text" required class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
