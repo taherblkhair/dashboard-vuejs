@@ -1,4 +1,5 @@
 import { request } from './index'
+import type { Product } from './products'
 
 export interface Category {
   id: number
@@ -24,4 +25,8 @@ export async function deleteCategory(id: number): Promise<any> {
 
 export async function updateCategory(id: number, payload: Partial<Category>): Promise<{ data: Category }> {
   return request(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(payload) }) as Promise<{ data: Category }>
+}
+
+export async function fetchCategoryProducts(categoryId: number, page = 1): Promise<{ data: Product[]; count?: number }> {
+  return request(`/categories/${categoryId}/products?page=${page}`)
 }

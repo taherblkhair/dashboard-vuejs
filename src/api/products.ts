@@ -17,6 +17,8 @@ export interface Variant {
   sale_price: string
   expiry_date: string
   is_active: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 export interface Product {
@@ -28,6 +30,8 @@ export interface Product {
   is_active: boolean
   category?: Category
   variants: Variant[]
+  created_at?: string
+  updated_at?: string
 }
 
 export interface ProductsResponse {

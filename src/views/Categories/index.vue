@@ -182,6 +182,15 @@
                       </svg>
                       تعديل
                     </button>
+                    <button
+                      @click="() => { goToCategoryProducts(cat.id); toggleActions(null); }"
+                      class="w-full text-right px-4 py-2.5 text-sm hover:bg-blue-50 text-gray-700 flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M3 3h14v2H3V3zm0 4h14v10H3V7zm2 2v6h10V9H5z" />
+                      </svg>
+                      عرض المنتجات
+                    </button>
                     <button 
                       @click="() => { remove(cat); toggleActions(null); }" 
                       class="w-full text-right px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
@@ -207,14 +216,15 @@
                     <div v-else class="text-gray-500">فئة رئيسية</div>
                   </div>
                   
-                  <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-1 text-sm" :class="cat.children?.length ? 'text-blue-600' : 'text-gray-400'">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-                      </svg>
-                      <span>{{ cat.children?.length || 0 }} فروع</span>
-                    </div>
-                  </div>
+                          <div class="flex items-center gap-4">
+                              <div class="flex items-center gap-1 text-sm" :class="cat.children?.length ? 'text-blue-600' : 'text-gray-400'">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                <span>{{ cat.children?.length || 0 }} فروع</span>
+                              </div>
+
+                            </div>
                 </div>
                 
                 <!-- عرض الفروع المصغرة -->
@@ -364,6 +374,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { fetchCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories'
 import type { Category } from '../../api/categories'
 
@@ -440,6 +451,12 @@ const load = async () => {
 
 onMounted(load)
 
+const router = useRouter()
+const goToCategoryProducts = (catId?: number) => {
+  if (!catId) return
+  router.push({ name: 'CategoryProducts', params: { id: catId } })
+}
+
 const openModal = (cat?: Category) => {
   if (cat) {
     editingId.value = cat.id
@@ -509,6 +526,7 @@ onMounted(() => {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

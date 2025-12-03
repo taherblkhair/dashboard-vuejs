@@ -14,8 +14,9 @@ const routes = [
     // all child routes under MainLayout are protected by the global guard
     children: [
       { path: '', name: 'Dashboard', component: () => import('../views/Home.vue') },
-      { path: 'products', name: 'Products', component: () => import('../views/Products/index.vue') },
-      { path: 'products/:id', name: 'ProductDetails', component: () => import('../views/Products/ProductDetails.vue') },
+  { path: 'products', name: 'Products', component: () => import('../views/Products/index.vue') },
+  { path: 'products/:id', name: 'ProductDetails', component: () => import('../views/Products/ProductDetails.vue') },
+  { path: 'categories/:id/products', name: 'CategoryProducts', component: () => import('../views/Categories/CategoryProducts.vue') },
       { path: 'orders', name: 'Orders', component: () => import('../views/Orders/index.vue') },
       { path: 'customers', name: 'Customers', component: () => import('../views/Users/index.vue') },
       { path: 'categories', name: 'Categories', component: () => import('../views/Categories/index.vue') },
