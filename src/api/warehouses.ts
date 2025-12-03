@@ -48,3 +48,11 @@ export async function fetchWarehouses(page = 1): Promise<{ data: Warehouse[]; me
 export async function createWarehouse(payload: Partial<Warehouse>): Promise<{ data: Warehouse }> {
   return request(`/warehouses`, { method: 'POST', body: JSON.stringify(payload) }) as Promise<{ data: Warehouse }>
 }
+
+export async function fetchWarehouse(id: number): Promise<{ data: Warehouse }> {
+  return request(`/warehouses/${id}`)
+}
+
+export async function fetchWarehouseStockReport(id: number): Promise<{ data: any }> {
+  return request(`/warehouses/${id}/stock-report`)
+}
