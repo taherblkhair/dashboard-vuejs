@@ -24,6 +24,7 @@ const routes = [
   { path: 'warehouses/create', name: 'WarehouseCreate', component: () => import('../views/Warehouses/Create.vue') },
   { path: 'warehouses/:id', name: 'WarehouseDetails', component: () => import('../views/Warehouses/Details.vue') },
   { path: 'stock-movements/create', name: 'StockMovementCreate', component: () => import('../views/StockMovements/Create.vue') },
+  { path: 'stock-movements/transfer', name: 'StockMovementTransfer', component: () => import('../views/StockMovements/Transfer.vue') },
       { path: 'reports', name: 'Reports', component: () => import('../views/Reports.vue') },
       { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') }
     ]

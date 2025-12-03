@@ -9,6 +9,7 @@
         <div class="flex items-center gap-3">
           <button @click="goBack" class="px-4 py-2 border rounded">عودة</button>
           <button @click="() => router.push({ name: 'StockMovementCreate', query: { warehouse_id: warehouseId } })" class="px-4 py-2 bg-green-600 text-white rounded">إضافة حركة مخزون</button>
+          <button @click="() => router.push({ name: 'StockMovementTransfer', query: { from_warehouse_id: warehouseId } })" class="px-4 py-2 bg-yellow-600 text-white rounded">نقل مخزون</button>
         </div>
       </div>
 

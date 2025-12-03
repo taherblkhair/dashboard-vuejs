@@ -21,6 +21,15 @@ export async function createStockMovement(payload: Partial<StockMovement>): Prom
   return request(`/stock-movements`, { method: 'POST', body: JSON.stringify(payload) }) as Promise<{ data: StockMovement }>
 }
 
+/**
+ * Transfer stock between warehouses
+ * POST /stock-movements/transfer
+ */
+export async function transferStockMovement(payload: Record<string, any>): Promise<{ data: any }> {
+  return request(`/stock-movements/transfer`, { method: 'POST', body: JSON.stringify(payload) }) as Promise<{ data: any }>
+}
+
 export default {
   createStockMovement,
+  transferStockMovement,
 }
