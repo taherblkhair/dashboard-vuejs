@@ -20,6 +20,8 @@ const routes = [
       { path: 'orders', name: 'Orders', component: () => import('../views/Orders/index.vue') },
       { path: 'customers', name: 'Customers', component: () => import('../views/Users/index.vue') },
       { path: 'categories', name: 'Categories', component: () => import('../views/Categories/index.vue') },
+  { path: 'warehouses', name: 'Warehouses', component: () => import('../views/Warehouses/index.vue') },
+  { path: 'warehouses/create', name: 'WarehouseCreate', component: () => import('../views/Warehouses/Create.vue') },
       { path: 'reports', name: 'Reports', component: () => import('../views/Reports.vue') },
       { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') }
     ]

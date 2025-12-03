@@ -257,10 +257,9 @@ const menuItems = ref<MenuItem[]>([
         icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
       },
       {
-        name: 'حركة المخزون',
-        route: '/inventory/movements',
-        icon: 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4'
-      },
+        name: 'المخازن',
+        route: '/warehouses',
+        icon: 'M3 7l9-4 9 4v10l-9 4-9-4V7zM12 3v18m0-18L3 7m9-4l9 4m-9 14l9-4m-9 4L3 17',},
       {
         name: 'جرد المخزون',
         route: '/inventory/stocktaking',
