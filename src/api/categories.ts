@@ -21,3 +21,7 @@ export async function createCategory(payload: Partial<Category>): Promise<{ data
 export async function deleteCategory(id: number): Promise<any> {
   return request(`/categories/${id}`, { method: 'DELETE' })
 }
+
+export async function updateCategory(id: number, payload: Partial<Category>): Promise<{ data: Category }> {
+  return request(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(payload) }) as Promise<{ data: Category }>
+}

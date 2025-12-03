@@ -3,11 +3,11 @@
     <div class="max-w-4xl mx-auto">
       <div class="flex items-center justify-between mb-6">
         <div>
-          <h1 class="text-2xl font-bold">الفئات (Categories)</h1>
+          <h1 class="text-2xl font-bold">الفئات</h1>
           <p class="text-sm text-gray-500">عرض وإضافة الفئات</p>
         </div>
         <div class="flex items-center gap-3">
-          <button @click="openModal" class="px-4 py-2 bg-blue-600 text-white rounded">إضافة فئة جديدة</button>
+          <button @click="() => openModal()" class="px-4 py-2 bg-blue-600 text-white rounded">إضافة فئة جديدة</button>
         </div>
       </div>
 
@@ -25,8 +25,10 @@
                   <div class="text-sm text-gray-500">{{ cat.description }}</div>
                   <div class="text-xs text-gray-400 mt-1">Parent: {{ cat.parent?.name || '-' }}</div>
                 </div>
-                <div class="text-right">
-                  <div class="text-sm">{{ cat.children?.length || 0 }} children</div>
+                <div class="text-right flex items-center gap-3">
+                  <div class="text-sm mr-4">{{ cat.children?.length || 0 }} children</div>
+                  <button @click="() => openModal(cat)" class="px-3 py-1 bg-yellow-400 text-white rounded">تعديل</button>
+                  <button @click="() => remove(cat)" class="px-3 py-1 bg-red-500 text-white rounded">حذف</button>
                 </div>
               </div>
             </li>
@@ -58,7 +60,7 @@
             <label class="block text-sm text-gray-700">الفئة الرئيسية (اختياري)</label>
             <select v-model="form.parent_id" class="w-full px-3 py-2 border rounded">
               <option :value="null">بدون</option>
-              <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+              <option v-for="c in availableParents" :key="c.id" :value="c.id">{{ c.name }}</option>
             </select>
           </div>
 
@@ -80,15 +82,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { fetchCategories, createCategory } from '../../api/categories'
+import { ref, onMounted, computed } from 'vue'
+import { fetchCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories'
 import type { Category } from '../../api/categories'
 
 const categories = ref<Category[]>([])
 const loading = ref(false)
 const show = ref(false)
+const editingId = ref<number | null>(null)
 
 const form = ref({ name: '', description: '', parent_id: null as number | null, is_active: true })
+
+const availableParents = computed(() => {
+  return categories.value.filter(c => c.id !== editingId.value)
+})
 
 const load = async () => {
   loading.value = true
@@ -105,22 +112,55 @@ const load = async () => {
 
 onMounted(load)
 
-const openModal = () => {
-  form.value = { name: '', description: '', parent_id: null, is_active: true }
+const openModal = (cat?: Category) => {
+  if (cat) {
+    // edit
+    editingId.value = cat.id
+    form.value = {
+      name: cat.name || '',
+      description: cat.description || '',
+      parent_id: cat.parent_id ?? null,
+      is_active: cat.is_active ?? true,
+    }
+  } else {
+    // create
+    editingId.value = null
+    form.value = { name: '', description: '', parent_id: null, is_active: true }
+  }
   show.value = true
 }
-const closeModal = () => { show.value = false }
+const closeModal = () => {
+  show.value = false
+  editingId.value = null
+}
 
 const submit = async () => {
   try {
     const payload = { ...form.value }
-    await createCategory(payload)
+    if (editingId.value) {
+      await updateCategory(editingId.value, payload)
+      alert('تم تحديث الفئة')
+    } else {
+      await createCategory(payload)
+      alert('تم إضافة الفئة')
+    }
     closeModal()
     await load()
-    alert('تم إضافة الفئة')
   } catch (e) {
-    console.error('Create category failed', e)
-    alert('فشل إضافة الفئة')
+    console.error('Create/update category failed', e)
+    alert('فشل العملية')
+  }
+}
+
+const remove = async (cat: Category) => {
+  if (!confirm(`حذف الفئة "${cat.name}"؟ هذا الإجراء لا يمكن التراجع عنه.`)) return
+  try {
+    await deleteCategory(cat.id)
+    await load()
+    alert('تم حذف الفئة')
+  } catch (e) {
+    console.error('Delete category failed', e)
+    alert('فشل حذف الفئة')
   }
 }
 </script>
