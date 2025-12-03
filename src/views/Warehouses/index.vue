@@ -100,7 +100,10 @@
 
             <hr class="my-4" />
 
-            <h4 class="text-lg font-semibold mb-2">تقرير المخزون</h4>
+            <div class="flex items-center justify-between">
+              <h4 class="text-lg font-semibold mb-2">تقرير المخزون</h4>
+              <button @click="() => router.push({ name: 'StockMovementCreate', query: { warehouse_id: activeWarehouse?.id } })" class="px-3 py-1 bg-green-600 text-white rounded text-sm">إضافة حركة مخزون</button>
+            </div>
             <div v-if="stockReport">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
                 <div>قيمة المخزون الإجمالية: <span class="font-medium">{{ stockReport.total_stock_value ?? 0 }}</span></div>
@@ -112,9 +115,27 @@
 
               <div v-if="stockReport.stock_details && stockReport.stock_details.length" class="mt-4">
                 <div class="text-sm text-gray-600 mb-2">تفاصيل المخزون:</div>
-                <ul class="space-y-2">
-                  <li v-for="(s, idx) in stockReport.stock_details" :key="idx" class="p-2 border rounded bg-gray-50 text-sm">
-                    {{ JSON.stringify(s) }}
+                <ul class="space-y-3">
+                  <li v-for="(s, idx) in stockReport.stock_details" :key="idx" class="p-4 border rounded bg-gray-50 text-sm">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-800 truncate">{{ s.product_name || ('#' + (s.product_variant_id ?? '')) }}</div>
+                        <div class="text-xs text-gray-500 mt-1 truncate">{{ formatAttributes(s.variant_attributes || s.variant_attributes_json || s.attributes || s.variant_attributes_raw) }}</div>
+                      </div>
+
+                      <div class="text-right text-sm flex-shrink-0 ml-4">
+                        <div>الكمية: <span class="font-medium">{{ s.quantity ?? s.available_quantity ?? 0 }}</span></div>
+                        <div>محجوز: <span class="font-medium">{{ s.reserved_quantity ?? 0 }}</span></div>
+                        <div>متاح: <span class="font-medium">{{ s.available_quantity ?? 0 }}</span></div>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
+                      <div>يعيد الطلب: <span class="font-medium">{{ s.needs_reorder ? 'نعم' : 'لا' }}</span></div>
+                      <div>خارج المخزون: <span class="font-medium">{{ s.is_out_of_stock ? 'نعم' : 'لا' }}</span></div>
+                      <div v-if="s.pendingAttributes">قيد الانتظار: <span class="font-medium">{{ s.pendingAttributes }}</span></div>
+                      <div v-if="s.note">ملاحظة: <span class="font-medium">{{ s.note }}</span></div>
+                    </div>
                   </li>
                 </ul>
               </div>
@@ -189,6 +210,31 @@ const closeDetails = () => {
 const formatDate = (iso?: string) => {
   if (!iso) return ''
   try { return new Date(iso).toLocaleDateString() } catch { return iso }
+}
+
+/**
+ * Helper to format attribute objects or JSON strings into a readable inline string
+ */
+const formatAttributes = (attr: any) => {
+  if (!attr) return ''
+  if (typeof attr === 'string') {
+    // some APIs return JSON as a string
+    try {
+      const parsed = JSON.parse(attr)
+      return Object.entries(parsed).map(([k, v]) => `${k}: ${v}`).join(', ')
+    } catch {
+      // fallback: return raw string (but trimmed)
+      return attr
+    }
+  }
+  if (typeof attr === 'object') {
+    try {
+      return Object.entries(attr).map(([k, v]) => `${k}: ${v}`).join(', ')
+    } catch {
+      return String(attr)
+    }
+  }
+  return String(attr)
 }
 </script>
 

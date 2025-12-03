@@ -22,6 +22,7 @@ const routes = [
       { path: 'categories', name: 'Categories', component: () => import('../views/Categories/index.vue') },
   { path: 'warehouses', name: 'Warehouses', component: () => import('../views/Warehouses/index.vue') },
   { path: 'warehouses/create', name: 'WarehouseCreate', component: () => import('../views/Warehouses/Create.vue') },
+  { path: 'stock-movements/create', name: 'StockMovementCreate', component: () => import('../views/StockMovements/Create.vue') },
       { path: 'reports', name: 'Reports', component: () => import('../views/Reports.vue') },
       { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') }
     ]
