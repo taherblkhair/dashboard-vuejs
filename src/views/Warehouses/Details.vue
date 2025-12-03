@@ -81,8 +81,8 @@
                     </div>
 
                     <div class="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
-                      <div>يعيد الطلب: <span class="font-medium">{{ s.needs_reorder ? 'نعم' : 'لا' }}</span></div>
-                      <div>خارج المخزون: <span class="font-medium">{{ s.is_out_of_stock ? 'نعم' : 'لا' }}</span></div>
+                      <!-- <div>يعيد الطلب: <span class="font-medium">{{ s.needs_reorder ? 'نعم' : 'لا' }}</span></div> -->
+                      <!-- <div>خارج المخزون: <span class="font-medium">{{ s.is_out_of_stock ? 'نعم' : 'لا' }}</span></div> -->
                       <div v-if="s.pendingAttributes">قيد الانتظار: <span class="font-medium">{{ s.pendingAttributes }}</span></div>
                       <div v-if="s.note">ملاحظة: <span class="font-medium">{{ s.note }}</span></div>
                     </div>
