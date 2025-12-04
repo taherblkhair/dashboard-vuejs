@@ -13,13 +13,14 @@ const routes = [
     component: MainLayout,
     // all child routes under MainLayout are protected by the global guard
     children: [
-      { path: '', name: 'Dashboard', component: () => import('../views/Home.vue') },
+  { path: '', name: 'Dashboard', component: () => import('../views/Home.vue') },
   { path: 'products', name: 'Products', component: () => import('../views/Products/index.vue') },
   { path: 'products/:id', name: 'ProductDetails', component: () => import('../views/Products/ProductDetails.vue') },
   { path: 'categories/:id/products', name: 'CategoryProducts', component: () => import('../views/Categories/CategoryProducts.vue') },
-      { path: 'orders', name: 'Orders', component: () => import('../views/Orders/index.vue') },
-      { path: 'customers', name: 'Customers', component: () => import('../views/Users/index.vue') },
-      { path: 'categories', name: 'Categories', component: () => import('../views/Categories/index.vue') },
+  { path: 'orders', name: 'Orders', component: () => import('../views/Orders/index.vue') },
+  { path: 'customers', name: 'Customers', component: () => import('../views/Customers/index.vue') },
+  { path: 'customers/create', name: 'CustomersCreate', component: () => import('../views/Customers/Create.vue') },
+  { path: 'categories', name: 'Categories', component: () => import('../views/Categories/index.vue') },
   { path: 'warehouses', name: 'Warehouses', component: () => import('../views/Warehouses/index.vue') },
   { path: 'warehouses/create', name: 'WarehouseCreate', component: () => import('../views/Warehouses/Create.vue') },
   { path: 'warehouses/:id', name: 'WarehouseDetails', component: () => import('../views/Warehouses/Details.vue') },
