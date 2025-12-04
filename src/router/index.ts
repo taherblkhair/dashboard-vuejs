@@ -18,6 +18,7 @@ const routes = [
   { path: 'products/:id', name: 'ProductDetails', component: () => import('../views/Products/ProductDetails.vue') },
   { path: 'categories/:id/products', name: 'CategoryProducts', component: () => import('../views/Categories/CategoryProducts.vue') },
   { path: 'orders', name: 'Orders', component: () => import('../views/Orders/index.vue') },
+  { path: 'orders/:id', name: 'OrderDetails', component: () => import('../views/Orders/OrderDetails.vue') },
   { path: 'customers', name: 'Customers', component: () => import('../views/Customers/index.vue') },
   { path: 'customers/create', name: 'CustomersCreate', component: () => import('../views/Customers/Create.vue') },
   { path: 'categories', name: 'Categories', component: () => import('../views/Categories/index.vue') },
