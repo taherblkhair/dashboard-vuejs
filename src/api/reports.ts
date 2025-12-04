@@ -11,3 +11,7 @@ export default {
 export async function fetchLowStockReport(): Promise<{ data: any }> {
   return request(`/reports/stock/low-stock`)
 }
+
+export async function fetchPurchasesReport(): Promise<{ data: any }> {
+  return request(`/reports/purchases`)
+}

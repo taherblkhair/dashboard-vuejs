@@ -281,6 +281,11 @@ const menuItems = ref<MenuItem[]>([
         route: '/reports/stock/low-stock',
         icon: 'M12 8v4l3 3'
       }
+          ,{
+            name: 'تقرير المشتريات',
+            route: '/reports/purchases',
+            icon: 'M3 3v18h18V3H3zm3 14V7h12v10H6zm3-9h6v2H9V8zm0 4h6v2H9v-2z'
+          }
     ],
     icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2'
   },

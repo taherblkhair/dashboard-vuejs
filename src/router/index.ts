@@ -26,6 +26,7 @@ const routes = [
   { path: 'stock-movements/create', name: 'StockMovementCreate', component: () => import('../views/StockMovements/Create.vue') },
   { path: 'stock-movements/transfer', name: 'StockMovementTransfer', component: () => import('../views/StockMovements/Transfer.vue') },
   { path: 'reports/stock/low-stock', name: 'ReportsLowStock', component: () => import('../views/Reports/LowStock.vue') },
+  { path: 'reports/purchases', name: 'ReportsPurchases', component: () => import('../views/Reports/Purchases.vue') },
   { path: 'purchases/suppliers', name: 'PurchasesSuppliers', component: () => import('../views/Purchases/Suppliers.vue') },
   { path: 'purchases/suppliers/create', name: 'PurchasesSupplierCreate', component: () => import('../views/Purchases/SuppliersCreate.vue') },
   { path: 'purchases/suppliers/:id/edit', name: 'PurchasesSupplierEdit', component: () => import('../views/Purchases/SuppliersCreate.vue') },
