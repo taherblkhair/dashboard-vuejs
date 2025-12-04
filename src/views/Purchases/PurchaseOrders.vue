@@ -6,6 +6,10 @@
           <h1 class="text-2xl font-bold">طلبات الشراء</h1>
           <p class="text-sm text-gray-500">قائمة طلبات الشراء.</p>
         </div>
+        <!-- استلام طلبات الشراء -->
+        <div class="flex gap-3">
+          <button @click="receiveOrders" class="px-4 py-2 border rounded bg-gray-100 text-sm">استلام طلبات الشراء</button>
+        </div>
       </div>
       <!-- create new order     -->
       <div class="flex justify-end gap-3 mt-6">
@@ -110,6 +114,14 @@ const createOrder = () => {
 const viewOrder = (id?: number) => {
   if (!id) return
   router.push({ name: 'PurchaseOrderDetails', params: { id } })
+}
+const receiveOrders = () => {
+  router.push({ name: 'PurchaseOrderReceives' })
+}
+
+const receiveOrder = (id?: number) => {
+  if (!id) return
+  router.push({ name: 'PurchaseOrderReceiveCreate', params: { id } })
 }
 
 const escapeCsv = (val: any) => {
