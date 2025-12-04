@@ -17,6 +17,13 @@
       </div>
 
       <div class="flex items-center gap-4">
+        <!-- Quick Reports Shortcut -->
+        <button @click="router.push('/reports')" class="p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors" title="التقارير">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l3-3 3 3 4-4"/>
+          </svg>
+        </button>
         <!-- Search -->
         <div class="relative hidden md:block">
           <input
