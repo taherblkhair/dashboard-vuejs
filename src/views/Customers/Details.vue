@@ -61,7 +61,7 @@
         <div v-else class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left text-xs text-gray-500">
+              <tr class="text-right text-xs text-gray-500 border-b">
                 <th class="px-2 py-2">كود</th>
                 <th class="px-2 py-2">الحالة</th>
                 <th class="px-2 py-2">حالة الدفع</th>
