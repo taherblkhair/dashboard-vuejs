@@ -119,10 +119,7 @@ const receiveOrders = () => {
   router.push({ name: 'PurchaseOrderReceives' })
 }
 
-const receiveOrder = (id?: number) => {
-  if (!id) return
-  router.push({ name: 'PurchaseOrderReceiveCreate', params: { id } })
-}
+// receiveOrder removed: navigation to per-order receive is handled from the Receives list page
 
 const escapeCsv = (val: any) => {
   if (val === null || val === undefined) return ''
