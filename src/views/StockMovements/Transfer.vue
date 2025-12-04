@@ -22,7 +22,13 @@
 
         <div>
           <label class="text-sm text-gray-600">معرف متغير المنتج (product_variant_id)</label>
-          <input v-model.number="form.product_variant_id" type="number" min="1" class="w-full mt-1 p-2 border rounded" />
+          <div v-if="loadingVariants" class="text-sm text-gray-500 mt-1">جاري تحميل المتغيرات...</div>
+          <div v-else-if="variants.length">
+            <select v-model.number="form.product_variant_id" class="w-full mt-1 p-2 border rounded">
+              <option v-for="v in variants" :key="v.id" :value="v.id">{{ v.label }} (متاح: {{ v.available }})</option>
+            </select>
+          </div>
+          <div v-else class="text-sm text-gray-500 mt-1">لا توجد متغيرات متاحة في هذا المخزن</div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -54,9 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { fetchWarehouses } from '../../api/warehouses'
+import { fetchWarehouses, fetchWarehouseStockReport } from '../../api/warehouses'
 import { transferStockMovement } from '../../api/stockMovements'
 
 const router = useRouter()
@@ -66,6 +72,9 @@ const loading = ref(false)
 const submitting = ref(false)
 const error = ref('')
 const success = ref('')
+const variants = ref<any[]>([])
+const loadingVariants = ref(false)
+const fromPrefilled = ref(false)
 
 const form = ref({
   from_warehouse_id: null as number | null,
@@ -95,9 +104,52 @@ onMounted(() => {
   const q = route.query
   const fromId = q.from_warehouse_id || q.warehouse_id
   const toId = q.to_warehouse_id
-  if (fromId) form.value.from_warehouse_id = Number(fromId)
+  if (fromId) {
+    form.value.from_warehouse_id = Number(fromId)
+    fromPrefilled.value = true
+    // fetch variants for this warehouse immediately
+    loadVariantsForWarehouse(Number(fromId))
+  }
   if (toId) form.value.to_warehouse_id = Number(toId)
 })
+
+// watch for changes to the from_warehouse_id (when user selects) and load variants
+watch(() => form.value.from_warehouse_id, (val) => {
+  if (!val) { variants.value = []; return }
+  // if not prefilled (user selected), load variants
+  loadVariantsForWarehouse(Number(val))
+})
+
+const loadVariantsForWarehouse = async (warehouseId: number) => {
+  loadingVariants.value = true
+  variants.value = []
+  try {
+    const res = await fetchWarehouseStockReport(warehouseId)
+    const details = (res?.data?.stock_details) || (res?.data) || []
+    variants.value = (details || []).map((d: any) => ({
+      id: d.product_variant_id,
+      label: `${d.product_name ? d.product_name : '#'+(d.product_variant_id ?? '')}${d.variant_attributes ? ' — ' + formatAttributes(d.variant_attributes) : ''}`,
+      available: d.available_quantity ?? d.quantity ?? 0
+    }))
+    // if there's at least one variant and no selected variant, pick the first
+    if (variants.value.length && !form.value.product_variant_id) {
+      form.value.product_variant_id = variants.value[0].id
+    }
+  } catch (e) {
+    console.error('Failed to load warehouse variants', e)
+  } finally {
+    loadingVariants.value = false
+  }
+}
+
+const formatAttributes = (attr: any) => {
+  if (!attr) return ''
+  if (typeof attr === 'string') {
+    try { const parsed = JSON.parse(attr); return Object.entries(parsed).map(([k, v]) => `${k}: ${v}`).join(', ') } catch { return attr }
+  }
+  if (typeof attr === 'object') { try { return Object.entries(attr).map(([k, v]) => `${k}: ${v}`).join(', ') } catch { return String(attr) } }
+  return String(attr)
+}
 
 const submit = async () => {
   error.value = ''
