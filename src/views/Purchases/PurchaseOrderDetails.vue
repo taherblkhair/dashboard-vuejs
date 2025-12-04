@@ -3,10 +3,7 @@
     <div class="max-w-4xl mx-auto">
       <div class="mb-6">
             <button @click="$router.back()" class="px-3 py-1 border rounded">رجوع</button>
-            <div class="inline-block mr-3">
-              <button v-if="order.status !== 'approved'" @click="onApprove" class="px-3 py-1 bg-green-600 text-white rounded">اعتماد</button>
-              <button v-if="order.status !== 'received'" @click="onReceive" class="ml-2 px-3 py-1 bg-indigo-600 text-white rounded">تأكيد الاستلام</button>
-            </div>
+          
       </div>
 
       <div class="bg-white rounded-lg shadow p-4">
@@ -28,7 +25,6 @@
                   <option value="pending">pending</option>
                   <option value="ordered">ordered</option>
                   <option value="approved">approved</option>
-                  <option value="received">received</option>
                   <option value="cancelled">cancelled</option>
                 </select>
                 <button @click="saveStatus" class="px-3 py-1 bg-yellow-500 text-white rounded text-sm">حفظ</button>
@@ -94,7 +90,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { request } from '../../api'
-import { receivePurchaseOrder, updatePurchaseOrderStatus } from '../../api/purchaseOrders'
+import { updatePurchaseOrderStatus } from '../../api/purchaseOrders'
 
 const route = useRoute()
 const id = Number(route.params.id)
@@ -123,37 +119,9 @@ const formatDate = (iso?: string) => {
   try { return new Date(iso).toLocaleDateString() } catch { return iso }
 }
 
-const onApprove = async () => {
-  if (!id) return
-  if (!confirm('هل تريد اعتماد طلب الشراء هذا؟')) return
-  try {
-    await updatePurchaseOrderStatus(id, 'approved')
-    alert('تم الاعتماد')
-    await load()
-  } catch (e) {
-    console.error('Approve failed', e)
-    alert('فشل الاعتماد')
-  }
-}
 
-const onReceive = async () => {
-  if (!id) return
-  if (!confirm('هل تأكدت من استلام الكمية؟')) return
-  try {
-    // Prefer using status PATCH for receipt if available
-    try {
-      await updatePurchaseOrderStatus(id, 'received')
-    } catch (_) {
-      // fallback to dedicated receive endpoint
-      await receivePurchaseOrder(id, { actual_delivery_date: new Date().toISOString() })
-    }
-    alert('تم تأكيد الاستلام')
-    await load()
-  } catch (e) {
-    console.error('Receive failed', e)
-    alert('فشل تأكيد الاستلام')
-  }
-}
+
+
 
 const saveStatus = async () => {
   if (!id) return
