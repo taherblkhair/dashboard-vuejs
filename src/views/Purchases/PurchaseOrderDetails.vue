@@ -20,6 +20,19 @@
             <div class="text-right">
               <div class="text-sm">الحالة: <span class="font-semibold">{{ order.status }}</span></div>
               <div class="text-sm">الإجمالي: <span class="font-semibold">{{ order.total_amount }}</span></div>
+
+              <div class="mt-3 flex items-center justify-end gap-2">
+                <select v-model="selectedStatus" class="px-2 py-1 border rounded bg-white text-sm">
+                  <option value="">-- تغيير الحالة --</option>
+                  <option value="draft">draft</option>
+                  <option value="pending">pending</option>
+                  <option value="ordered">ordered</option>
+                  <option value="approved">approved</option>
+                  <option value="received">received</option>
+                  <option value="cancelled">cancelled</option>
+                </select>
+                <button @click="saveStatus" class="px-3 py-1 bg-yellow-500 text-white rounded text-sm">حفظ</button>
+              </div>
             </div>
           </div>
 
@@ -81,12 +94,13 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { request } from '../../api'
-import { approvePurchaseOrder, receivePurchaseOrder } from '../../api/purchaseOrders'
+import { receivePurchaseOrder, updatePurchaseOrderStatus } from '../../api/purchaseOrders'
 
 const route = useRoute()
 const id = Number(route.params.id)
 const order = ref<any>({})
 const loading = ref(false)
+const selectedStatus = ref<string>('')
 
 const load = async () => {
   if (!id) return
@@ -94,6 +108,7 @@ const load = async () => {
   try {
     const res = await request(`/purchase-orders/${id}`)
     order.value = res?.data || res || {}
+    selectedStatus.value = order.value?.status || ''
   } catch (e) {
     console.error('Failed to fetch purchase order', e)
   } finally {
@@ -112,7 +127,7 @@ const onApprove = async () => {
   if (!id) return
   if (!confirm('هل تريد اعتماد طلب الشراء هذا؟')) return
   try {
-    await approvePurchaseOrder(id)
+    await updatePurchaseOrderStatus(id, 'approved')
     alert('تم الاعتماد')
     await load()
   } catch (e) {
@@ -125,13 +140,32 @@ const onReceive = async () => {
   if (!id) return
   if (!confirm('هل تأكدت من استلام الكمية؟')) return
   try {
-    // send a simple receive request; payload can include actual_delivery_date if needed
-    await receivePurchaseOrder(id, { actual_delivery_date: new Date().toISOString() })
+    // Prefer using status PATCH for receipt if available
+    try {
+      await updatePurchaseOrderStatus(id, 'received')
+    } catch (_) {
+      // fallback to dedicated receive endpoint
+      await receivePurchaseOrder(id, { actual_delivery_date: new Date().toISOString() })
+    }
     alert('تم تأكيد الاستلام')
     await load()
   } catch (e) {
     console.error('Receive failed', e)
     alert('فشل تأكيد الاستلام')
+  }
+}
+
+const saveStatus = async () => {
+  if (!id) return
+  if (!selectedStatus.value) return alert('اختر الحالة أولاً')
+  if (!confirm(`تغيير الحالة إلى: ${selectedStatus.value} ؟`)) return
+  try {
+    await updatePurchaseOrderStatus(id, selectedStatus.value)
+    alert('تم تحديث الحالة')
+    await load()
+  } catch (e) {
+    console.error('Update status failed', e)
+    alert('فشل تحديث الحالة')
   }
 }
 </script>

@@ -16,4 +16,8 @@ export async function receivePurchaseOrder(id: number, payload: any = {}) {
   return request(`/purchase-orders/${id}/receive`, { method: 'POST', body: JSON.stringify(payload) })
 }
 
+export async function updatePurchaseOrderStatus(id: number, status: string) {
+  return request(`/purchase-orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) })
+}
+
 export default { fetchPurchaseOrders, fetchPurchaseOrder }
