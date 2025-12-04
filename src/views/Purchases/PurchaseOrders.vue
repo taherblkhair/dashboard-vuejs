@@ -7,6 +7,10 @@
           <p class="text-sm text-gray-500">قائمة طلبات الشراء.</p>
         </div>
       </div>
+      <!-- create new order     -->
+      <div class="flex justify-end gap-3 mt-6">
+        <button @click="createOrder" class="px-4 py-2 border rounded bg-gray-100 text-sm">إنشاء طلب شراء</button>
+      </div>
 
       <div class="bg-white rounded-lg shadow p-4">
         <div v-if="loading" class="text-center py-8">جاري التحميل...</div>
@@ -97,6 +101,10 @@ const changePage = (p: number) => { load(p) }
 const formatDate = (iso?: string) => {
   if (!iso) return '-'
   try { return new Date(iso).toLocaleDateString() } catch { return iso }
+}
+// Navigate to create order page
+const createOrder = () => {
+    router.push({ name: 'PurchaseOrderCreate' })
 }
 
 const viewOrder = (id?: number) => {

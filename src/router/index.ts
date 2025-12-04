@@ -32,6 +32,7 @@ const routes = [
   { path: 'purchases/suppliers/:id/purchase-orders', name: 'PurchasesSupplierPurchaseOrders', component: () => import('../views/Purchases/SupplierPurchaseOrders.vue') },
   { path: 'purchases/orders/:id', name: 'PurchaseOrderDetails', component: () => import('../views/Purchases/PurchaseOrderDetails.vue') },
   { path: 'purchase-orders', name: 'PurchaseOrders', component: () => import('../views/Purchases/PurchaseOrders.vue') },
+  { path: 'purchases/orders/create', name: 'PurchaseOrderCreate', component: () => import('../views/Purchases/PurchaseOrderCreate.vue') },
   { path: 'reports', name: 'Reports', component: () => import('../views/Reports.vue') },
   { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') }
     ]
