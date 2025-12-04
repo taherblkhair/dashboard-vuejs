@@ -39,6 +39,7 @@
                   <td class="p-2 text-right">
                     <div class="flex justify-end gap-2">
                       <button @click="() => editSupplier(s.id)" class="px-2 py-1 bg-yellow-500 text-white rounded text-xs">تعديل</button>
+                      <button @click="() => viewPurchaseOrders(s.id)" class="px-2 py-1 bg-indigo-600 text-white rounded text-xs">طلبات الشراء</button>
                       <button @click="() => removeSupplier(s.id)" class="px-2 py-1 bg-red-500 text-white rounded text-xs">حذف</button>
                     </div>
                   </td>
@@ -93,6 +94,11 @@ const changePage = (p: number) => {
 const editSupplier = (id?: number) => {
   if (!id) return
   router.push({ name: 'PurchasesSupplierEdit', params: { id } })
+}
+
+const viewPurchaseOrders = (id?: number) => {
+  if (!id) return
+  router.push({ name: 'PurchasesSupplierPurchaseOrders', params: { id } })
 }
 
 const removeSupplier = async (id?: number) => {

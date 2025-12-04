@@ -37,6 +37,10 @@ export async function deleteSupplier(id: number): Promise<any> {
   return request(`/suppliers/${id}`, { method: 'DELETE' })
 }
 
+export async function fetchSupplierPurchaseOrders(supplierId: number, page = 1): Promise<{ data: any[]; meta?: any }> {
+  return request(`/suppliers/${supplierId}/purchase-orders?page=${page}`)
+}
+
 export default {
   fetchSuppliers,
   createSupplier,
