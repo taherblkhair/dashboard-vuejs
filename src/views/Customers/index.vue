@@ -42,13 +42,49 @@
                   <td class="p-2 text-right">{{ c.total_spent }}</td>
                   <td class="p-2 text-right">{{ formatDate(c.last_order_date) }}</td>
                   <td class="p-2 text-right">
-                    <div class="flex justify-end gap-2">
+                    <div class="flex justify-end gap-1">
                       <button @click="viewCustomer(c.id)" class="px-2 py-1 bg-blue-600 text-white rounded text-xs">عرض</button>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address modal -->
+      <div v-if="addressModal.open">
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="closeAddressModal"></div>
+        <div class="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div class="bg-white w-full max-w-lg rounded shadow p-4">
+            <h3 class="text-lg font-semibold mb-3">إضافة عنوان للعميل</h3>
+            <div class="grid grid-cols-1 gap-3">
+              <div>
+                <label class="block text-sm mb-1">المدينة</label>
+                <input v-model="addressModal.form.city" class="w-full border rounded px-2 py-2" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">المنطقة</label>
+                <input v-model="addressModal.form.area" class="w-full border rounded px-2 py-2" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">الشارع</label>
+                <input v-model="addressModal.form.street" class="w-full border rounded px-2 py-2" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">المبنى</label>
+                <input v-model="addressModal.form.building" class="w-full border rounded px-2 py-2" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">ملاحظات (اختياري)</label>
+                <input v-model="addressModal.form.notes" class="w-full border rounded px-2 py-2" />
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+              <button @click="submitAddress" :disabled="addressModal.loading" class="px-4 py-2 bg-green-600 text-white rounded">حفظ</button>
+              <button @click="closeAddressModal" class="px-4 py-2 border rounded">إلغاء</button>
+            </div>
           </div>
         </div>
       </div>
@@ -59,7 +95,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchCustomers } from '../../api/customers'
+import { fetchCustomers, createCustomerAddress } from '../../api/customers'
 
 const router = useRouter()
 const customers = ref<any[]>([])
@@ -88,6 +124,39 @@ const formatDate = (iso?: string) => {
 
 const createCustomer = () => router.push({ name: 'CustomersCreate' })
 const viewCustomer = (id?: number) => { if (!id) return; router.push({ name: 'CustomersView', params: { id } }) }
+
+// Address modal state & handlers
+const addressModal = ref<any>({ open: false, customerId: null, loading: false, form: { city: '', area: '', street: '', building: '', notes: '' } })
+
+const openAddressModal = (customerId?: number) => {
+  if (!customerId) return
+  addressModal.value.open = true
+  addressModal.value.customerId = customerId
+  addressModal.value.form = { city: '', area: '', street: '', building: '', notes: '' }
+}
+
+const closeAddressModal = () => {
+  addressModal.value.open = false
+  addressModal.value.customerId = null
+}
+
+const submitAddress = async () => {
+  const cid = addressModal.value.customerId
+  if (!cid) return alert('Missing customer id')
+  if (!addressModal.value.form.city) return alert('المدينة مطلوبة')
+  try {
+    addressModal.value.loading = true
+    await createCustomerAddress(cid, addressModal.value.form)
+    alert('تمت إضافة العنوان')
+    closeAddressModal()
+    await load() // refresh customers list
+  } catch (e) {
+    console.error('Failed to create address', e)
+    alert('فشل إضافة العنوان')
+  } finally {
+    addressModal.value.loading = false
+  }
+}
 
 </script>
 
