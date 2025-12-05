@@ -646,9 +646,9 @@ const formatCurrency = (val?: string | number) => {
   if (val === null || val === undefined || val === '') return '0.00'
   const num = typeof val === 'number' ? val : Number(String(val))
   if (Number.isNaN(num)) return String(val)
-  return new Intl.NumberFormat('ar-SA', { 
+  return new Intl.NumberFormat('en-US', {
     style: 'currency', 
-    currency: 'SAR',
+    currency: 'LYD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2 
   }).format(num)

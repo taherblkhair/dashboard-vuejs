@@ -156,7 +156,8 @@ interface MenuItem {
 const openMenus = reactive<{ [key: string]: boolean }>({
   'المبيعات': false,
   'المشتريات': false,
-  'المخزون': false
+  'المخزون': false,
+  'التقارير': false
 })
 
 // دالة لفتح/إغلاق القوائم
@@ -275,6 +276,11 @@ const menuItems = ref<MenuItem[]>([
         name: 'تقرير المخزون',
         route: '/reports',
         icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2'
+      },
+      {
+        name: 'تقرير المبيعات',
+        route: '/reports/sales',
+        icon: 'M3 3v18h18V3H3zm3 14V7h12v10H6zm3-9h6v2H9V8zm0 4h6v2H9v-2z'
       },
       {
         name: 'منخفض المخزون',
