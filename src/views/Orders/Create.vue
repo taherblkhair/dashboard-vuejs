@@ -11,6 +11,12 @@
         </div>
       </div>
 
+      <!-- Global SKU quick-add: choose a variant to add a new line -->
+      <div class="mb-4">
+        <label class="text-xs text-gray-500">إضافة بند سريعًا بواسطة SKU</label>
+        <VariantAutocomplete @select="addVariantLine" placeholder="ابحث عن SKU أو اسم المنتج لإضافة بند" />
+      </div>
+
       <div class="bg-white rounded shadow p-4 mb-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
@@ -72,12 +78,9 @@
           <div class="grid grid-cols-1 md:grid-cols-6 gap-2 items-center">
             <div class="md:col-span-2">
               <label class="text-xs text-gray-500">المنتج / المتغير</label>
-              <select v-model.number="line.product_variant_id" @change="onVariantSelect(idx)" class="w-full border rounded px-2 py-2">
-                <option value="">اختر متغير</option>
-                <optgroup v-for="p in products" :label="p.name" :key="'g-' + p.id">
-                  <option v-for="v in p.variants" :key="v.id" :value="v.id">{{ p.name }} — {{ v.sku_variant }} — {{ formatAttributes(v.attributes) }}</option>
-                </optgroup>
-              </select>
+              <div class="flex gap-2">
+                <VariantAutocomplete v-model="line.product_variant_id" @select="(v) => onVariantSelected(idx, v)" placeholder="SKU أو اسم المنتج" />
+              </div>
             </div>
             <div>
               <label class="text-xs text-gray-500">الكمية</label>
@@ -126,7 +129,8 @@ import { fetchProducts } from '../../api/products'
 import { createOrder } from '../../api/orders'
 import { fetchAddresses } from '../../api/addresses'
 import { fetchCustomer } from '../../api/customers'
-import { formatAttributes } from '../../utils/helpers'
+import VariantAutocomplete from '../../components/VariantAutocomplete.vue'
+// formatAttributes not used directly here; VariantAutocomplete formats attributes for results
 
 const router = useRouter()
 
@@ -216,17 +220,20 @@ const removeLine = (idx: number) => {
   form.value.lines.splice(idx, 1)
 }
 
-const onVariantSelect = (idx: number) => {
-  const vId = form.value.lines[idx].product_variant_id
-  if (!vId) return
-  // find variant sale price
-  for (const p of products.value) {
-    const v = (p.variants || []).find((x: any) => Number(x.id) === Number(vId))
-    if (v) {
-      form.value.lines[idx].unit_price = Number(v.sale_price || v.sale_price || 0)
-      return
-    }
-  }
+// onVariantSelect removed; per-line selection handled by VariantAutocomplete @select -> onVariantSelected
+
+const onVariantSelected = (idx: number, variant: any) => {
+  if (!variant) return
+  form.value.lines[idx].product_variant_id = variant.id
+  form.value.lines[idx].unit_price = Number(variant.sale_price || 0)
+}
+
+// global SKU quick-add handler: receives a selected variant object
+const addVariantLine = (variant: any) => {
+  if (!variant) return
+  // create a new line and populate
+  const l = { _uid: uid(), product_variant_id: variant.id, quantity: 1, unit_price: Number(variant.sale_price || 0), discount_amount: 0, notes: '' }
+  form.value.lines.push(l)
 }
 
 const lineTotal = (l: any) => {

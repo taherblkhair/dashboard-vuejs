@@ -72,3 +72,10 @@ export async function fetchProductStock(productId: number): Promise<any> {
   // returns { data: { total_stock, total_reserved_stock, total_available_stock, variants: [...] } }
   return request(`/products/${productId}/stock`)
 }
+
+export async function fetchProductVariants(search = '', page = 1): Promise<{ data: any[]; meta?: any }> {
+  const qs = new URLSearchParams()
+  if (search) qs.append('search', String(search))
+  qs.append('page', String(page))
+  return request(`/product-variants?${qs.toString()}`)
+}
