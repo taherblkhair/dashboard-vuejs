@@ -13,3 +13,10 @@ export async function loadRiders(page = 1, params: Record<string, any> = {}) {
   ridersMeta.value = m
   return { data: d, meta: m }
 }
+
+export function updateRiderLocationInStore(id: number, current_location: string) {
+  const idx = ridersStore.value.findIndex((r: any) => Number(r.id) === Number(id))
+  if (idx !== -1) {
+    ridersStore.value[idx] = { ...ridersStore.value[idx], current_location }
+  }
+}

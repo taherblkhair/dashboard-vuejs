@@ -36,7 +36,8 @@
               <th class="text-right py-2">الهاتف</th>
               <th class="text-right py-2">مركبة</th>
               <th class="text-right py-2">السعة</th>
-              <th class="text-right py-2">الحالة</th>
+              <th class="text-right py-2">الموقع الحالي</th>
+              <th class="text-right py-2">الإجراءات</th>
             </tr>
           </thead>
           <tbody>
@@ -45,7 +46,21 @@
               <td class="py-2 text-right">{{ r.phone }}</td>
               <td class="py-2 text-right">{{ r.vehicle_type }} — {{ r.vehicle_number }}</td>
               <td class="py-2 text-right">{{ r.max_capacity }}</td>
-              <td class="py-2 text-right">{{ r.is_available ? 'متاح' : 'مشغول' }}</td>
+              <td class="py-2 text-right">
+                <div v-if="editingId !== r.id">{{ r.current_location ?? '-' }}</div>
+                <div v-else class="flex items-center gap-2">
+                  <input v-model="editingLocation" class="border rounded px-2 py-1 text-sm w-64" />
+                </div>
+              </td>
+              <td class="py-2 text-right">
+                <div v-if="editingId !== r.id" class="flex gap-2 justify-end">
+                  <button @click="startEdit(r)" class="px-2 py-1 text-sm bg-gray-200 rounded">تعديل الموقع</button>
+                </div>
+                <div v-else class="flex gap-2 justify-end">
+                  <button @click="saveLocation(r)" :disabled="saving" class="px-2 py-1 text-sm bg-green-600 text-white rounded">حفظ</button>
+                  <button @click="cancelEdit" class="px-2 py-1 text-sm bg-gray-200 rounded">إلغاء</button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -60,6 +75,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ridersStore, loadRiders } from '../../store/riders'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import ToastList from '../../components/ToastList.vue'
+import { updateRiderLocationOptimistic } from '../../services/ridersService'
 
 const providers = ref<any[]>([])
 const selectedProvider = ref<number | ''>('')
@@ -91,6 +107,35 @@ const load = async () => {
     providers.value = d
   } catch (e) {
     addToast('فشل جلب البيانات', 'error')
+  }
+}
+
+const editingId = ref<number | null>(null)
+const editingLocation = ref<string>('')
+const saving = ref(false)
+
+const startEdit = (r: any) => {
+  editingId.value = r.id
+  editingLocation.value = r.current_location ?? ''
+}
+
+const cancelEdit = () => {
+  editingId.value = null
+  editingLocation.value = ''
+}
+
+const saveLocation = async (r: any) => {
+  if (!editingId.value) return
+  saving.value = true
+  try {
+    await updateRiderLocationOptimistic(r.id, editingLocation.value)
+    addToast('تم تحديث الموقع', 'success')
+    cancelEdit()
+  } catch (err: any) {
+    console.error('Failed to update location', err)
+    addToast('فشل تحديث الموقع', 'error')
+  } finally {
+    saving.value = false
   }
 }
 

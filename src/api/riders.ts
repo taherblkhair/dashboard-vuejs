@@ -12,7 +12,15 @@ export async function fetchRiders(page = 1, params: Record<string, any> = {}): P
   return request(`/riders?${qs}`)
 }
 
+export async function updateRiderLocation(id: number, payload: { current_location: string }): Promise<any> {
+  return request(`/riders/${id}/location`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
 export default {
   createRider,
   fetchRiders,
+  updateRiderLocation,
 }
