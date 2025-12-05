@@ -269,6 +269,19 @@ const menuItems = ref<MenuItem[]>([
     ],
     icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'
   },
+  // شركات الشحن والتوصيل 
+   {
+    name: 'خدمات التوصيل',
+    children: [
+      {
+        name: 'مزودو خدمة التوصيل',
+        route: '/delivery-providers',
+        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2'
+      },
+    
+    ],
+    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2'
+  },
   {
     name: 'التقارير',
     children: [
