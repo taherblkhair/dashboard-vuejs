@@ -1,0 +1,18 @@
+import { request } from './index'
+
+export async function createRider(payload: Record<string, any>): Promise<any> {
+  return request('/riders', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function fetchRiders(page = 1, params: Record<string, any> = {}): Promise<any> {
+  const qs = new URLSearchParams({ page: String(page), ...Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null)) }).toString()
+  return request(`/riders?${qs}`)
+}
+
+export default {
+  createRider,
+  fetchRiders,
+}

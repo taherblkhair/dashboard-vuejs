@@ -274,8 +274,13 @@ const menuItems = ref<MenuItem[]>([
     name: 'خدمات التوصيل',
     children: [
       {
-        name: 'مزودو خدمة التوصيل',
+        name: 'شركات التوصيل',
         route: '/delivery-providers',
+        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2'
+      },
+      {
+        name: 'المندوبون',
+        route: '/riders',
         icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2'
       },
     
