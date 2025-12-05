@@ -321,7 +321,12 @@
           <div v-for="(line, idx) in form.lines" :key="line._uid" 
                class="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all duration-200">
             <div class="flex justify-between items-start mb-3">
-              <span class="text-sm font-medium text-gray-700">البند #{{ idx + 1 }}</span>
+              <span class="text-sm font-medium text-gray-700">
+                <template v-if="line.product_name">
+                  {{ line.product_name }}<span v-if="line.product_sku"> — {{ line.product_sku }}</span>
+                </template>
+                <template v-else>البند #{{ idx + 1 }}</template>
+              </span>
               <button 
                 @click="removeLine(idx)" 
                 class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
@@ -337,6 +342,7 @@
                 <label class="block text-xs font-medium text-gray-600 mb-1">المنتج / المتغير</label>
                 <VariantAutocomplete 
                   v-model="line.product_variant_id" 
+                  :selected-label="line.product_name ? (line.product_name + (line.product_sku ? ' — ' + line.product_sku : '')) : ''"
                   @select="(v) => onVariantSelected(idx, v)" 
                   placeholder="ابحث عن منتج..."
                   class="w-full"
@@ -563,7 +569,9 @@ const addLine = () => {
     quantity: 1, 
     unit_price: 0, 
     discount_amount: 0, 
-    notes: '' 
+    notes: '',
+    product_name: null,
+    product_sku: ''
   })
   showToast('تمت إضافة بند جديد', 'success')
 }
@@ -577,7 +585,12 @@ const onVariantSelected = (idx: number, variant: any) => {
   if (!variant) return
   form.value.lines[idx].product_variant_id = variant.id
   form.value.lines[idx].unit_price = Number(variant.sale_price || 0)
-  showToast(`تم إضافة ${variant.name || 'المنتج'}`, 'success')
+  const fullName = variant.product?.name || variant.name || 'المنتج'
+  const sku = variant.sku_variant || ''
+  // store display name on line so it's visible in the card header
+  form.value.lines[idx].product_name = fullName
+  form.value.lines[idx].product_sku = sku
+  showToast(`تمت إضافة البند: ${fullName}${sku ? ' — ' + sku : ''}`, 'success')
 }
 
 const addVariantLine = (variant: any) => {
@@ -588,10 +601,12 @@ const addVariantLine = (variant: any) => {
     quantity: 1, 
     unit_price: Number(variant.sale_price || 0), 
     discount_amount: 0, 
-    notes: '' 
+    notes: '',
+    product_name: variant.product?.name || variant.name || 'المنتج',
+    product_sku: variant.sku_variant || ''
   }
   form.value.lines.push(l)
-  showToast(`تم إضافة ${variant.name || 'المنتج'} إلى الفاتورة`, 'success')
+  showToast(`تمت إضافة البند: ${l.product_name}${l.product_sku ? ' — ' + l.product_sku : ''}`, 'success')
 }
 
 const lineTotal = (l: any) => {
@@ -733,7 +748,6 @@ select:focus,
 input:focus,
 textarea:focus {
   outline: none;
-  ring: 2px;
 }
 
 .hover-lift:hover {

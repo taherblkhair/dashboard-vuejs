@@ -22,13 +22,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { fetchProductVariants } from '../api/products'
 import { formatAttributes as fa } from '../utils/helpers'
 
 const props = defineProps({
   modelValue: { type: [Number, String], default: null },
-  placeholder: { type: String, default: '' }
+  placeholder: { type: String, default: '' },
+  selectedLabel: { type: String, default: '' }
 })
 const emit = defineEmits(['update:modelValue', 'select'])
 
@@ -38,6 +39,25 @@ const loading = ref(false)
 const show = ref(false)
 let timer: any = null
 const idx = ref(-1)
+
+// keep query in sync when parent provides a selected label (so the input shows the name)
+watch(() => props.selectedLabel, (val) => {
+  if (val && typeof val === 'string') {
+    query.value = val
+    // hide dropdown when a selection label is set
+    show.value = false
+  } else if (!val) {
+    // if cleared, reset the input
+    query.value = ''
+  }
+})
+
+// when parent changes modelValue to null/empty, clear the input
+watch(() => props.modelValue, (val) => {
+  if (!val) {
+    query.value = ''
+  }
+})
 
 const search = async (q: string) => {
   if (!q || q.trim().length === 0) {
