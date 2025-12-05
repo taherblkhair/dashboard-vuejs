@@ -195,17 +195,12 @@ const menuItems = ref<MenuItem[]>([
   {
     name: 'المبيعات',
     children: [
-      {
-        name: 'فواتير المبيعات',
-        route: '/sales/invoices',
-        icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-        badge: '3'
-      },
+      
       {
         name: 'طلبات المبيعات',
         route: '/orders',
         icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
-        badge: '12'
+        
       },
       {
         name: 'عملاء المبيعات',
@@ -214,22 +209,16 @@ const menuItems = ref<MenuItem[]>([
       },
       {
         name: 'تقارير المبيعات',
-        route: '/sales/reports',
+        route: '/reports/sales',
         icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
       }
     ],
     icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z',
-    badge: '15'
+    
   },
   {
     name: 'المشتريات',
     children: [
-      {
-        name: 'فواتير المشتريات',
-        route: '/purchases/invoices',
-        icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-        badge: '5'
-      },
       {
         name: 'طلبات الشراء',
         route: '/purchase-orders',
@@ -239,6 +228,11 @@ const menuItems = ref<MenuItem[]>([
         name: 'الموردون',
         route: '/purchases/suppliers',
         icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+      },
+      {
+        name: 'استلام طلبات الشراء',
+        route: '/purchase-orders/receives',
+        icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
       }
     ],
     icon: 'M3 3h18v18H3V3zm16 16V5H5v14h14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z'
@@ -250,7 +244,7 @@ const menuItems = ref<MenuItem[]>([
         name: 'الأصناف',
         route: '/products',
         icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
-        badge: '45'
+        // badge: '45'
       },
       {
         name: 'الفئات',
@@ -260,12 +254,7 @@ const menuItems = ref<MenuItem[]>([
       {
         name: 'المخازن',
         route: '/warehouses',
-        icon: 'M3 7l9-4 9 4v10l-9 4-9-4V7zM12 3v18m0-18L3 7m9-4l9 4m-9 14l9-4m-9 4L3 17',},
-      {
-        name: 'جرد المخزون',
-        route: '/inventory/stocktaking',
-        icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01'
-      }
+        icon: 'M3 7l9-4 9 4v10l-9 4-9-4V7zM12 3v18m0-18L3 7m9-4l9 4m-9 14l9-4m-9 4L3 17',}
     ],
     icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4'
   },
