@@ -44,3 +44,10 @@ export default {
   updateDelivery,
   uploadProof,
 }
+
+export async function createDeliveryForOrder(orderId: number, payload: Record<string, any>): Promise<any> {
+  return request(`/deliveries/orders/${orderId}/deliveries`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
