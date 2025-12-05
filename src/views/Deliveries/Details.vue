@@ -114,8 +114,9 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchDelivery, updateDelivery, uploadProof } from '../../api/deliveries'
+import { fetchDelivery, uploadProof, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
 import { fetchRiders } from '../../api/riders'
+import { useToast } from '../../composables/useToast'
 
 const route = useRoute()
 const id = Number(route.params.id)
@@ -130,6 +131,7 @@ const newStatus = ref<string>('')
 const selectedFile = ref<File | null>(null)
 
 const fileInput = ref<HTMLInputElement | null>(null)
+const { addToast } = useToast()
 
 const formatDate = (d?: string) => {
   if (!d) return '-'
@@ -169,12 +171,14 @@ const changeStatus = async () => {
   delivery.value.status = newStatus.value // optimistic
   saving.value = true
   try {
-    await updateDelivery(delivery.value.id, { status: newStatus.value })
-    // success
+    const res = await updateDeliveryStatus(delivery.value.id, { status: newStatus.value })
+    const updated = res?.data?.data ?? res?.data ?? null
+    if (updated) delivery.value = { ...delivery.value, ...updated }
+    addToast('تم تحديث حالة التوصيل', 'success')
   } catch (err) {
     delivery.value.status = prev // revert
     console.error('Failed to update status', err)
-    alert('فشل تحديث الحالة')
+    addToast('فشل تحديث الحالة', 'error')
   } finally {
     saving.value = false
   }
@@ -183,15 +187,18 @@ const changeStatus = async () => {
 const reassign = async () => {
   if (!delivery.value || !selectedRider.value) return
   const prevRider = delivery.value.rider
-  // optimistic
-  delivery.value.rider = ridersForProvider.value.find(r => r.id === selectedRider.value) ?? delivery.value.rider
+  // optimistic: set to selected rider object if available
+  delivery.value.rider = ridersForProvider.value.find(r => r.id === selectedRider.value) ?? { id: selectedRider.value }
   saving.value = true
   try {
-    await updateDelivery(delivery.value.id, { rider_id: selectedRider.value })
+    const res = await assignRiderToDelivery(delivery.value.id, { rider_id: selectedRider.value })
+    const updated = res?.data?.data ?? res?.data ?? null
+    if (updated) delivery.value = { ...delivery.value, ...updated }
+    addToast('تم تعيين المندوب بنجاح', 'success')
   } catch (err) {
     delivery.value.rider = prevRider
     console.error('Failed to reassign rider', err)
-    alert('فشل إعادة التعيين')
+    addToast('فشل إعادة التعيين', 'error')
   } finally {
     saving.value = false
   }
@@ -211,13 +218,13 @@ const upload = async () => {
     // merge returned data if any
     const updated = res?.data?.data ?? res?.data ?? null
     if (updated) delivery.value = { ...delivery.value, ...updated }
-    alert('تم رفع الملف بنجاح')
+  addToast('تم رفع الملف بنجاح', 'success')
     // clear file input
     if (fileInput.value) fileInput.value.value = ''
     selectedFile.value = null
   } catch (err) {
-    console.error('Failed to upload proof', err)
-    alert('فشل رفع الملف')
+  console.error('Failed to upload proof', err)
+  addToast('فشل رفع الملف', 'error')
   } finally {
     saving.value = false
   }

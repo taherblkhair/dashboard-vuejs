@@ -51,3 +51,17 @@ export async function createDeliveryForOrder(orderId: number, payload: Record<st
     body: JSON.stringify(payload),
   })
 }
+
+export async function assignRiderToDelivery(id: number, payload: { rider_id: number }): Promise<any> {
+  return request(`/deliveries/${id}/assign-rider`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function updateDeliveryStatus(id: number, payload: { status: string; notes?: string; location?: string }): Promise<any> {
+  return request(`/deliveries/${id}/update-status`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+}

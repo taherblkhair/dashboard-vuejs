@@ -37,7 +37,11 @@
                 <td class="py-2 text-right">{{ formatDate(d.estimated_delivery_time) }}</td>
                
                 <td class="py-2 text-right">
-                  <router-link :to="`/deliveries/${d.id}`" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">تفاصيل</router-link>
+                  <div class="flex gap-2 justify-end">
+                    <router-link :to="`/deliveries/${d.id}`" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">تفاصيل</router-link>
+                    <button @click.prevent="openAssign(d)" class="px-2 py-1 bg-yellow-500 text-white rounded text-sm">تعيين</button>
+                    <button @click.prevent="openStatus(d)" class="px-2 py-1 bg-green-600 text-white rounded text-sm">حالة</button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -53,15 +57,42 @@
       </div>
     </div>
   </div>
+      <!-- Assign Rider Modal -->
+      <AssignRiderModal :show="showAssign" :providerId="activeDelivery?.provider_id ?? activeDelivery?.provider?.id" @close="showAssign = false" @confirm="onAssignConfirm" />
+
+      <!-- Status Modal -->
+      <div v-if="showStatus" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div class="bg-white rounded shadow p-4 w-96" dir="rtl">
+          <h3 class="font-semibold mb-2">تغيير الحالة</h3>
+          <label class="text-sm">اختر الحالة</label>
+          <select v-model="statusToApply" class="w-full border rounded px-2 py-1 mt-1 text-sm">
+            <option value="">-- اختر --</option>
+            <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+          </select>
+          <div class="mt-4 flex justify-end gap-2">
+            <button @click="showStatus = false" class="px-3 py-1 border rounded">إلغاء</button>
+            <button @click="onStatusApply" :disabled="!statusToApply" class="px-3 py-1 bg-green-600 text-white rounded">تطبيق</button>
+          </div>
+        </div>
+      </div>
+
+      <ConfirmModal :show="showConfirm" title="تأكيد الإجراء" message="هل أنت متأكد أنك تريد تنفيذ هذا الإجراء؟" @confirm="onConfirm" @cancel="showConfirm = false" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { fetchDeliveries } from '../../api/deliveries'
+import { fetchDeliveries, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
+import { useToast } from '../../composables/useToast'
+import AssignRiderModal from '../../components/AssignRiderModal.vue'
+import ConfirmModal from '../../components/ConfirmModal.vue'
 
 const deliveries = ref<any[]>([])
 const meta = ref<any>(null)
 const loading = ref(false)
+
+const { addToast } = useToast()
+
+const statuses = ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered', 'failed', 'returned']
 
 const formatDate = (d?: string) => {
   if (!d) return '-'
@@ -88,6 +119,85 @@ const load = async (page = 1) => {
     console.error('Failed to load deliveries', e)
   } finally {
     loading.value = false
+  }
+}
+
+// modal state
+const showAssign = ref(false)
+const showStatus = ref(false)
+const showConfirm = ref(false)
+const activeDelivery = ref<any | null>(null)
+const statusToApply = ref<string>('')
+
+const openAssign = (d: any) => {
+  activeDelivery.value = d
+  showAssign.value = true
+}
+
+const openStatus = (d: any) => {
+  activeDelivery.value = d
+  showStatus.value = true
+}
+
+const onAssignConfirm = async (riderId: number) => {
+  if (!activeDelivery.value) return
+  const d = activeDelivery.value
+  const prev = { ...d }
+  d.rider = { id: riderId }
+  showAssign.value = false
+  try {
+    const res = await assignRiderToDelivery(d.id, { rider_id: riderId })
+    const updated = res?.data?.data ?? res?.data ?? null
+    if (updated) Object.assign(d, updated)
+    addToast('تم تعيين المندوب', 'success')
+  } catch (err) {
+    Object.assign(d, prev)
+    console.error('Failed to assign rider', err)
+    addToast('فشل تعيين المندوب', 'error')
+  }
+}
+
+const onStatusApply = async () => {
+  if (!activeDelivery.value || !statusToApply.value) return
+  const d = activeDelivery.value
+  const prev = d.status
+  // destructive statuses require confirmation
+  const destructive = ['failed', 'returned']
+  if (destructive.includes(statusToApply.value)) {
+    showConfirm.value = true
+    return
+  }
+  d.status = statusToApply.value
+  showStatus.value = false
+  try {
+    const res = await updateDeliveryStatus(d.id, { status: statusToApply.value })
+    const updated = res?.data?.data ?? res?.data ?? null
+    if (updated) Object.assign(d, updated)
+    addToast('تم تحديث الحالة', 'success')
+  } catch (err) {
+    d.status = prev
+    console.error('Failed to change status', err)
+    addToast('فشل تحديث الحالة', 'error')
+  }
+}
+
+const onConfirm = async () => {
+  // user confirmed destructive status
+  showConfirm.value = false
+  if (!activeDelivery.value) return
+  const d = activeDelivery.value
+  const prev = d.status
+  d.status = statusToApply.value
+  showStatus.value = false
+  try {
+    const res = await updateDeliveryStatus(d.id, { status: statusToApply.value })
+    const updated = res?.data?.data ?? res?.data ?? null
+    if (updated) Object.assign(d, updated)
+    addToast('تم تحديث الحالة', 'success')
+  } catch (err) {
+    d.status = prev
+    console.error('Failed to change status', err)
+    addToast('فشل تحديث الحالة', 'error')
   }
 }
 
