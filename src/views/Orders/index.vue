@@ -8,6 +8,10 @@
 					<div class="flex items-center gap-2">
 						<button @click="loadOrders(1)" class="px-3 py-1 bg-gray-100 rounded text-sm">تحديث</button>
 					</div>
+					<!-- create new order button -->
+					 <div class="flex items-center gap-2 mt-3">
+						<button @click="createOrder" class="px-3 py-1 bg-blue-600 text-white rounded">إنشاء طلب شراء</button>
+					</div>
 				</div>
 
 					<div class="bg-white rounded shadow p-3 mb-4">
@@ -125,6 +129,9 @@ const resetFilters = () => {
 }
 
 onMounted(() => loadOrders(1))
+const createOrder = () => {
+	window.location.href = 'orders/create'
+}
 
 const formatDate = (iso?: string) => {
 	if (!iso) return '—'

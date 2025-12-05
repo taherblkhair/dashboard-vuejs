@@ -44,6 +44,7 @@
                   <td class="p-2 text-right">
                     <div class="flex justify-end gap-1">
                       <button @click="viewCustomer(c.id)" class="px-2 py-1 bg-blue-600 text-white rounded text-xs">عرض</button>
+                      <button @click="openAddressModal(c.id)" class="px-2 py-1 bg-green-600 text-white rounded text-xs">إضافة عنوان</button>
                     </div>
                   </td>
                 </tr>

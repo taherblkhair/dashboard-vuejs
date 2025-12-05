@@ -26,3 +26,7 @@ export function getOrderInvoiceUrl(id: number) {
 	const base = BASE_URL.replace(/\/+$/, '')
 	return base ? `${base}/orders/${id}/invoice` : `/orders/${id}/invoice`
 }
+
+export async function createOrder(payload: any) {
+	return request(`/orders`, { method: 'POST', body: JSON.stringify(payload) })
+}
