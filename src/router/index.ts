@@ -49,7 +49,8 @@ const routes = [
   { path: 'delivery-providers/create', name: 'DeliveryProviderCreate', component: () => import('../views/DeliveryProviders/Create.vue') },
   { path: 'delivery-providers/:id', name: 'DeliveryProviderDetails', component: () => import('../views/DeliveryProviders/Details.vue') },
   { path: 'riders/create', name: 'RiderCreate', component: () => import('../views/Riders/Create.vue') },
-  { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') }
+  { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') },
+  { path: 'addresses', name: 'Addresses', component: () => import('../views/Addresses/index.vue') },
     ]
   }
 ]

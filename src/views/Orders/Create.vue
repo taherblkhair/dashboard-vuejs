@@ -534,8 +534,8 @@ const onCustomerChange = async () => {
     if (cust?.addresses && Array.isArray(cust.addresses)) {
       customerAddresses.value = cust.addresses
     } else {
-      const ares = await fetchAddresses(1)
-      const all = ares?.data || []
+      const ares = await fetchAddresses()
+      const all = ares || []
       customerAddresses.value = all.filter((a: any) => 
         a.owner_type && a.owner_type.includes('Customer') && Number(a.owner_id) === Number(id)
       )

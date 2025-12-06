@@ -158,8 +158,8 @@ const loadAddresses = async () => {
   loadingAddresses.value = true
   try {
     // fetch all addresses and filter by owner
-    const res = await fetchAddresses(1)
-    const all = res?.data || []
+  const res = await fetchAddresses()
+  const all = res || []
     addresses.value = all.filter((a: any) => a.owner_type && a.owner_type.includes('Customer') && Number(a.owner_id) === id)
   } catch (e) {
     console.error('Failed to load addresses', e)

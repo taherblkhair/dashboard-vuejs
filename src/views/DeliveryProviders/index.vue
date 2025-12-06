@@ -55,7 +55,6 @@
 import { ref, onMounted } from 'vue'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import { useRouter } from 'vue-router'
-import { create } from 'domain'
 
 const providers = ref<any[]>([])
 const meta = ref<any>(null)
