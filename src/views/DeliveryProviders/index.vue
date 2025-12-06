@@ -6,6 +6,12 @@
           <h1 class="text-2xl font-bold">مزودو خدمة التوصيل</h1>
           <p class="text-sm text-gray-500">قائمة مزودي التوصيل المتوفرين ومعلوماتهم الأساسية.</p>
         </div>
+        <div class="flex items-center gap-3">
+          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="createDeliveryProvider">
+            إضافة مزود
+          </button>
+          </div>
+
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -49,6 +55,7 @@
 import { ref, onMounted } from 'vue'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import { useRouter } from 'vue-router'
+import { create } from 'domain'
 
 const providers = ref<any[]>([])
 const meta = ref<any>(null)
@@ -76,6 +83,9 @@ const viewDetails = (id: number) => {
   router.push({ path: `/delivery-providers/${id}` })
 }
 
+const createDeliveryProvider = () => {
+  router.push({ path: `delivery-providers/create` })
+}
 onMounted(() => load(1))
 </script>
 
