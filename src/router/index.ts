@@ -51,6 +51,7 @@ const routes = [
   { path: 'riders/create', name: 'RiderCreate', component: () => import('../views/Riders/Create.vue') },
   { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') },
   { path: 'addresses', name: 'Addresses', component: () => import('../views/Addresses/index.vue') },
+  { path: 'cities', name: 'Cities', component: () => import('../views/Cities/index.vue') },
     ]
   }
 ]
