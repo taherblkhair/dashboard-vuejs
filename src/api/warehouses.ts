@@ -56,3 +56,8 @@ export async function fetchWarehouse(id: number): Promise<{ data: Warehouse }> {
 export async function fetchWarehouseStockReport(id: number): Promise<{ data: any }> {
   return request(`/warehouses/${id}/stock-report`)
 }
+
+export async function updateWarehouse(id: number, payload: Partial<Warehouse>): Promise<{ data: Warehouse }>
+{
+  return request(`/warehouses/${id}`, { method: 'PUT', body: JSON.stringify(payload) }) as Promise<{ data: Warehouse }>
+}
