@@ -30,3 +30,7 @@ export async function updateCategory(id: number, payload: Partial<Category>): Pr
 export async function fetchCategoryProducts(categoryId: number, page = 1): Promise<{ data: Product[]; count?: number }> {
   return request(`/categories/${categoryId}/products?page=${page}`)
 }
+
+export async function fetchCategory(categoryId: number): Promise<{ data: Category } | Category> {
+  return request(`/categories/${categoryId}`)
+}

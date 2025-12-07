@@ -9,7 +9,7 @@
 
       <div class="flex items-center gap-3">
         <button
-          @click="openCreateModal"
+          @click="() => router.push({ name: 'ProductCreate' })"
           class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,54 +176,13 @@
 
   </div>
 
-  <!-- Modal (create product) -->
-  <div v-if="showCreateModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" @click.self="closeCreateModal">
-    <div class="bg-white rounded-lg w-full max-w-2xl mx-4 overflow-auto">
-      <header class="flex items-center justify-between p-4 border-b">
-        <h3 class="font-semibold text-lg">إضافة منتج جديد</h3>
-        <button class="text-gray-500 hover:text-gray-700" @click="closeCreateModal">×</button>
-      </header>
-
-<div class="p-4 max-h-[70vh] overflow-y-auto">
-          <ProductForm
-            :categories="categories"
-            :loading="createLoading"
-            :example="examplePayload"
-            @save="handleCreateProduct"
-            @close="closeCreateModal"
-          />
-        </div>
-    </div>
-  </div>
+  <!-- Creation moved to dedicated page: /products/create -->
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchProducts as apiFetchProducts, fetchCategories } from '../../api/products'
-import { createProduct as apiCreateProduct, deleteProduct as apiDeleteProduct } from '../../api/products'
-import ProductForm from './ProductForm.vue'
-// example payload used for pre-fill (can be moved to .env or fetched)
-const examplePayload: Partial<Product> = {
-  sku: 'PROD-4442',
-  name: 'Smartphone Xm',
-  description: 'Latest smartphone with advanced features',
-  category_id: 1,
-  is_active: true,
-  variants: [
-    {
-      // backend may fill id/product_id
-      id: Date.now(),
-      product_id: 0,
-      sku_variant: 'PROD-4442-1',
-      attributes: { color: 'Black', storage: '128GB' },
-      purchase_price: String(500),
-      sale_price: String(699),
-      expiry_date: '2026-12-31',
-      is_active: true,
-    }
-  ] as any
-}
+import { fetchProducts as apiFetchProducts, fetchCategories, deleteProduct as apiDeleteProduct } from '../../api/products'
 import type { Product, Category, Variant } from '../../api/products'
 
 // البيانات التفاعلية
@@ -306,37 +265,7 @@ const getMaxPrice = (variants: Variant[]) => {
 }
 
 // الإجراءات
-const showCreateModal = ref(false)
-
 const router = useRouter()
-
-const openCreateModal = () => { showCreateModal.value = true }
-const closeCreateModal = () => { showCreateModal.value = false }
-
-const createLoading = ref(false)
-
-const handleCreateProduct = async (payload: Partial<Product>) => {
-  createLoading.value = true
-  try {
-    // call API to create product
-    const res = await apiCreateProduct(payload)
-    const created = res.data as Product
-
-    // ensure category object is present (optional)
-    if (created && created.category_id && !created.category) {
-      created.category = categories.value.find(c => c.id === created.category_id)
-    }
-
-    // prepend to products list
-    products.value.unshift(created)
-    closeCreateModal()
-  } catch (e) {
-    console.error('Error creating product:', e)
-    alert('حدث خطأ عند إنشاء المنتج. تحقق من الاتصال أو سجلات الخادم.')
-  } finally {
-    createLoading.value = false
-  }
-}
 
 // formatDate removed (was used only by modal/export helpers)
 
