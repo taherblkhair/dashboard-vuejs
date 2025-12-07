@@ -291,12 +291,15 @@
           <div v-for="(line, idx) in form.lines" :key="line._uid" 
                class="border border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all duration-200">
             <div class="flex justify-between items-start mb-3">
-              <span class="text-sm font-medium text-gray-700">
-                <template v-if="line.product_name">
-                  {{ line.product_name }}<span v-if="line.product_sku"> — {{ line.product_sku }}</span>
-                </template>
-                <template v-else>البند #{{ idx + 1 }}</template>
-              </span>
+              <div>
+                <span class="text-sm font-medium text-gray-700">
+                  <template v-if="line.product_name">
+                    {{ line.product_name }}<span v-if="line.product_sku"> — {{ line.product_sku }}</span>
+                  </template>
+                  <template v-else>البند #{{ idx + 1 }}</template>
+                </span>
+                <div v-if="line.product_category" class="text-xs text-gray-500 mt-1">{{ line.product_category }}</div>
+              </div>
               <button 
                 @click="removeLine(idx)" 
                 class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200"
@@ -541,7 +544,8 @@ const addLine = () => {
     discount_amount: 0, 
     notes: '',
     product_name: null,
-    product_sku: ''
+    product_sku: '',
+    product_category: null
   })
   showToast('تمت إضافة بند جديد', 'success')
 }
@@ -557,9 +561,11 @@ const onVariantSelected = (idx: number, variant: any) => {
   form.value.lines[idx].unit_price = Number(variant.sale_price || 0)
   const fullName = variant.product?.name || variant.name || 'المنتج'
   const sku = variant.sku_variant || ''
+  const categoryName = variant.product?.category?.name || variant.product?.category_name || null
   // store display name on line so it's visible in the card header
   form.value.lines[idx].product_name = fullName
   form.value.lines[idx].product_sku = sku
+  form.value.lines[idx].product_category = categoryName
   showToast(`تمت إضافة البند: ${fullName}${sku ? ' — ' + sku : ''}`, 'success')
 }
 
@@ -573,7 +579,8 @@ const addVariantLine = (variant: any) => {
     discount_amount: 0, 
     notes: '',
     product_name: variant.product?.name || variant.name || 'المنتج',
-    product_sku: variant.sku_variant || ''
+    product_sku: variant.sku_variant || '',
+    product_category: variant.product?.category?.name || variant.product?.category_name || null
   }
   form.value.lines.push(l)
   showToast(`تمت إضافة البند: ${l.product_name}${l.product_sku ? ' — ' + l.product_sku : ''}`, 'success')
