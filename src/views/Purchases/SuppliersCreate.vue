@@ -25,27 +25,23 @@
             <label class="text-sm text-gray-600">البريد الإلكتروني</label>
             <input v-model="form.email" type="email" class="w-full mt-1 p-2 border rounded" />
           </div>
-          <div>
+          <!-- <div>
             <label class="text-sm text-gray-600">الرمز الضريبي</label>
             <input v-model="form.tax_number" class="w-full mt-1 p-2 border rounded" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-sm text-gray-600">شروط الدفع</label>
-            <input v-model="form.payment_terms" class="w-full mt-1 p-2 border rounded" />
-          </div>
-          <div>
+          </div> -->
+           <div>
             <label class="text-sm text-gray-600">زمن التوريد (أيام)</label>
             <input v-model.number="form.lead_time_days" type="number" min="0" class="w-full mt-1 p-2 border rounded" />
           </div>
         </div>
 
+     
+
         <div>
           <label class="text-sm text-gray-600">العنوان</label>
-          <select v-model.number="form.address_id" class="w-full mt-1 p-2 border rounded">
+          <select v-model.number="form.address_id" :disabled="addressesLoading" class="w-full mt-1 p-2 border rounded">
             <option value="">اختر عنواناً</option>
+            <option v-if="addressesLoading" value="">جاري التحميل...</option>
             <option v-for="a in addresses" :key="a.id" :value="a.id">{{ a.city }} - {{ a.area }} - {{ a.street }} {{ a.building || '' }}</option>
           </select>
         </div>
@@ -76,6 +72,7 @@ const router = useRouter()
 const submitting = ref(false)
 const error = ref('')
 const addresses = ref<any[]>([])
+const addressesLoading = ref(false)
 
 const route = useRoute()
 const supplierId = Number(route.params.id || 0)
@@ -94,11 +91,20 @@ const form = ref({
 })
 
 const loadAddresses = async () => {
+  addressesLoading.value = true
   try {
     const res = await fetchAddresses()
-    addresses.value = res?.data || []
+    // fetchAddresses may return a raw array or an object with { data }
+    if (Array.isArray(res)) {
+      addresses.value = res
+    } else {
+      addresses.value = (res && (res.data ?? res)) || []
+    }
   } catch (e) {
     console.error('Failed to load addresses', e)
+    addresses.value = []
+  } finally {
+    addressesLoading.value = false
   }
 }
 

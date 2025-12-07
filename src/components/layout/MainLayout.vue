@@ -9,6 +9,9 @@
     <div class="flex-1 flex flex-col overflow-hidden">
       <Navbar @toggle-sidebar="sidebarOpen = !sidebarOpen" />
 
+      <!-- global breadcrumbs -->
+      <Breadcrumbs />
+
       <main class="flex-1 overflow-auto p-4">
         <router-view />
       </main>
@@ -20,6 +23,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import Sidebar from './Sidebar.vue'
 import Navbar from './Navbar.vue'
+import Breadcrumbs from './Breadcrumbs.vue'
 
 const sidebarOpen = ref(false)
 
