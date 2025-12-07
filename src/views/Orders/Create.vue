@@ -30,37 +30,7 @@
             </div>
           </div>
           
-          <div class="flex flex-col sm:flex-row gap-3">
-            <button 
-              @click="submit" 
-              :disabled="submitting"
-              :class="[
-                'px-6 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2',
-                submitting 
-                  ? 'bg-blue-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg'
-              ]"
-            >
-              <svg v-if="submitting" class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-              </svg>
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-              </svg>
-              {{ submitting ? 'جاري الحفظ...' : 'حفظ وإنشاء الفاتورة' }}
-            </button>
-            
-            <router-link 
-              to="/orders" 
-              class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-2"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-              إلغاء
-            </router-link>
-          </div>
+          
         </div>
       </div>
 

@@ -10,7 +10,7 @@
 					</div>
 					<!-- create new order button -->
 					 <div class="flex items-center gap-2 mt-3">
-						<button @click="createOrder" class="px-3 py-1 bg-blue-600 text-white rounded">إنشاء طلب شراء</button>
+						<button @click="createOrder" class="px-3 py-1 bg-blue-600 text-white rounded">إنشاء طلبية مبيعات</button>
 					</div>
 				</div>
 
