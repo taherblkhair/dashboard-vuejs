@@ -126,7 +126,7 @@ const loading = ref(false)
 const saving = ref(false)
 const ridersForProvider = ref<any[]>([])
 const selectedRider = ref<number | null>(null)
-const statuses = ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered', 'failed', 'returned']
+const statuses = ['pending', 'assigned', 'picked_up', 'in_transit', 'shipped', 'delivered', 'failed', 'returned']
 const newStatus = ref<string>('')
 const selectedFile = ref<File | null>(null)
 

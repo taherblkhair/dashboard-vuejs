@@ -408,7 +408,7 @@
             @click="submit" 
             :disabled="submitting"
             :class="[
-              'px-8 py-3 rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2',
+              'px-8 py-3 rounded-xl text-white font-medium transition-all duration-200 flex items-center justify-center gap-2',
               submitting 
                 ? 'bg-blue-400 cursor-not-allowed' 
                 : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl'
