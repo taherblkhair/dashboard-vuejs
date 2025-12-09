@@ -21,11 +21,8 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading && !form.lines.length" class="bg-white rounded-2xl shadow-lg p-12 border border-gray-200">
-        <div class="text-center">
-          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <p class="text-gray-600">جاري تحميل البيانات...</p>
-        </div>
+      <div v-if="loading && !form.lines.length">
+        <SkeletonLoader />
       </div>
 
       <!-- Main Form -->
@@ -206,6 +203,7 @@
                     <ProductAutocomplete
                       v-model="line.product_id"
                       @select="(p) => onProductSelected(idx, p)"
+                      @select-all="(p) => addAllVariants(idx, p)"
                       :class="[
                         'w-full px-0 py-0 transition-all duration-200',
                         errors[`lines.${idx}.product_id`] ? 'border-red-500' : ''
@@ -398,6 +396,7 @@ import { fetchProducts } from '../../api/products'
 import { createPurchaseOrder } from '../../api/purchaseOrders'
 import { formatAttributes } from '../../utils/helpers'
 import ProductAutocomplete from '../../components/ProductAutocomplete.vue'
+import SkeletonLoader from '../../components/ui/SkeletonLoader.vue'
 
 const router = useRouter()
 
@@ -467,6 +466,39 @@ const onProductSelected = (idx: number, product: any) => {
   // set default variant if available
   const v = product.variants || []
   form.lines[idx].product_variant_id = v.length > 0 ? v[0].id : null
+}
+
+const addAllVariants = (idx: number, product: any) => {
+  if (!product) return
+  const variants = product.variants || []
+  if (!variants.length) {
+    alert('هذا المنتج لا يحتوي على متغيرات ليتم إضافتها')
+    return
+  }
+
+  // Replace the current line with the first variant, then insert others after
+  const first = variants[0]
+  form.lines[idx].product_id = product.id
+  form.lines[idx].product_name = product.name || null
+  form.lines[idx].product_variant_id = first.id
+  form.lines[idx].unit_price = first.price || 0
+
+  // insert remaining variants after idx
+  const rest = variants.slice(1)
+  const newLines = rest.map((v: any) => ({
+    _uid: Date.now() + Math.random(),
+    product_id: product.id,
+    product_variant_id: v.id,
+    quantity_ordered: 1,
+    unit_price: v.price || 0,
+    expiry_date: '',
+    notes: '',
+    product_name: product.name || null
+  }))
+
+  if (newLines.length) {
+    form.lines.splice(idx + 1, 0, ...newLines)
+  }
 }
 
 const formatCurrency = (val?: number) => {
