@@ -79,3 +79,10 @@ export async function fetchProductVariants(search = '', page = 1): Promise<{ dat
   qs.append('page', String(page))
   return request(`/product-variants?${qs.toString()}`)
 }
+
+export async function searchProducts(q = '', page = 1): Promise<{ data: any[]; meta?: any }> {
+  const qs = new URLSearchParams()
+  if (q) qs.append('q', String(q))
+  qs.append('page', String(page))
+  return request(`/products/search?${qs.toString()}`)
+}

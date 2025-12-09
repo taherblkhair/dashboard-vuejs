@@ -203,23 +203,14 @@
                     المنتج
                     <span class="text-red-500">*</span>
                   </label>
-                  <select 
-                    v-model.number="line.product_id" 
-                    @change="onProductChange(idx)"
-                    :class="[
-                      'w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 appearance-none bg-white',
-                      errors[`lines.${idx}.product_id`] ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200' : 'border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
-                    ]"
-                  >
-                    <option value="">اختر المنتج</option>
-                    <option 
-                      v-for="p in products" 
-                      :key="p.id" 
-                      :value="p.id"
-                    >
-                      {{ p.name }} ({{ p.code || p.sku || 'بدون رمز' }})
-                    </option>
-                  </select>
+                    <ProductAutocomplete
+                      v-model="line.product_id"
+                      @select="(p) => onProductSelected(idx, p)"
+                      :class="[
+                        'w-full px-0 py-0 transition-all duration-200',
+                        errors[`lines.${idx}.product_id`] ? 'border-red-500' : ''
+                      ]"
+                    />
                   <div v-if="errors[`lines.${idx}.product_id`]" class="text-xs text-red-600">{{ errors[`lines.${idx}.product_id`] }}</div>
                 </div>
 
@@ -406,6 +397,7 @@ import { fetchSuppliers } from '../../api/suppliers'
 import { fetchProducts } from '../../api/products'
 import { createPurchaseOrder } from '../../api/purchaseOrders'
 import { formatAttributes } from '../../utils/helpers'
+import ProductAutocomplete from '../../components/ProductAutocomplete.vue'
 
 const router = useRouter()
 
@@ -448,7 +440,8 @@ const addLine = () => {
     quantity_ordered: 1, 
     unit_price: 0, 
     expiry_date: '', 
-    notes: '' 
+    notes: '',
+    product_name: null
   })
 }
 
@@ -465,8 +458,14 @@ const variantsForLine = (idx: number) => {
   return prod?.variants || []
 }
 
-const onProductChange = (idx: number) => {
-  const v = variantsForLine(idx)
+// (product change handled by ProductAutocomplete via onProductSelected)
+
+const onProductSelected = (idx: number, product: any) => {
+  if (!product) return
+  form.lines[idx].product_id = product.id
+  form.lines[idx].product_name = product.name || null
+  // set default variant if available
+  const v = product.variants || []
   form.lines[idx].product_variant_id = v.length > 0 ? v[0].id : null
 }
 
@@ -565,7 +564,7 @@ const submit = async () => {
   try {
     const res = await createPurchaseOrder(payload)
     alert('تم إنشاء طلب الشراء بنجاح')
-    
+
     // Navigate to details of created order
     const id = res?.data?.id || res?.id
     if (id) {
@@ -582,27 +581,19 @@ const submit = async () => {
   }
 }
 
-// Load data
+// Lifecycle: load suppliers/products and ensure at least one line
 onMounted(async () => {
   loading.value = true
   try {
-    const [sp, pr] = await Promise.allSettled([
-      fetchSuppliers(),
-      fetchProducts(1)
-    ])
+    const s = await fetchSuppliers()
+    suppliers.value = s?.data || s || []
 
-    if (sp.status === 'fulfilled') {
-      suppliers.value = sp.value?.data || []
-    }
+    const p = await fetchProducts()
+    products.value = p?.data || p || []
 
-    if (pr.status === 'fulfilled') {
-      products.value = pr.value?.data || []
-    }
-
-    // Start with one empty line
-    addLine()
+    if (!form.lines.length) addLine()
   } catch (e) {
-    console.error('Failed to load data', e)
+    console.error('Failed to load initial data', e)
   } finally {
     loading.value = false
   }
