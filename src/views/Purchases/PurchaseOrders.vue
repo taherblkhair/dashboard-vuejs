@@ -577,7 +577,7 @@ const receiveOrders = () => {
 
 const receiveOrder = (id?: number) => {
   if (!id) return
-  router.push({ name: 'PurchaseOrderReceive', params: { id } })
+  router.push({ name: 'PurchaseOrderReceiveCreate', params: { id } })
 }
 
 // Filter functions
