@@ -683,7 +683,7 @@ const formatAttributes = (attr: any) => {
 // Actions
 const receiveOrder = () => {
   router.push({ 
-    name: 'PurchaseOrderReceives',
+    name: 'PurchaseOrderReceiveCreate',
     query: { purchase_order_id: id }
   })
 }
