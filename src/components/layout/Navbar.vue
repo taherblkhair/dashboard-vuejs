@@ -2,14 +2,7 @@
   <header class="bg-white shadow-sm border-b border-gray-200">
     <div class="flex items-center justify-between p-4">
       <div class="flex items-center gap-4">
-        <button
-          class="p-2 rounded-md text-gray-600 hover:bg-gray-100 transition-colors"
-          @click="$emit('toggle-sidebar')"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
+      
         
         <h2 class="text-xl font-semibold text-gray-800">
           {{ currentPageTitle }}
