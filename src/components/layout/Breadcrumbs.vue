@@ -1,29 +1,38 @@
 <template>
-  <nav class="bg-white border-b border-gray-200" aria-label="Breadcrumb">
-    <div class="px-4 py-2">
-      <ol class="flex items-center space-x-2 rtl:space-x-reverse text-sm text-gray-600">
-        <li>
-          <button @click="goTo('/', 'Dashboard')" class="flex items-center gap-2 text-gray-600 hover:text-gray-800 focus:outline-none">
+  <nav class="px-6 py-3" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm">
+      <li>
+        <button 
+          @click="goTo('/', 'Dashboard')" 
+          class="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 transition-colors focus:outline-none group"
+        >
+          <div class="p-1 rounded-md group-hover:bg-blue-50 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" />
             </svg>
-            <span>لوحة التحكم</span>
+          </div>
+          <span class="font-medium">لوحة التحكم</span>
+        </button>
+      </li>
+
+      <template v-for="(crumb, idx) in crumbs" :key="idx">
+        <li class="flex items-center text-gray-300">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </li>
+        <li>
+          <span v-if="idx === crumbs.length - 1" class="text-blue-600 font-semibold bg-blue-50/50 px-2 py-1 rounded-lg">{{ crumb.label }}</span>
+          <button 
+            v-else 
+            @click="goToCrumb(crumb)" 
+            class="text-gray-500 hover:text-gray-900 transition-colors focus:outline-none"
+          >
+            {{ crumb.label }}
           </button>
         </li>
-
-        <template v-for="(crumb, idx) in crumbs" :key="idx">
-          <li class="flex items-center">
-            <svg class="w-3 h-3 text-gray-400 mx-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </li>
-          <li>
-            <span v-if="idx === crumbs.length - 1" class="text-gray-800 font-medium">{{ crumb.label }}</span>
-            <button v-else @click="goToCrumb(crumb)" class="text-gray-600 hover:text-gray-800 focus:outline-none">{{ crumb.label }}</button>
-          </li>
-        </template>
-      </ol>
-    </div>
+      </template>
+    </ol>
   </nav>
 </template>
 

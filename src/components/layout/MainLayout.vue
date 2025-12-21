@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen bg-slate-100">
+  <div class="flex h-screen bg-slate-50">
     <Sidebar
       :isOpen="sidebarOpen"
       @close="sidebarOpen = false"
@@ -20,27 +20,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
-import Sidebar from './Sidebar.vue'
-import Navbar from './Navbar.vue'
-import Breadcrumbs from './Breadcrumbs.vue'
+import { ref, watch, onMounted, onUnmounted } from "vue";
+import Sidebar from "./Sidebar.vue";
+import Navbar from "./Navbar.vue";
+import Breadcrumbs from "./Breadcrumbs.vue";
 
-const sidebarOpen = ref(false)
+const sidebarOpen = ref(false);
 
 // prevent background scrolling when sidebar (mobile) is open
 watch(sidebarOpen, (val) => {
-  if (typeof document !== 'undefined') {
-    document.body.classList.toggle('overflow-hidden', val)
+  if (typeof document !== "undefined") {
+    document.body.classList.toggle("overflow-hidden", val);
   }
-})
+});
 
 // close on Escape key for accessibility
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape' && sidebarOpen.value) {
-    sidebarOpen.value = false
+  if (e.key === "Escape" && sidebarOpen.value) {
+    sidebarOpen.value = false;
   }
 }
 
-onMounted(() => window.addEventListener('keydown', handleKeydown))
-onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
+onMounted(() => window.addEventListener("keydown", handleKeydown));
+onUnmounted(() => window.removeEventListener("keydown", handleKeydown));
 </script>
