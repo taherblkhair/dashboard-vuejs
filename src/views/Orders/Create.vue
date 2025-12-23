@@ -16,12 +16,7 @@
         </div>
       </div>
 
-      <!-- Quick Add -->
-      <MCard title="إضافة سريعة بالباركود">
-        <div class="p-4">
-          <VariantAutocomplete @select="addVariantLine" placeholder="ابحث عن المنتج (SKU أو الاسم)..." />
-        </div>
-      </MCard>
+   
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Customer & Delivery -->
