@@ -1,63 +1,64 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen" dir="rtl">
-    <div class="max-w-6xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
+    <div class="max-w-6xl mx-auto space-y-6">
+      
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold">الموردون</h1>
-          <p class="text-sm text-gray-500">قائمة الموردين.</p>
+          <h1 class="text-2xl font-semibold text-gray-900">الموردون</h1>
+          <p class="text-sm text-gray-500 mt-1">إدارة قائمة الموردين والشركاء</p>
         </div>
-        <div>
-          <button @click="() => router.push({ name: 'PurchasesSupplierCreate' })" class="px-4 py-2 bg-blue-600 text-white rounded">إضافة مورد</button>
-        </div>
+        <MButton variant="primary" @click="() => router.push({ name: 'PurchasesSupplierCreate' })">
+          إضافة مورد جديد
+        </MButton>
       </div>
 
-      <div class="bg-white rounded-lg shadow p-4">
-        <div v-if="loading" class="text-center py-8">جاري التحميل...</div>
-        <div v-else>
-          <div v-if="suppliers.length === 0" class="text-center py-8 text-gray-500">لا يوجد موردون</div>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full table-auto text-sm">
-              <thead>
-                <tr class="text-right text-xs text-gray-500 border-b">
-                  <th class="p-2">#</th>
-                  <th class="p-2">الاسم</th>
-                  <th class="p-2">الشخص المسؤول</th>
-                  <th class="p-2">الهاتف</th>
-                  <th class="p-2">البريد</th>
-                  <th class="p-2">ملاحظات</th>
-                  <th class="p-2">إجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="s in suppliers" :key="s.id" class="border-b hover:bg-gray-50">
-                  <td class="p-2 text-right">{{ s.id }}</td>
-                  <td class="p-2 text-right">{{ s.name }}</td>
-                  <td class="p-2 text-right">{{ s.contact_name || '-' }}</td>
-                  <td class="p-2 text-right">{{ s.phone || '-' }}</td>
-                  <td class="p-2 text-right">{{ s.email || '-' }}</td>
-                  <td class="p-2 text-right">{{ s.notes || '-' }}</td>
-                  <td class="p-2 text-right">
-                    <div class="flex justify-end gap-2">
-                      <button @click="() => editSupplier(s.id)" class="px-2 py-1 bg-yellow-500 text-white rounded text-xs">تعديل</button>
-                      <button @click="() => viewPurchaseOrders(s.id)" class="px-2 py-1 bg-indigo-600 text-white rounded text-xs">طلبات الشراء</button>
-                      <button @click="() => removeSupplier(s.id)" class="px-2 py-1 bg-red-500 text-white rounded text-xs">حذف</button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- Loading -->
+      <div v-if="loading" class="text-center py-12 text-gray-500">جاري التحميل...</div>
 
-          <!-- Pagination -->
-          <div class="mt-4 flex items-center justify-between">
-            <div class="text-sm text-gray-500">الصفحة {{ meta.current_page }} من {{ meta.last_page }}</div>
-            <div class="flex gap-2">
-              <button :disabled="meta.current_page <= 1" @click="changePage(meta.current_page - 1)" class="px-3 py-1 border rounded">السابق</button>
-              <button :disabled="meta.current_page >= meta.last_page" @click="changePage(meta.current_page + 1)" class="px-3 py-1 border rounded">التالي</button>
-            </div>
+      <!-- Empty -->
+      <MCard v-else-if="suppliers.length === 0" padding="p-12">
+        <div class="text-center">
+          <p class="text-gray-500 mb-4">لا يوجد موردون مضافون حالياً</p>
+          <MButton variant="secondary" @click="() => router.push({ name: 'PurchasesSupplierCreate' })">إضافة أول مورد</MButton>
+        </div>
+      </MCard>
+
+      <!-- Suppliers Table -->
+      <MCard v-else padding="p-0">
+        <MTable>
+          <template #header>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الاسم</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">المسؤول</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الهاتف</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">البريد</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجراءات</th>
+          </template>
+          <tr v-for="s in suppliers" :key="s.id" class="hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-900">{{ s.name }}</td>
+            <td class="px-4 py-3 text-sm text-gray-600">{{ s.contact_name || '-' }}</td>
+            <td class="px-4 py-3 text-sm text-gray-600 font-mono">{{ s.phone || '-' }}</td>
+            <td class="px-4 py-3 text-sm text-gray-600">{{ s.email || '-' }}</td>
+            <td class="px-4 py-3">
+              <div class="flex gap-2">
+                <MButton variant="ghost" size="sm" @click="() => editSupplier(s.id)">تعديل</MButton>
+                <MButton variant="ghost" size="sm" @click="() => viewPurchaseOrders(s.id)">الطلبات</MButton>
+                <MButton variant="ghost" size="sm" class="text-red-500 hover:bg-red-50" @click="() => removeSupplier(s.id)">حذف</MButton>
+              </div>
+            </td>
+          </tr>
+        </MTable>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between p-4 border-t border-gray-100">
+          <span class="text-sm text-gray-500">صفحة {{ meta.current_page }} من {{ meta.last_page }}</span>
+          <div class="flex gap-2">
+            <MButton variant="secondary" size="sm" :disabled="meta.current_page <= 1" @click="changePage(meta.current_page - 1)">السابق</MButton>
+            <MButton variant="secondary" size="sm" :disabled="meta.current_page >= meta.last_page" @click="changePage(meta.current_page + 1)">التالي</MButton>
           </div>
         </div>
-      </div>
+      </MCard>
+
     </div>
   </div>
 </template>
@@ -66,6 +67,9 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchSuppliers, deleteSupplier } from '../../api/suppliers'
+import MButton from '../../components/ui/MButton.vue'
+import MCard from '../../components/ui/MCard.vue'
+import MTable from '../../components/ui/MTable.vue'
 
 const router = useRouter()
 const suppliers = ref<any[]>([])
@@ -78,40 +82,22 @@ const load = async (page = 1) => {
     const res = await fetchSuppliers(page)
     suppliers.value = res?.data || []
     meta.value = res?.meta || meta.value
-  } catch (e) {
-    console.error('Failed to fetch suppliers', e)
-  } finally {
-    loading.value = false
-  }
+  } catch (e) { console.error(e) }
+  finally { loading.value = false }
 }
 
 onMounted(load)
+const changePage = (p: number) => load(p)
 
-const changePage = (p: number) => {
-  load(p)
-}
-
-const editSupplier = (id?: number) => {
-  if (!id) return
-  router.push({ name: 'PurchasesSupplierEdit', params: { id } })
-}
-
-const viewPurchaseOrders = (id?: number) => {
-  if (!id) return
-  router.push({ name: 'PurchasesSupplierPurchaseOrders', params: { id } })
-}
+const editSupplier = (id?: number) => id && router.push({ name: 'PurchasesSupplierEdit', params: { id } })
+const viewPurchaseOrders = (id?: number) => id && router.push({ name: 'PurchasesSupplierPurchaseOrders', params: { id } })
 
 const removeSupplier = async (id?: number) => {
-  if (!id) return
-  if (!confirm('هل أنت متأكد من حذف هذا المورد؟')) return
+  if (!id || !confirm('هل أنت متأكد من حذف هذا المورد؟')) return
   try {
     await deleteSupplier(id)
-    // refresh current page
     load(meta.value.current_page)
-  } catch (e) {
-    console.error('Failed to delete supplier', e)
-    alert('فشل الحذف')
-  }
+  } catch (e) { alert('فشل الحذف') }
 }
 </script>
 
