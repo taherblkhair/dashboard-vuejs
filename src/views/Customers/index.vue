@@ -1,93 +1,73 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen" dir="rtl">
-    <div class="max-w-6xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
+    <div class="max-w-6xl mx-auto space-y-6">
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold">العملاء</h1>
-          <p class="text-sm text-gray-500">قائمة العملاء.</p>
+          <h1 class="text-2xl font-semibold text-gray-900">العملاء</h1>
+          <p class="text-sm text-gray-500 mt-1">قائمة جميع العملاء</p>
         </div>
+        <MButton variant="primary" @click="createCustomer">إضافة عميل</MButton>
       </div>
 
-      <div class="flex justify-end gap-3 mt-6">
-        <button @click="createCustomer" class="px-4 py-2 border rounded bg-gray-100 text-sm">إضافة عميل</button>
-      </div>
+      <!-- Loading -->
+      <div v-if="loading" class="text-center py-12 text-gray-500">جاري التحميل...</div>
 
-      <div class="bg-white rounded-lg shadow p-4 mt-4">
-        <div v-if="loading" class="text-center py-8">جاري التحميل...</div>
-        <div v-else>
-          <div v-if="customers.length === 0" class="text-center py-8 text-gray-500">لا يوجد عملاء</div>
-          <div v-else class="overflow-x-auto">
-            <table class="w-full table-auto text-sm">
-              <thead>
-                <tr class="text-right text-xs text-gray-500 border-b">
-                  <th class="p-2">#</th>
-                  <th class="p-2">الاسم</th>
-                  <th class="p-2">الهاتف</th>
-                  <th class="p-2">البريد الإلكتروني</th>
-                  <th class="p-2">النوع</th>
-                  <th class="p-2">الطلبات</th>
-                  <th class="p-2">المجموع</th>
-                  <th class="p-2">آخر طلب</th>
-                  <th class="p-2">الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="c in customers" :key="c.id" class="border-b hover:bg-gray-50">
-                  <td class="p-2 text-right">{{ c.id }}</td>
-                  <td class="p-2 text-right">{{ c.name }}</td>
-                  <td class="p-2 text-right">{{ c.phone }}</td>
-                  <td class="p-2 text-right">{{ c.email }}</td>
-                  <td class="p-2 text-right">{{ c.customer_type }}</td>
-                  <td class="p-2 text-right">{{ c.total_orders }}</td>
-                  <td class="p-2 text-right">{{ c.total_spent }}</td>
-                  <td class="p-2 text-right">{{ formatDate(c.last_order_date) }}</td>
-                  <td class="p-2 text-right">
-                    <div class="flex justify-end gap-1">
-                      <button @click="viewCustomer(c.id)" class="px-2 py-1 bg-blue-600 text-white rounded text-xs">عرض</button>
-                      <button @click="openAddressModal(c.id)" class="px-2 py-1 bg-green-600 text-white rounded text-xs">إضافة عنوان</button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+      <!-- Empty -->
+      <MCard v-else-if="customers.length === 0" padding="p-12">
+        <div class="text-center">
+          <p class="text-gray-500 mb-4">لا يوجد عملاء</p>
+          <MButton variant="primary" @click="createCustomer">إضافة عميل جديد</MButton>
+        </div>
+      </MCard>
+
+      <!-- Customers Table -->
+      <MCard v-else padding="p-0">
+        <MTable>
+          <template #header>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">#</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الاسم</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الهاتف</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">البريد</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">النوع</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الطلبات</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">المجموع</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">إجراءات</th>
+          </template>
+          <tr v-for="c in customers" :key="c.id" class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-gray-500">{{ c.id }}</td>
+            <td class="px-4 py-3 font-medium text-gray-900">{{ c.name }}</td>
+            <td class="px-4 py-3 text-gray-600">{{ c.phone }}</td>
+            <td class="px-4 py-3 text-gray-600">{{ c.email }}</td>
+            <td class="px-4 py-3">
+              <MBadge variant="neutral">{{ c.customer_type }}</MBadge>
+            </td>
+            <td class="px-4 py-3 text-gray-600">{{ c.total_orders }}</td>
+            <td class="px-4 py-3 text-gray-600">{{ c.total_spent }}</td>
+            <td class="px-4 py-3 flex gap-2">
+              <MButton variant="ghost" size="sm" @click="viewCustomer(c.id)">عرض</MButton>
+              <MButton variant="ghost" size="sm" @click="openAddressModal(c.id)">عنوان</MButton>
+            </td>
+          </tr>
+        </MTable>
+      </MCard>
+
+      <!-- Address Modal -->
+      <div v-if="addressModal.open" class="fixed inset-0 flex items-center justify-center z-50 p-4">
+        <div class="fixed inset-0 bg-black/30" @click="closeAddressModal"></div>
+        <MCard class="relative z-10 w-full max-w-lg" title="إضافة عنوان">
+          <div class="p-4 space-y-4">
+            <MInput v-model="addressModal.form.city" label="المدينة" />
+            <MInput v-model="addressModal.form.area" label="المنطقة" />
+            <MInput v-model="addressModal.form.street" label="الشارع" />
+            <MInput v-model="addressModal.form.building" label="المبنى" />
+            <MInput v-model="addressModal.form.notes" label="ملاحظات (اختياري)" />
           </div>
-        </div>
-      </div>
-
-      <!-- Address modal -->
-      <div v-if="addressModal.open">
-        <div class="fixed inset-0 bg-black bg-opacity-50 z-40" @click="closeAddressModal"></div>
-        <div class="fixed inset-0 flex items-center justify-center z-50 p-4">
-          <div class="bg-white w-full max-w-lg rounded shadow p-4">
-            <h3 class="text-lg font-semibold mb-3">إضافة عنوان للعميل</h3>
-            <div class="grid grid-cols-1 gap-3">
-              <div>
-                <label class="block text-sm mb-1">المدينة</label>
-                <input v-model="addressModal.form.city" class="w-full border rounded px-2 py-2" />
-              </div>
-              <div>
-                <label class="block text-sm mb-1">المنطقة</label>
-                <input v-model="addressModal.form.area" class="w-full border rounded px-2 py-2" />
-              </div>
-              <div>
-                <label class="block text-sm mb-1">الشارع</label>
-                <input v-model="addressModal.form.street" class="w-full border rounded px-2 py-2" />
-              </div>
-              <div>
-                <label class="block text-sm mb-1">المبنى</label>
-                <input v-model="addressModal.form.building" class="w-full border rounded px-2 py-2" />
-              </div>
-              <div>
-                <label class="block text-sm mb-1">ملاحظات (اختياري)</label>
-                <input v-model="addressModal.form.notes" class="w-full border rounded px-2 py-2" />
-              </div>
-            </div>
-            <div class="flex justify-end gap-2 mt-4">
-              <button @click="submitAddress" :disabled="addressModal.loading" class="px-4 py-2 bg-green-600 text-white rounded">حفظ</button>
-              <button @click="closeAddressModal" class="px-4 py-2 border rounded">إلغاء</button>
-            </div>
+          <div class="flex justify-end gap-2 p-4 border-t border-gray-100">
+            <MButton variant="secondary" @click="closeAddressModal">إلغاء</MButton>
+            <MButton variant="primary" @click="submitAddress" :loading="addressModal.loading">حفظ</MButton>
           </div>
-        </div>
+        </MCard>
       </div>
     </div>
   </div>
@@ -97,6 +77,11 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCustomers, createCustomerAddress } from '../../api/customers'
+import MButton from '../../components/ui/MButton.vue'
+import MInput from '../../components/ui/MInput.vue'
+import MCard from '../../components/ui/MCard.vue'
+import MBadge from '../../components/ui/MBadge.vue'
+import MTable from '../../components/ui/MTable.vue'
 
 const router = useRouter()
 const customers = ref<any[]>([])
@@ -118,15 +103,13 @@ const load = async (page = 1) => {
 
 onMounted(() => load())
 
-const formatDate = (iso?: string) => {
-  if (!iso) return '-'
-  try { return new Date(iso).toLocaleDateString() } catch { return iso }
+const createCustomer = () => router.push({ name: 'CustomersCreate' })
+const viewCustomer = (id?: number) => {
+  if (!id) return
+  router.push({ name: 'CustomersView', params: { id } })
 }
 
-const createCustomer = () => router.push({ name: 'CustomersCreate' })
-const viewCustomer = (id?: number) => { if (!id) return; router.push({ name: 'CustomersView', params: { id } }) }
-
-// Address modal state & handlers
+// Address modal
 const addressModal = ref<any>({ open: false, customerId: null, loading: false, form: { city: '', area: '', street: '', building: '', notes: '' } })
 
 const openAddressModal = (customerId?: number) => {
@@ -150,7 +133,7 @@ const submitAddress = async () => {
     await createCustomerAddress(cid, addressModal.value.form)
     alert('تمت إضافة العنوان')
     closeAddressModal()
-    await load() // refresh customers list
+    await load()
   } catch (e) {
     console.error('Failed to create address', e)
     alert('فشل إضافة العنوان')
@@ -158,7 +141,6 @@ const submitAddress = async () => {
     addressModal.value.loading = false
   }
 }
-
 </script>
 
 <style scoped>
