@@ -1,6 +1,11 @@
 import { request } from './index'
 
-export async function fetchCustomers(page = 1) {
+export async function fetchCustomers(page = 1, q: string | null = null) {
+  if (q && q.toString().trim() !== '') {
+    // Use the dedicated search endpoint when a query is provided
+    const url = `/customers/search?page=${page}&search=${encodeURIComponent(q.toString())}`
+    return request(url)
+  }
   return request(`/customers?page=${page}`)
 }
 

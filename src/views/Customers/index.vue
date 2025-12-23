@@ -7,7 +7,10 @@
           <h1 class="text-2xl font-semibold text-gray-900">العملاء</h1>
           <p class="text-sm text-gray-500 mt-1">قائمة جميع العملاء</p>
         </div>
-        <MButton variant="primary" @click="createCustomer">إضافة عميل</MButton>
+        <div class="flex items-center gap-3">
+          <MInput v-model="search" placeholder="ابحث عن عميل بالاسم أو الهاتف" class="w-64" @input="onSearchInput" />
+          <MButton variant="primary" @click="createCustomer">إضافة عميل</MButton>
+        </div>
       </div>
 
       <!-- Loading -->
@@ -88,10 +91,13 @@ const customers = ref<any[]>([])
 const loading = ref(false)
 const meta = ref<any>({ current_page: 1, last_page: 1 })
 
-const load = async (page = 1) => {
+const search = ref('')
+let searchTimer: number | undefined = undefined
+
+const load = async (page = 1, q: string | null = null) => {
   loading.value = true
   try {
-    const res = await fetchCustomers(page)
+    const res = await fetchCustomers(page, q)
     customers.value = res?.data || []
     meta.value = res?.meta || meta.value
   } catch (e) {
@@ -99,6 +105,14 @@ const load = async (page = 1) => {
   } finally {
     loading.value = false
   }
+}
+
+const onSearchInput = () => {
+  // debounce user input
+  if (searchTimer) window.clearTimeout(searchTimer)
+  searchTimer = window.setTimeout(async () => {
+    await load(1, search.value || null)
+  }, 450) as unknown as number
 }
 
 onMounted(() => load())
