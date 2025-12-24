@@ -59,10 +59,11 @@
               <div class="flex flex-col sm:flex-row gap-4 items-end">
                 <div class="flex-1">
                   <label class="block text-xs text-gray-500 mb-1">تغيير حالة الطلب</label>
-                  <select v-model="selectedStatus" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
-                    <option value="">اختر حالة جديدة</option>
-                    <option v-for="(txt, val) in statusMap" :key="val" :value="val">{{ txt }}</option>
+                  <select v-model="selectedStatus" :disabled="allowedStatusOptions.length === 0" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm">
+                    <option value="">{{ allowedStatusOptions.length ? 'اختر حالة جديدة' : 'لا توجد حالات متاحة' }}</option>
+                    <option v-for="opt in allowedStatusOptions" :key="opt.value" :value="opt.value">{{ opt.text }}</option>
                   </select>
+
                 </div>
                 <MButton variant="secondary" size="sm" @click="saveStatus" :disabled="!selectedStatus || selectedStatus === order.status || savingStatus">تطبيق</MButton>
               </div>
@@ -184,8 +185,27 @@ const statusMap: any = {
   cancelled: 'ملغي'
 }
 
-const canReceiveOrder = computed(() => ['ordered', 'approved', 'partially_received'].includes(order.value.status))
+const canReceiveOrder = computed(() => ['ordered', 'partially_received'].includes(order.value.status))
 const totalQuantityOrdered = computed(() => order.value.lines?.reduce((s: number, l: any) => s + (l.quantity_ordered || 0), 0) || 0)
+
+// Define allowed transitions to mirror backend business rules
+const allowedTransitions: any = {
+  draft: ['pending', 'cancelled'],
+  pending: ['approved', 'cancelled'],
+  approved: ['ordered', 'cancelled'],
+  ordered: ['cancelled'],
+ // partially_received: ['received', 'cancelled'],
+ // received: [],
+  cancelled: []
+}
+
+const allowedStatusOptions = computed(() => {
+  const cur = (order.value.status || '').toLowerCase()
+  const arr = allowedTransitions[cur] || []
+  return arr.map((v: string) => ({ value: v, text: statusMap[v] || v }))
+})
+
+const allowedStatusText = computed(() => allowedStatusOptions.value.map((o: any) => o.text).join('، '))
 
 const getStatusVariant = (s?: string): any => {
   const m: any = { received: 'success', ordered: 'info', pending: 'warning', approved: 'success', cancelled: 'error', partially_received: 'warning' }
@@ -230,6 +250,13 @@ const load = async () => {
 
 const saveStatus = async () => {
   if (!id || !selectedStatus.value) return
+  // ensure transition is allowed on client side as well
+  const cur = (order.value.status || '').toLowerCase()
+  const allowed = allowedTransitions[cur] || []
+  if (!allowed.includes(selectedStatus.value)) {
+    alert('هذا الانتقال غير مسموح')
+    return
+  }
   if (!confirm(`تغيير الحالة إلى ${getStatusText(selectedStatus.value)}؟`)) return
   savingStatus.value = true
   try {

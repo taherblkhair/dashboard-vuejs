@@ -9,7 +9,6 @@
           <p><span>التاريخ:</span> <strong>{{ formatDate(order.order_date) }}</strong></p>
         </div>
       </div>
-      <div class="business-logo">Dashboard</div>
     </div>
 
     <!-- Info Sections -->

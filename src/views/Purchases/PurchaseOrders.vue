@@ -81,7 +81,7 @@
             <td class="px-4 py-3">
               <div class="flex gap-2">
                 <MButton variant="ghost" size="sm" @click="viewOrder(order.id)">عرض</MButton>
-                <MButton v-if="canReceiveOrder(order)" variant="ghost" size="sm" @click="receiveOrder(order.id)">استلام</MButton>
+                <!-- <MButton v-if="canReceiveOrder(order)" variant="ghost" size="sm" @click="receiveOrder(order.id)">استلام</MButton> -->
               </div>
             </td>
           </tr>
