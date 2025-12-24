@@ -210,8 +210,7 @@ const canEdit = computed(() => {
 
 const editOrder = () => {
   if (!order.value?.id) return
-  // Navigate to order creation/edit page with query indicating edit
-  router.push({ name: 'OrderCreate', query: { order_id: order.value.id } })
+  router.push({ name: 'OrderEdit', params: { id: order.value.id } })
 }
 
 onMounted(() => load())

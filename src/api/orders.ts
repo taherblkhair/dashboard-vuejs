@@ -30,3 +30,7 @@ export function getOrderInvoiceUrl(id: number) {
 export async function createOrder(payload: any) {
 	return request(`/orders`, { method: 'POST', body: JSON.stringify(payload) })
 }
+
+export async function updateOrder(id: number, payload: any) {
+	return request(`/orders/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
+}

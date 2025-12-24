@@ -108,9 +108,12 @@
             </td>
             <td class="px-4 py-3 font-medium text-gray-900">{{ formatCurrency(order.total) }}</td>
             <td class="px-4 py-3 text-gray-500 text-sm">{{ formatDate(order.order_date) }}</td>
-            <td class="px-4 py-3">
+            <td class="px-4 py-3 flex gap-2">
               <router-link :to="{ name: 'OrderDetails', params: { id: order.id } }" class="text-primary-600 hover:underline text-sm">
                 عرض
+              </router-link>
+              <router-link :to="{ name: 'OrderEdit', params: { id: order.id } }" class="text-gray-600 hover:underline text-sm">
+                تعديل
               </router-link>
             </td>
           </tr>
