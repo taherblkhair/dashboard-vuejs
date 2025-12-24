@@ -19,6 +19,7 @@
         </div>
         <div class="flex gap-2">
           <MButton variant="secondary" @click="openInvoice">طباعة الفاتورة</MButton>
+          <MButton v-if="canEdit" variant="ghost" @click="editOrder">تعديل الطلب</MButton>
           <MButton variant="primary" @click="openCreateDelivery">إنشاء توصيل</MButton>
         </div>
       </div>
@@ -200,6 +201,17 @@ const load = async () => {
     const res = await fetchOrder(id)
     order.value = res?.data || null
   } catch (e) { console.error(e) }
+}
+
+const canEdit = computed(() => {
+  const s = (order.value?.status || '').toString().toLowerCase()
+  return s === 'pending' || s === 'draft'
+})
+
+const editOrder = () => {
+  if (!order.value?.id) return
+  // Navigate to order creation/edit page with query indicating edit
+  router.push({ name: 'OrderCreate', query: { order_id: order.value.id } })
 }
 
 onMounted(() => load())
