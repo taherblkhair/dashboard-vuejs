@@ -167,7 +167,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchOrder, updateOrderStatus, getOrderInvoiceUrl } from '../../api/orders'
+import { fetchOrder, updateOrderStatus } from '../../api/orders'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import { createDeliveryForOrder } from '../../api/deliveries'
 import { formatAttributes } from '../../utils/helpers'
@@ -237,7 +237,8 @@ const getPaymentVariant = (s?: string): 'success' | 'warning' | 'error' | 'neutr
 
 const openInvoice = () => {
   if (!order.value?.id) return
-  window.open(getOrderInvoiceUrl(order.value.id), '_blank')
+  const url = router.resolve({ name: 'OrderPrint', params: { id: order.value.id } }).href
+  window.open(url, '_blank')
 }
 
 const changeStatus = async () => {

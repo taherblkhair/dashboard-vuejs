@@ -55,6 +55,12 @@ const routes = [
   { path: 'addresses', name: 'Addresses', component: () => import('../views/Addresses/index.vue') },
   { path: 'cities', name: 'Cities', component: () => import('../views/Cities/index.vue') },
     ]
+  },
+  {
+    path: '/orders/:id/print',
+    name: 'OrderPrint',
+    component: () => import('../views/Orders/PrintInvoice.vue'),
+    meta: { layout: 'empty' }
   }
 ]
 
