@@ -13,14 +13,14 @@
             <h1 class="text-2xl font-semibold text-gray-900">تفاصيل الطلب</h1>
             <div class="flex items-center gap-2 mt-1">
               <span class="text-sm text-gray-500">#{{ order?.code }}</span>
-              <MBadge :variant="getStatusVariant(order?.status)">{{ order?.status }}</MBadge>
+              <MBadge :variant="getStatusVariant(order?.status)">{{ statusLabels[order?.status] || order?.status }}</MBadge>
             </div>
           </div>
         </div>
         <div class="flex gap-2">
           <MButton variant="secondary" @click="openInvoice">طباعة الفاتورة</MButton>
           <MButton v-if="canEdit" variant="ghost" @click="editOrder">تعديل الطلب</MButton>
-          <MButton variant="primary" @click="openCreateDelivery">إنشاء توصيل</MButton>
+          <MButton v-if="order?.status === 'confirmed'" variant="primary" @click="openCreateDelivery">إنشاء توصيل</MButton>
         </div>
       </div>
 
@@ -52,7 +52,7 @@
                   <label class="block text-sm text-gray-500 mb-1">تحديث الحالة</label>
                   <select v-model="statusToSet" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
                     <option value="">اختر الحالة</option>
-                    <option v-for="s in allowedStatuses" :key="s" :value="s">{{ s }}</option>
+                    <option v-for="s in allowedStatuses" :key="s" :value="s">{{ statusLabels[s] || s }}</option>
                   </select>
                 </div>
                 <MButton variant="primary" @click="changeStatus" :disabled="!statusToSet">تطبيق</MButton>
@@ -108,7 +108,7 @@
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">حالة الطلب</span>
-                <span class="font-medium">{{ order?.status }}</span>
+                <span class="font-medium">{{ statusLabels[order?.status] || order?.status }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">حالة الدفع</span>
@@ -193,7 +193,21 @@ const validTransitions: Record<string, string[]> = {
   returned: []
 }
 
-const allowedStatuses = computed(() => validTransitions[order.value?.status] || [])
+const statusLabels: Record<string, string> = {
+  draft: 'مسودة',
+  pending: 'قيد الانتظار',
+  confirmed: 'مؤكد',
+  processing: 'قيد التجهيز',
+  shipped: 'تم الشحن',
+  delivered: 'تم التسليم',
+  returned: 'معاد',
+  cancelled: 'ملغي'
+}
+
+const allowedStatuses = computed(() => {
+  const s = String(order.value?.status || '').toLowerCase()
+  return validTransitions[s] || []
+})
 
 const load = async () => {
   if (!id) return
@@ -226,8 +240,17 @@ const formatCurrency = (val?: number) => {
 }
 
 const getStatusVariant = (s?: string): 'success' | 'warning' | 'error' | 'neutral' | 'info' => {
-  const m: any = { delivered: 'success', shipped: 'info', processing: 'warning', cancelled: 'error', pending: 'warning' }
-  return m[s?.toLowerCase() || ''] || 'neutral'
+  const m: any = { 
+    delivered: 'success', 
+    shipped: 'info', 
+    processing: 'warning', 
+    confirmed: 'info',
+    pending: 'warning', 
+    cancelled: 'error', 
+    returned: 'neutral',
+    draft: 'neutral'
+  }
+  return m[String(s || '').toLowerCase()] || 'neutral'
 }
 
 const getPaymentVariant = (s?: string): 'success' | 'warning' | 'error' | 'neutral' => {

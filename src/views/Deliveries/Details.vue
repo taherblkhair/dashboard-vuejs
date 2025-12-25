@@ -50,13 +50,14 @@
             <div>
               <div class="font-semibold">المناديب</div>
               <div v-if="ridersForProvider.length">
-                <select v-model.number="selectedRider" class="w-full border rounded px-2 py-1 text-sm">
-                  <option value="">-- إعادة تعيين المناديب --</option>
+                <select v-model.number="selectedRider" :disabled="!canAssign && !canReassign" class="w-full border rounded px-2 py-1 text-sm">
+                  <option value="">{{ canAssign ? '-- اختر مندوب للتعيين --' : (canReassign ? '-- اختر مندوب لإعادة التعيين --' : '-- غير متاح حالياً --') }}</option>
                   <option v-for="r in ridersForProvider" :key="r.id" :value="r.id">{{ r.name }} — {{ r.phone }}</option>
                 </select>
                 <div class="mt-2 flex gap-2 justify-end">
-                  <button @click="reassign" :disabled="saving" class="px-3 py-1 bg-yellow-500 text-white rounded text-sm">إعادة التعيين</button>
+                  <button @click="reassign" :disabled="saving || !selectedRider || (!canAssign && !canReassign)" class="px-3 py-1 bg-yellow-500 text-white rounded text-sm">{{ canAssign ? 'تعيين المندوب' : (canReassign ? 'إعادة التعيين' : 'غير متاح') }}</button>
                 </div>
+                <p v-if="!canAssign && !canReassign" class="text-xs text-gray-400 mt-2 italic">لا يمكن (تعيين/إعادة تعيين) المندوب في هذه الحالة: <span class="font-medium">{{ statusLabels[delivery.status] ?? delivery.status }}</span></p>
               </div>
               <div v-else class="text-gray-500">لا تتوفر بيانات مناديب للمزود</div>
             </div>
@@ -68,11 +69,16 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label class="text-sm">تغيير الحالة</label>
-              <select v-model="newStatus" class="w-full border rounded px-2 py-1 mt-1 text-sm">
-                <option v-for="s in statuses" :key="s" :value="s">{{ s }}</option>
+              <select v-model="newStatus" :disabled="allowedStatusOptions.length === 0" class="w-full border rounded px-2 py-1 mt-1 text-sm">
+                <option value="">{{ allowedStatusOptions.length ? 'اختر حالة جديدة' : 'لا توجد حالات متاحة' }}</option>
+                <option v-for="opt in allowedStatusOptions" :key="opt.value" :value="opt.value">{{ opt.text }}</option>
               </select>
+              <p v-if="allowedStatusOptions.length" class="text-xs text-gray-400 mt-1">الحالات المتاحة: <span class="font-medium text-gray-700">{{ allowedStatusText }}</span></p>
+              <p v-else class="text-xs text-gray-400 mt-1 italic">لا يمكن تغيير حالة التوصيل في المرحلة الحالية</p>
               <div class="mt-2 flex justify-end">
-                <button @click="changeStatus" :disabled="saving" class="px-3 py-1 bg-green-600 text-white rounded text-sm">تحديث الحالة</button>
+                <button @click="changeStatus"
+                  :disabled="saving || !newStatus || !allowedStatusOptions.map(o => o.value).includes(newStatus)"
+                  class="px-3 py-1 bg-green-600 text-white rounded text-sm">تحديث الحالة</button>
               </div>
             </div>
 
@@ -112,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchDelivery, uploadProof, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
 import { fetchRiders } from '../../api/riders'
@@ -126,8 +132,44 @@ const loading = ref(false)
 const saving = ref(false)
 const ridersForProvider = ref<any[]>([])
 const selectedRider = ref<number | null>(null)
-const statuses = ['pending', 'assigned', 'picked_up', 'in_transit', 'shipped', 'delivered', 'failed', 'returned']
+
+// backend-allowed transitions for delivery statuses
+const allowedTransitions: Record<string, string[]> = {
+  pending: ['assigned', 'cancelled'],
+  assigned: ['picked_up', 'cancelled'],
+  picked_up: ['in_transit', 'failed', 'cancelled'],
+  in_transit: ['delivered', 'failed', 'returned'],
+  delivered: [],
+  failed: ['assigned'],
+  cancelled: [],
+  returned: ['assigned'],
+}
+
+const statusLabels: any = {
+  pending: 'قيد الانتظار',
+  assigned: 'معين',
+  picked_up: 'تم استلام الطرد من المستودع',
+  in_transit: 'قيد التوصيل',
+  delivered: 'تم التسليم',
+  failed: 'فشل التسليم',
+  cancelled: 'ملغي',
+  returned: 'معاد',
+}
+
 const newStatus = ref<string>('')
+
+const allowedStatusOptions = computed(() => {
+  const cur = String(delivery.value?.status || '').toLowerCase()
+  const arr = allowedTransitions[cur] || []
+  return arr
+    .filter((s: string) => s !== 'assigned')
+    .map((s: string) => ({ value: s, text: statusLabels[s] || s }))
+})
+
+const allowedStatusText = computed(() => allowedStatusOptions.value.map((o: any) => o.text).join('، '))
+
+const canAssign = computed(() => (delivery.value?.status || '') === 'pending')
+const canReassign = computed(() => ['assigned', 'picked_up', 'failed', 'returned'].includes((delivery.value?.status || '')))
 const selectedFile = ref<File | null>(null)
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -150,7 +192,8 @@ const load = async () => {
   try {
     const res = await fetchDelivery(id)
     delivery.value = res?.data?.data ?? res?.data ?? null
-    newStatus.value = delivery.value?.status ?? ''
+    // reset newStatus so user must choose a next state
+    newStatus.value = ''
     // load riders for provider if provider id present
     const pid = delivery.value?.provider_id ?? delivery.value?.provider?.id
     if (pid) {
@@ -167,6 +210,16 @@ const load = async () => {
 
 const changeStatus = async () => {
   if (!delivery.value) return
+  const cur = String(delivery.value.status || '').toLowerCase()
+  const allowed = allowedTransitions[cur] || []
+  if (!newStatus.value || !allowed.includes(newStatus.value)) {
+    alert('هذا الانتقال غير مسموح من ' + (statusLabels[cur] || cur) + ' إلى ' + (statusLabels[newStatus.value] || newStatus.value))
+    return
+  }
+  // 'assigned' transition is handled exclusively through the rider assign button;
+  // the status selector never exposes 'assigned'. Continue with normal updates.
+
+  // normal status update for other states
   const prev = delivery.value.status
   delivery.value.status = newStatus.value // optimistic
   saving.value = true
@@ -175,6 +228,7 @@ const changeStatus = async () => {
     const updated = res?.data?.data ?? res?.data ?? null
     if (updated) delivery.value = { ...delivery.value, ...updated }
     addToast('تم تحديث حالة التوصيل', 'success')
+    newStatus.value = ''
   } catch (err) {
     delivery.value.status = prev // revert
     console.error('Failed to update status', err)
@@ -186,6 +240,14 @@ const changeStatus = async () => {
 
 const reassign = async () => {
   if (!delivery.value || !selectedRider.value) return
+
+  // only allow assign when pending OR reassign when assigned/picked_up/failed/returned
+  const st = String(delivery.value.status || '').toLowerCase()
+  if (!(st === 'pending' || ['assigned', 'picked_up', 'failed', 'returned'].includes(st))) {
+    alert('لا يمكن (تعيين/إعادة تعيين) المندوب في هذه الحالة: ' + (statusLabels[st] || st))
+    return
+  }
+
   const prevRider = delivery.value.rider
   // optimistic: set to selected rider object if available
   delivery.value.rider = ridersForProvider.value.find(r => r.id === selectedRider.value) ?? { id: selectedRider.value }
