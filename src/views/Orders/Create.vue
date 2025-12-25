@@ -34,7 +34,6 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">المصدر</label>
                 <select v-model="form.source" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                   <option value="internal">داخلي</option>
-                  <option value="webstore">متجر إلكتروني</option>
                 </select>
               </div>
               <div>
@@ -52,33 +51,7 @@
           </MCard>
         </div>
 
-        <!-- Summary Sidebar -->
-        <div>
-          <MCard title="ملخص الفاتورة" class="sticky top-6">
-            <div class="p-4 space-y-3">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">عدد الأصناف</span>
-                <span class="font-medium">{{ form.lines.length }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">المجموع الجزئي</span>
-                <span class="font-medium text-primary-600">{{ formatCurrency(subtotal) }}</span>
-              </div>
-              <div class="flex justify-between text-sm items-center">
-                <span class="text-gray-500">الخصم</span>
-                <input v-model.number="form.discount_amount" type="number" min="0" step="0.01" class="w-20 px-2 py-1 border border-gray-200 rounded text-left text-sm" />
-              </div>
-              <div class="flex justify-between text-sm items-center">
-                <span class="text-gray-500">الشحن</span>
-                <input v-model.number="form.shipping_fee" type="number" min="0" step="0.01" class="w-20 px-2 py-1 border border-gray-200 rounded text-left text-sm" />
-              </div>
-              <div class="border-t pt-3 flex justify-between">
-                <span class="font-semibold text-gray-900">الإجمالي</span>
-                <span class="font-bold text-lg text-gray-900">{{ formatCurrency(grandTotal) }}</span>
-              </div>
-            </div>
-          </MCard>
-        </div>
+      
       </div>
 
       <!-- Order Items -->
@@ -135,6 +108,34 @@
           <textarea v-model="form.notes" rows="2" placeholder="ملاحظات الفاتورة..." class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500"></textarea>
         </div>
       </MCard>
+
+      <!-- Summary Sidebar -->
+         <div>
+          <MCard title="ملخص الفاتورة" class="sticky top-6">
+            <div class="p-4 space-y-3">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">عدد الأصناف</span>
+                <span class="font-medium">{{ form.lines.length }}</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">المجموع الجزئي</span>
+                <span class="font-medium text-primary-600">{{ formatCurrency(subtotal) }}</span>
+              </div>
+              <div class="flex justify-between text-sm items-center">
+                <span class="text-gray-500">الخصم</span>
+                <input v-model.number="form.discount_amount" type="number" min="0" step="0.01" class="w-20 px-2 py-1 border border-gray-200 rounded text-left text-sm" />
+              </div>
+              <div class="flex justify-between text-sm items-center">
+                <span class="text-gray-500">الشحن</span>
+                <input v-model.number="form.shipping_fee" type="number" min="0" step="0.01" class="w-20 px-2 py-1 border border-gray-200 rounded text-left text-sm" />
+              </div>
+              <div class="border-t pt-3 flex justify-between">
+                <span class="font-semibold text-gray-900">الإجمالي</span>
+                <span class="font-bold text-lg text-gray-900">{{ formatCurrency(grandTotal) }}</span>
+              </div>
+            </div>
+          </MCard>
+        </div>
 
       <!-- Actions -->
       <div class="flex justify-end gap-3">

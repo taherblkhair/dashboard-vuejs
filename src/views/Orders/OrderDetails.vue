@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50/50 pb-12" dir="rtl">
     <!-- Header Area -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <header class="bg-white border-b border-gray-200  top-0 z-30">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
           <!-- Title & Breadcrumb -->
@@ -60,7 +60,7 @@
         <div class="min-w-[700px]">
            <div class="relative flex items-center justify-between">
              <div class="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -z-0 rounded-full"></div>
-             <div class="absolute top-1/2 left-0 h-1 bg-blue-500 -z-0 rounded-full transition-all duration-1000" :style="{ width: orderProgressPercentage + '%' }"></div>
+             <div class="absolute top-1/2 right-0 h-1 bg-blue-500 -z-0 rounded-full transition-all duration-1000" :style="{ width: orderProgressPercentage + '%' }"></div>
              
              <div v-for="(step, idx) in orderTimelineSteps" :key="step.key" class="relative z-10 flex flex-col items-center group cursor-default">
                <div :class="[
