@@ -1,180 +1,318 @@
 <template>
-  <div class="p-6 bg-gray-50 min-h-screen" dir="rtl">
-    <div class="max-w-5xl mx-auto space-y-6">
-      <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <router-link to="/orders" class="text-gray-400 hover:text-gray-600">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </router-link>
-          <div>
-            <h1 class="text-2xl font-semibold text-gray-900">تفاصيل الطلب</h1>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-sm text-gray-500">#{{ order?.code }}</span>
-              <MBadge :variant="getStatusVariant(order?.status)">{{ statusLabels[order?.status] || order?.status }}</MBadge>
+  <div class="min-h-screen bg-gray-50/50 pb-12" dir="rtl">
+    <!-- Header Area -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between py-4 gap-4">
+          <!-- Title & Breadcrumb -->
+          <div class="flex items-center gap-4">
+            <button @click="router.back()" class="p-2 -mr-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" class="transform rotate-180" />
+              </svg>
+            </button>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 tracking-tight">تفاصيل الطلب <span class="text-gray-400 text-lg font-medium">#{{ order?.code }}</span></h1>
+              <div class="flex items-center gap-2 text-sm text-gray-500 mt-0.5">
+                <span>{{ formatDate(order?.created_at) }}</span>
+                <span>•</span>
+                <span :class="['px-2 py-0.5 rounded-full text-xs font-medium', getStatusColor(order?.status)]">
+                  {{ statusLabels[order?.status] || order?.status }}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="flex gap-2">
-          <MButton variant="secondary" @click="openInvoice">طباعة الفاتورة</MButton>
-          <MButton v-if="canEdit" variant="ghost" @click="editOrder">تعديل الطلب</MButton>
-          <MButton v-if="order?.status === 'confirmed'" variant="primary" @click="openCreateDelivery">إنشاء توصيل</MButton>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-3">
+            <button @click="openInvoice" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+              <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+              طباعة الفاتورة
+            </button>
+            <button v-if="canEdit" @click="editOrder" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+              <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+              تعديل
+            </button>
+            <button v-if="order?.status === 'confirmed'" @click="openCreateDelivery" class="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+              <svg class="w-4 h-4 ml-2 text-blue-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              إنشاء توصيل
+            </button>
+          </div>
         </div>
       </div>
+    </header>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Info -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      
+      <!-- Visual Timeline -->
+      <section class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 overflow-x-auto">
+        <div class="min-w-[700px]"> <!-- ensure scrolling on very small screens -->
+           <div class="relative flex items-center justify-between">
+             <div class="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -z-0 rounded-full"></div>
+             <div class="absolute top-1/2 left-0 h-1 bg-blue-500 -z-0 rounded-full transition-all duration-1000" :style="{ width: progressPercentage + '%' }"></div>
+             
+             <div v-for="(step, idx) in timelineSteps" :key="step.key" class="relative z-10 flex flex-col items-center group cursor-default">
+               <div :class="[
+                 'w-10 h-10 rounded-full flex items-center justify-center border-4 transition-all duration-300',
+                 isStepConfigured(idx) ? 'bg-blue-600 border-blue-100 text-white shadow-md scale-110' : 
+                 (idx === currentStepIndex ? 'bg-white border-blue-500 text-blue-600 shadow-sm scale-110' : 'bg-white border-gray-200 text-gray-300')
+               ]">
+                 <component :is="step.icon" class="w-5 h-5" />
+               </div>
+               <span :class="[
+                 'mt-3 text-sm font-medium transition-colors duration-300',
+                 isStepConfigured(idx) || idx === currentStepIndex ? 'text-gray-900' : 'text-gray-400'
+               ]">{{ step.label }}</span>
+             </div>
+           </div>
+        </div>
+      </section>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Order Info -->
-          <MCard title="معلومات الطلب">
-            <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p class="text-sm text-gray-500">العميل</p>
-                <router-link v-if="order?.customer" :to="{ name: 'CustomersView', params: { id: order.customer.id } }" class="font-medium text-primary-600 hover:underline">
-                  {{ order.customer.name }}
-                </router-link>
-                <p class="text-xs text-gray-400">{{ order?.customer?.phone }}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">تاريخ الطلب</p>
-                <p class="font-medium">{{ formatDate(order?.order_date) }}</p>
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">المبلغ الإجمالي</p>
-                <p class="text-xl font-bold text-gray-900">{{ formatCurrency(order?.total) }}</p>
-              </div>
+          
+          <!-- Products Table -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
+              <h3 class="text-base font-semibold text-gray-900">المنتجات المطلوبة</h3>
+              <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{{ order?.lines?.length || 0 }} عناصر</span>
             </div>
-            <div class="p-4 border-t border-gray-100">
-              <div class="flex flex-col sm:flex-row gap-3 items-end">
-                <div class="flex-1">
-                  <label class="block text-sm text-gray-500 mb-1">تحديث الحالة</label>
-                  <select v-model="statusToSet" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
-                    <option value="">اختر الحالة</option>
-                    <option v-for="s in allowedStatuses" :key="s" :value="s">{{ statusLabels[s] || s }}</option>
-                  </select>
+            <div class="overflow-x-auto">
+              <table class="w-full text-right">
+                <thead>
+                  <tr class="bg-gray-50/50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3">المنتج</th>
+                    <th class="px-6 py-3 text-center">الكمية</th>
+                    <th class="px-6 py-3">سعر الوحدة</th>
+                    <th class="px-6 py-3">الإجمالي</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                  <tr v-for="line in order?.lines" :key="line.id" class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300">
+                          <!-- Placeholder for product image -->
+                          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        </div>
+                        <div>
+                          <p class="text-sm font-medium text-gray-900">{{ line.product_variant?.product?.name }}</p>
+                          <p class="text-xs text-gray-500 mt-0.5">{{ formatAttributes(line.product_variant?.attributes) }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                        {{ line.quantity }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600 font-mono">{{ formatCurrency(line.unit_price) }}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900 font-mono">{{ formatCurrency(line.total_price || (line.quantity * line.unit_price)) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- Summary Footer -->
+            <div class="bg-gray-50/50 p-6 border-t border-gray-100">
+              <div class="flex flex-col sm:flex-row justify-end gap-8">
+                <div class="w-full sm:w-64 space-y-3">
+                  <div class="flex justify-between text-sm text-gray-600">
+                    <span>المجموع الفرعي</span>
+                    <span class="font-medium font-mono">{{ formatCurrency(order?.subtotal || order?.total) }}</span>
+                  </div>
+                  <div v-if="order?.discount_amount" class="flex justify-between text-sm text-green-600">
+                    <span>الخصم</span>
+                    <span class="font-medium font-mono">- {{ formatCurrency(order.discount_amount) }}</span>
+                  </div>
+                  <div v-if="order?.shipping_fee" class="flex justify-between text-sm text-gray-600">
+                    <span>رسوم الشحن</span>
+                    <span class="font-medium font-mono">+ {{ formatCurrency(order.shipping_fee) }}</span>
+                  </div>
+                  <div class="pt-3 border-t border-gray-200 flex justify-between items-center">
+                    <span class="text-base font-bold text-gray-900">الإجمالي النهائي</span>
+                    <span class="text-xl font-bold text-blue-600 font-mono">{{ formatCurrency(order?.total) }}</span>
+                  </div>
                 </div>
-                <MButton variant="primary" @click="changeStatus" :disabled="!statusToSet">تطبيق</MButton>
               </div>
             </div>
-          </MCard>
+          </div>
 
-          <!-- Order Items -->
-          <MCard title="عناصر الطلب" padding="p-0">
-            <MTable>
-              <template #header>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">المنتج</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">المتغير</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الكمية</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">السعر</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجمالي</th>
-              </template>
-              <tr v-for="l in order?.lines" :key="l.id" class="hover:bg-gray-50">
-                <td class="px-4 py-3 font-medium text-gray-900">{{ l.product_variant?.product?.name }}</td>
-                <td class="px-4 py-3 text-gray-500 text-sm">{{ formatAttributes(l.product_variant?.attributes) }}</td>
-                <td class="px-4 py-3"><MBadge variant="info">{{ l.quantity }}</MBadge></td>
-                <td class="px-4 py-3 text-gray-600">{{ formatCurrency(l.unit_price) }}</td>
-                <td class="px-4 py-3 font-medium text-gray-900">{{ formatCurrency(l.total_price) }}</td>
-              </tr>
-            </MTable>
-            <div class="p-4 border-t border-gray-100 text-left">
-              <span class="text-gray-500">الإجمالي:</span>
-              <span class="text-lg font-bold mr-2">{{ formatCurrency(order?.total) }}</span>
-            </div>
-          </MCard>
+          <!-- Notes Card -->
+          <div v-if="order?.notes || order?.internal_notes" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div v-if="order?.notes" class="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                  ملاحظات العميل
+                </h4>
+                <p class="text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg">{{ order.notes }}</p>
+             </div>
+             <div v-if="order?.internal_notes" class="bg-yellow-50 rounded-xl border border-yellow-100 p-5 shadow-sm">
+                <h4 class="text-sm font-semibold text-yellow-800 mb-3 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  ملاحظات داخلية
+                </h4>
+                <p class="text-sm text-yellow-700 leading-relaxed">{{ order.internal_notes }}</p>
+             </div>
+          </div>
+
         </div>
 
         <!-- Sidebar -->
         <div class="space-y-6">
-          <!-- Delivery Address -->
-          <MCard title="عنوان التوصيل">
-            <div class="p-4">
-              <div v-if="order?.delivery_address">
-                <p class="font-medium text-gray-900">{{ order.delivery_address.city }} — {{ order.delivery_address.area }}</p>
-                <p class="text-sm text-gray-500 mt-1">{{ order.delivery_address.street }}</p>
-                <p v-if="order.delivery_address.notes" class="text-xs text-gray-400 mt-2 bg-yellow-50 p-2 rounded">{{ order.delivery_address.notes }}</p>
+          
+          <!-- Status Action Card -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">تحديث الحالة</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1.5">الحالة التالية المتاحة</label>
+                <div class="relative">
+                  <select v-model="statusToSet" class="block w-full pl-3 pr-10 py-2.5 text-sm border border-gray-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-lg bg-gray-50 appearance-none transition-shadow">
+                    <option value="" disabled>اختر الحالة...</option>
+                    <option v-for="s in allowedStatuses" :key="s" :value="s">{{ statusLabels[s] || s }}</option>
+                  </select>
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                     <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
               </div>
-              <p v-else class="text-gray-400 text-center py-4">لا يوجد عنوان</p>
+              <button @click="changeStatus" :disabled="!statusToSet" class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                تحديث الحالة
+              </button>
             </div>
-          </MCard>
+          </div>
 
-          <!-- Summary -->
-          <MCard title="ملخص">
-            <div class="p-4 space-y-3">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">عدد المنتجات</span>
-                <span class="font-medium">{{ order?.lines?.length || 0 }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">حالة الطلب</span>
-                <span class="font-medium">{{ statusLabels[order?.status] || order?.status }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">حالة الدفع</span>
-                <MBadge :variant="getPaymentVariant(order?.payment_status)">{{ order?.payment_status }}</MBadge>
-              </div>
-              <div class="border-t pt-3 flex justify-between">
-                <span class="font-semibold text-gray-900">الإجمالي</span>
-                <span class="font-bold text-lg">{{ formatCurrency(order?.total) }}</span>
-              </div>
+          <!-- Customer Card -->
+          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">بيانات العميل</h3>
+              <router-link v-if="order?.customer" :to="{ name: 'CustomersView', params: { id: order.customer.id } }" class="text-xs text-blue-600 hover:text-blue-800 font-medium">عرض الملف</router-link>
             </div>
-          </MCard>
+            <div class="flex items-center gap-4 mb-4">
+               <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                 {{ order?.customer?.name?.charAt(0) || '?' }}
+               </div>
+               <div>
+                 <p class="font-bold text-gray-900">{{ order?.customer?.name }}</p>
+                 <p class="text-sm text-gray-500 dir-ltr text-right">{{ order?.customer?.phone }}</p>
+               </div>
+            </div>
+            <div v-if="order?.customer?.email" class="flex items-center gap-2 text-sm text-gray-600 mb-2">
+               <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+               <span>{{ order.customer.email }}</span>
+            </div>
+          </div>
+
+          <!-- Address Card -->
+           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">عنوان التوصيل</h3>
+            <div v-if="order?.delivery_address" class="space-y-3">
+               <div class="flex gap-3">
+                 <div class="mt-0.5"><svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div>
+                 <div>
+                   <p class="text-sm font-medium text-gray-900">{{ order.delivery_address.city }}، {{ order.delivery_address.area }}</p>
+                   <p class="text-sm text-gray-500 leading-relaxed mt-1">{{ order.delivery_address.street }}</p>
+                 </div>
+               </div>
+               <div v-if="order.delivery_address.notes" class="text-xs text-yellow-700 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
+                 <span class="font-bold block mb-1">تعليمات:</span>
+                 {{ order.delivery_address.notes }}
+               </div>
+            </div>
+            <div v-else class="text-center py-6 bg-gray-50 rounded-lg text-gray-500 text-sm">
+               لا يوجد عنوان مسجل
+            </div>
+          </div>
+
+          <!-- Payment Info -->
+           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">معلومات الدفع</h3>
+             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
+               <span class="text-sm text-gray-600">طريقة الدفع</span>
+               <span class="text-sm font-medium text-gray-900">{{ order?.payment_method || 'نقداً' }}</span>
+             </div>
+             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+               <span class="text-sm text-gray-600">الحالة</span>
+               <span :class="['text-xs font-bold px-2 py-1 rounded bg-white shadow-sm', getPaymentColor(order?.payment_status)]">
+                 {{ order?.payment_status }}
+               </span>
+             </div>
+          </div>
+
         </div>
       </div>
-
-      <!-- Create Delivery Modal -->
-      <div v-if="showCreateDelivery" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-black/30" @click="closeCreate"></div>
-        <MCard class="relative z-10 w-full max-w-md" title="إنشاء توصيل">
-          <div class="p-4 space-y-4">
-            <div>
-              <label class="block text-sm text-gray-700 mb-1">مزود التوصيل</label>
-              <select v-model.number="createForm.provider_id" class="w-full px-3 py-2 border border-gray-200 rounded-lg">
-                <option value="">اختر مزوداً</option>
-                <option v-for="p in providers" :key="p.id" :value="p.id">{{ p.name }}</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm text-gray-700 mb-1">الوقت المتوقع</label>
-              <input v-model="createForm.estimated_delivery_time" type="datetime-local" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm text-gray-700 mb-1">الوزن (كجم)</label>
-                <input v-model.number="createForm.weight_kg" type="number" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
-              </div>
-              <div>
-                <label class="block text-sm text-gray-700 mb-1">المسافة (كم)</label>
-                <input v-model.number="createForm.distance_km" type="number" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
-              </div>
-            </div>
-            <div class="bg-gray-50 p-3 rounded-lg">
-              <p class="text-sm text-gray-500">التكلفة المتوقعة</p>
-              <p class="text-lg font-bold">{{ previewFee !== null ? formatCurrency(previewFee) : '--' }}</p>
-            </div>
+    </main>
+    
+    <!-- Create Delivery Modal -->
+    <div v-if="showCreateDelivery" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-gray-900/60 transition-opacity backdrop-blur-sm" @click="closeCreate"></div>
+        <div class="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all">
+          <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+             <h3 class="text-lg font-bold text-gray-900">إنشاء توصيل جديد</h3>
+             <button @click="closeCreate" class="text-gray-400 hover:text-gray-500"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
           </div>
-          <div class="flex gap-2 p-4 border-t border-gray-100">
-            <MButton variant="secondary" @click="closeCreate" class="flex-1">إلغاء</MButton>
-            <MButton variant="primary" @click="submitCreateDelivery" :loading="creating" :disabled="!createForm.provider_id" class="flex-1">إنشاء</MButton>
+          
+          <div class="p-6 space-y-5">
+             <div>
+               <label class="block text-sm font-medium text-gray-700 mb-1.5">مزود التوصيل</label>
+               <select v-model.number="createForm.provider_id" class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                 <option value="">اختر مزوداً...</option>
+                 <option v-for="p in providers" :key="p.id" :value="p.id">{{ p.name }}</option>
+               </select>
+             </div>
+             
+             <div>
+               <label class="block text-sm font-medium text-gray-700 mb-1.5">الوقت المتوقع</label>
+               <input v-model="createForm.estimated_delivery_time" type="datetime-local" class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
+             </div>
+             
+             <div class="grid grid-cols-2 gap-4">
+               <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1.5">الوزن (كجم)</label>
+                  <input v-model.number="createForm.weight_kg" type="number" step="0.01" class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
+               </div>
+               <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1.5">المسافة (كم)</label>
+                  <input v-model.number="createForm.distance_km" type="number" step="0.01" class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm" />
+               </div>
+             </div>
+             
+             <div v-if="createForm.provider_id" class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex justify-between items-center">
+               <span class="text-sm font-medium text-blue-900">التكلفة التقديرية</span>
+               <span class="text-lg font-bold text-blue-700 font-mono">{{ previewFee !== null ? formatCurrency(previewFee) : '--' }}</span>
+             </div>
           </div>
-        </MCard>
-      </div>
+          
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
+             <button @click="closeCreate" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">إلغاء</button>
+             <button @click="submitCreateDelivery" :disabled="!createForm.provider_id || creating" class="flex-1 px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+               <span v-if="creating">جاري الإنشاء...</span>
+               <span v-else>تأكيد وإنشاء</span>
+             </button>
+          </div>
+        </div>
     </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, defineComponent, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchOrder, updateOrderStatus } from '../../api/orders'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import { createDeliveryForOrder } from '../../api/deliveries'
 import { formatAttributes } from '../../utils/helpers'
-import MButton from '../../components/ui/MButton.vue'
-import MCard from '../../components/ui/MCard.vue'
-import MBadge from '../../components/ui/MBadge.vue'
-import MTable from '../../components/ui/MTable.vue'
+
+// Icons (Simple SVGs as components for the stepper)
+const IconClipboard = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' })]) })
+const IconCheckCircle = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' })]) })
+const IconTruck = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' })]) }) // Placeholder for truck logic if needed differently
+const IconClock = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' })]) })
+const IconBox = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' })]) })
+const IconHome = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' })]) })
 
 const route = useRoute()
 const router = useRouter()
@@ -196,13 +334,41 @@ const validTransitions: Record<string, string[]> = {
 const statusLabels: Record<string, string> = {
   draft: 'مسودة',
   pending: 'قيد الانتظار',
-  confirmed: 'مؤكد',
+  confirmed: 'معتمد',
   processing: 'قيد التجهيز',
   shipped: 'تم الشحن',
   delivered: 'تم التسليم',
   returned: 'معاد',
   cancelled: 'ملغي'
 }
+
+// Timeline UI Steps
+const timelineSteps = [
+  { key: 'draft', label: 'مسودة', icon: IconClipboard },
+  { key: 'pending', label: 'قيد الانتظار', icon: IconClock },
+  { key: 'confirmed', label: 'معتمد', icon: IconCheckCircle },
+  { key: 'processing', label: 'قيد التجهيز', icon: IconBox },
+  { key: 'shipped', label: 'تم الشحن', icon: IconTruck },
+  { key: 'delivered', label: 'تم التسليم', icon: IconHome },
+]
+
+const currentStepIndex = computed(() => {
+  const s = String(order.value?.status || '').toLowerCase()
+  return timelineSteps.findIndex(step => step.key === s)
+})
+
+const isStepConfigured = (idx: number) => {
+  // Logic to show progress: if current status is found, all previous steps are "done"
+  // If status is cancelled/returned, we might need special handling, but for linear timeline:
+  if (currentStepIndex.value === -1) return false // cancelled/returned or unknown
+  return idx < currentStepIndex.value
+}
+
+const progressPercentage = computed(() => {
+  if (currentStepIndex.value === -1) return 0
+  if (currentStepIndex.value === 0) return 0
+  return (currentStepIndex.value / (timelineSteps.length - 1)) * 100
+})
 
 const allowedStatuses = computed(() => {
   const s = String(order.value?.status || '').toLowerCase()
@@ -231,7 +397,7 @@ onMounted(() => load())
 
 const formatDate = (iso?: string) => {
   if (!iso) return '—'
-  try { return new Date(iso).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' }) } catch { return iso }
+  try { return new Date(iso).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' }) } catch { return iso }
 }
 
 const formatCurrency = (val?: number) => {
@@ -239,23 +405,27 @@ const formatCurrency = (val?: number) => {
   return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(val) + ' د.ل'
 }
 
-const getStatusVariant = (s?: string): 'success' | 'warning' | 'error' | 'neutral' | 'info' => {
+const getStatusColor = (s?: string) => {
   const m: any = { 
-    delivered: 'success', 
-    shipped: 'info', 
-    processing: 'warning', 
-    confirmed: 'info',
-    pending: 'warning', 
-    cancelled: 'error', 
-    returned: 'neutral',
-    draft: 'neutral'
+    delivered: 'bg-green-100 text-green-800', 
+    shipped: 'bg-blue-100 text-blue-800', 
+    processing: 'bg-indigo-100 text-indigo-800', 
+    confirmed: 'bg-blue-100 text-blue-800',
+    pending: 'bg-yellow-100 text-yellow-800', 
+    cancelled: 'bg-red-100 text-red-800', 
+    returned: 'bg-gray-100 text-gray-800',
+    draft: 'bg-gray-100 text-gray-600'
   }
-  return m[String(s || '').toLowerCase()] || 'neutral'
+  return m[String(s || '').toLowerCase()] || 'bg-gray-100 text-gray-800'
 }
 
-const getPaymentVariant = (s?: string): 'success' | 'warning' | 'error' | 'neutral' => {
-  const m: any = { paid: 'success', pending: 'warning', failed: 'error' }
-  return m[s?.toLowerCase() || ''] || 'neutral'
+const getPaymentColor = (s?: string) => {
+  const m: any = { 
+    paid: 'text-green-600', 
+    pending: 'text-yellow-600', 
+    failed: 'text-red-600' 
+  }
+  return m[String(s || '').toLowerCase()] || 'text-gray-600'
 }
 
 const openInvoice = () => {
@@ -273,7 +443,7 @@ const changeStatus = async () => {
   } catch (e) { console.error(e) }
 }
 
-// Delivery Modal
+// Delivery Modal logic
 const showCreateDelivery = ref(false)
 const providers = ref<any[]>([])
 const createForm = ref<any>({ provider_id: null, estimated_delivery_time: '', weight_kg: null, distance_km: null })
@@ -315,4 +485,19 @@ const submitCreateDelivery = async () => {
 </script>
 
 <style scoped>
+/* Custom scrollbar for timeline if needed */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
 </style>
