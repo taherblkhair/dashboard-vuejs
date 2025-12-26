@@ -394,13 +394,59 @@
         </div>
     </div>
 
+    <!-- Stock Check Modal -->
+    <div v-if="showStockError" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-gray-900/60 transition-opacity backdrop-blur-sm" @click="closeStockError"></div>
+        <div class="relative z-10 w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all">
+          <div class="px-6 py-4 border-b border-gray-100 bg-red-50/50 flex justify-between items-center">
+             <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                تنبيه: الكمية غير متوفرة
+             </h3>
+             <button @click="closeStockError" class="text-gray-400 hover:text-gray-500"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+          </div>
+          
+          <div class="p-6">
+             <div class="bg-red-50 border border-red-100 rounded-lg p-4 mb-6">
+                <p class="text-red-700 text-sm">عذراً، لا يمكن إتمام العملية نظراً لعدم توفر كميات كافية للمنتجات التالية:</p>
+             </div>
+
+             <div class="max-h-80 overflow-y-auto border border-gray-100 rounded-lg">
+                <table class="w-full text-right text-sm">
+                   <thead class="bg-gray-50 font-semibold text-gray-600">
+                      <tr>
+                        <th class="px-4 py-3">المنتج</th>
+                        <th class="px-4 py-3 text-center">الكمية المطلوبة</th>
+                        <th class="px-4 py-3 text-center">المتوفر</th>
+                      </tr>
+                   </thead>
+                   <tbody class="divide-y divide-gray-50">
+                      <tr v-for="(item, idx) in unavailableItems" :key="idx" class="hover:bg-gray-50/50">
+                         <td class="px-4 py-3">
+                            <p class="font-medium text-gray-900">{{ item.product_variant?.product?.name || item.product_name }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5" dir="ltr">{{ item.product_variant?.sku || item.product_variant_id }}</p>
+                         </td>
+                         <td class="px-4 py-3 text-center font-bold text-red-600">{{ item.requested_quantity }}</td>
+                         <td class="px-4 py-3 text-center font-bold text-gray-600">{{ item.available_quantity }}</td>
+                      </tr>
+                   </tbody>
+                </table>
+             </div>
+          </div>
+          
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+             <button @click="closeStockError" class="px-6 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 transition-colors">حسناً</button>
+          </div>
+        </div>
+    </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, defineComponent, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchOrder, updateOrderStatus } from '../../api/orders'
+import { fetchOrder, updateOrderStatus, checkOrderStock } from '../../api/orders'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import { createDeliveryForOrder, fetchDeliveries, fetchDelivery, uploadProof, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
 import { fetchRiders } from '../../api/riders'
@@ -428,6 +474,8 @@ const activeTab = ref<'order' | 'delivery'>('order')
 
 const orderStatusToSet = ref('')
 const deliveryStatusToSet = ref('')
+const showStockError = ref(false)
+const unavailableItems = ref<any[]>([])
 
 const ridersForProvider = ref<any[]>([])
 const selectedRider = ref<number | null>(null)
@@ -551,12 +599,39 @@ onMounted(() => load())
 
 const changeOrderStatus = async () => {
   if (!order.value?.id || !orderStatusToSet.value) return
+
+  // Check stock before processing or shipping
+  if (['processing'].includes(orderStatusToSet.value) || (orderStatusToSet.value === 'confirmed' && order.value.status === 'pending')) {
+      try {
+          const stockRes = await checkOrderStock(order.value.id)
+          const data = stockRes?.data?.data || stockRes?.data
+          if (data && data.has_sufficient_stock === false) {
+             unavailableItems.value = data.unavailable_items || []
+             showStockError.value = true
+             orderStatusToSet.value = '' // Reset selection
+             return
+          }
+      } catch (e) {
+         console.error('Stock check failed', e)
+         // Decide if we should block or warn. For now let's just log and maybe proceed or alert.
+         // Let's safe-fail: if check fails (e.g. network), maybe allow? OR block?
+         // Optimally we should alert user check failed.
+         addToast('فشل التحقق من المخزون', 'error')
+         return 
+      }
+  }
+
   try {
     await updateOrderStatus(order.value.id, orderStatusToSet.value)
     await load()
     orderStatusToSet.value = ''
     addToast('تم تحديث حالة الطلب', 'success')
   } catch (e) { console.error(e) }
+}
+
+const closeStockError = () => {
+    showStockError.value = false
+    unavailableItems.value = []
 }
 
 const changeDeliveryStatus = async () => {

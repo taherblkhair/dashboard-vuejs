@@ -22,6 +22,10 @@ export async function updateOrderStatus(id: number, status: string) {
 	return request(`/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) })
 }
 
+export async function checkOrderStock(id: number) {
+	return request(`/orders/${id}/check-stock`)
+}
+
 export function getOrderInvoiceUrl(id: number) {
 	const base = BASE_URL.replace(/\/+$/, '')
 	return base ? `${base}/orders/${id}/invoice` : `/orders/${id}/invoice`
