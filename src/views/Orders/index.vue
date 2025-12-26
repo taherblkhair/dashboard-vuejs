@@ -40,7 +40,9 @@
       <!-- Filters -->
       <MCard title="تصفية الطلبات">
         <div class="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <MInput v-model="filters.q" label="بحث" placeholder="كود الطلب، اسم العميل..." />
+          <div>
+            <MInput v-model="filters.q" label="بحث" placeholder="كود الطلب، اسم العميل..." />
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">حالة الطلب</label>
             <select v-model="filters.status" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
@@ -62,8 +64,9 @@
               <option value="paid">مدفوع</option>
             </select>
           </div>
-          <div class="flex items-end">
-            <MButton variant="primary" @click="applyFilters" class="w-full">تطبيق</MButton>
+          <div class="flex items-end gap-2">
+            <MButton variant="primary" @click="applyFilters" class="flex-1">تطبيق</MButton>
+            <MButton variant="secondary" @click="resetFilters" class="flex-1">مسح الفلاتر</MButton>
           </div>
         </div>
       </MCard>
@@ -154,7 +157,7 @@ const loadOrders = async (page = 1) => {
   loading.value = true
   try {
     const params: Record<string, any> = { page, per_page: 25 }
-    if (filters.value.q) params.q = filters.value.q
+    if (filters.value.q) params.search = filters.value.q
     if (filters.value.status) params.status = filters.value.status
     if (filters.value.payment_status) params.payment_status = filters.value.payment_status
 
