@@ -66,7 +66,6 @@
           </div>
           <div class="flex items-end gap-2">
             <MButton variant="primary" @click="applyFilters" class="flex-1">تطبيق</MButton>
-            <MButton variant="secondary" @click="resetFilters" class="flex-1">مسح الفلاتر</MButton>
           </div>
         </div>
       </MCard>
