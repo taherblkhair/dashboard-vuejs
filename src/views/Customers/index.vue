@@ -47,9 +47,11 @@
             </td>
             <td class="px-4 py-3 text-gray-600">{{ c.total_orders }}</td>
             <td class="px-4 py-3 text-gray-600">{{ c.total_spent }}</td>
-            <td class="px-4 py-3 flex gap-2">
-              <MButton variant="ghost" size="sm" @click="viewCustomer(c.id)">عرض</MButton>
-              <MButton variant="ghost" size="sm" @click="openAddressModal(c.id)">عنوان</MButton>
+            <td class="px-4 py-3">
+               <ActionMenu :items="[
+                  { label: 'عرض', action: () => viewCustomer(c.id), icon: IconEye },
+                  { label: 'العنوان', action: () => openAddressModal(c.id), icon: IconMapPin }
+               ]" />
             </td>
           </tr>
         </MTable>
@@ -77,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCustomers, createCustomerAddress } from '../../api/customers'
 import MButton from '../../components/ui/MButton.vue'
@@ -85,6 +87,12 @@ import MInput from '../../components/ui/MInput.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import ActionMenu from '../../components/ui/ActionMenu.vue'
+
+// Icons
+const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
+const IconMapPin = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 11a3 3 0 11-6 0 3 3 0 016 0z' })]) })
+
 
 const router = useRouter()
 const customers = ref<any[]>([])

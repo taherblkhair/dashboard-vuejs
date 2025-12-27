@@ -54,11 +54,13 @@
               </td>
               <td class="py-2 text-right">
                 <div v-if="editingId !== r.id" class="flex gap-2 justify-end">
-                  <button @click="startEdit(r)" class="px-2 py-1 text-sm bg-gray-200 rounded">تعديل الموقع</button>
+                   <ActionMenu :items="[
+                     { label: 'تعديل الموقع', action: () => startEdit(r), icon: IconPencil }
+                   ]" />
                 </div>
                 <div v-else class="flex gap-2 justify-end">
-                  <button @click="saveLocation(r)" :disabled="saving" class="px-2 py-1 text-sm bg-green-600 text-white rounded">حفظ</button>
-                  <button @click="cancelEdit" class="px-2 py-1 text-sm bg-gray-200 rounded">إلغاء</button>
+                  <button @click="saveLocation(r)" :disabled="saving" class="px-2 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">حفظ</button>
+                  <button @click="cancelEdit" class="px-2 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300">إلغاء</button>
                 </div>
               </td>
             </tr>
@@ -71,11 +73,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, defineComponent, h } from 'vue'
 import { ridersStore, loadRiders } from '../../store/riders'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import ToastList from '../../components/ToastList.vue'
 import { updateRiderLocationOptimistic } from '../../services/ridersService'
+import ActionMenu from '../../components/ui/ActionMenu.vue'
+
+// Icons
+const IconPencil = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z' })]) })
+
 
 const providers = ref<any[]>([])
 const selectedProvider = ref<number | ''>('')

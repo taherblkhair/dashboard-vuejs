@@ -212,7 +212,7 @@
         <div class="min-w-[700px]">
            <div class="relative flex items-center justify-between">
              <div class="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -z-0 rounded-full"></div>
-             <div class="absolute top-1/2 left-0 h-1 bg-blue-500 -z-0 rounded-full transition-all duration-1000" :style="{ width: deliveryProgressPercentage + '%' }"></div>
+             <div class="absolute top-1/2 right-0 h-1 bg-blue-500 -z-0 rounded-full transition-all duration-1000" :style="{ width: deliveryProgressPercentage + '%' }"></div>
              
              <div v-for="(step, idx) in deliveryTimelineSteps" :key="step.key" class="relative z-10 flex flex-col items-center group cursor-default">
                <div :class="[

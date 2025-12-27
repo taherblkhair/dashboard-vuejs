@@ -110,13 +110,11 @@
             </td>
             <td class="px-4 py-3 font-medium text-gray-900">{{ formatCurrency(order.total) }}</td>
             <td class="px-4 py-3 text-gray-500 text-sm">{{ formatDate(order.order_date) }}</td>
-            <td class="px-4 py-3 flex gap-2">
-              <router-link :to="{ name: 'OrderDetails', params: { id: order.id } }" class="text-primary-600 hover:underline text-sm">
-                عرض
-              </router-link>
-              <router-link :to="{ name: 'OrderEdit', params: { id: order.id } }" class="text-gray-600 hover:underline text-sm">
-                تعديل
-              </router-link>
+            <td class="px-4 py-3">
+               <ActionMenu :items="[
+                 { label: 'عرض التفاصيل', to: { name: 'OrderDetails', params: { id: order.id } }, icon: IconEye },
+                 { label: 'تعديل', to: { name: 'OrderEdit', params: { id: order.id } }, icon: IconPencil }
+               ]" />
             </td>
           </tr>
         </MTable>
@@ -135,14 +133,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchOrders } from '../../api/orders'
 import MButton from '../../components/ui/MButton.vue'
-import MInput from '../../components/ui/MInput.vue'
 import MCard from '../../components/ui/MCard.vue'
-import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import MInput from '../../components/ui/MInput.vue'
+import ActionMenu from '../../components/ui/ActionMenu.vue'
+import MBadge from '../../components/ui/MBadge.vue'
+
+// Icons
+const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
+const IconPencil = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z' })]) })
+
 
 const router = useRouter()
 
