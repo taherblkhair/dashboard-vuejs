@@ -10,10 +10,10 @@
       class="w-full border rounded px-2 py-2" />
 
     <ul v-if="show && results.length" class="absolute z-50 mt-1 w-full bg-white border rounded shadow max-h-48 overflow-auto">
-      <li v-for="(r, i) in results" :key="r.id" :class="['px-3 py-2 cursor-pointer', i === idx ? 'bg-gray-100' : '']"
+      <li v-for="(r, i) in results" :key="r.id" :class="['px-3 py-2 cursor-pointer hover:bg-gray-50', i === idx ? 'bg-gray-100' : '']"
           @mousedown.prevent="selectResult(r)">
-        <div class="text-sm font-medium">{{ r.product?.name }} — {{ r.sku_variant }}</div>
-        <div class="text-xs text-gray-500">{{ formatAttributes(r.attributes) }}</div>
+        <div class="text-sm font-medium">{{ r.product?.name }} <span v-if="r.sku_variant">({{ r.sku_variant }})</span></div>
+        <div class="text-xs text-gray-500" v-if="r.attributes">{{ formatAttributes(r.attributes) }}</div>
       </li>
     </ul>
     <div v-if="show && !results.length && !loading" class="absolute z-50 mt-1 w-full bg-white border rounded p-2 text-sm text-gray-500">لا توجد نتائج</div>

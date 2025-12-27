@@ -79,10 +79,7 @@
             <td class="px-4 py-3 text-gray-600 text-sm">{{ formatDate(order.order_date) }}</td>
             <td class="px-4 py-3 text-gray-600 text-sm">{{ formatDate(order.expected_delivery_date) }}</td>
             <td class="px-4 py-3">
-              <div class="flex gap-2">
-                <MButton variant="ghost" size="sm" @click="viewOrder(order.id)">عرض</MButton>
-                <!-- <MButton v-if="canReceiveOrder(order)" variant="ghost" size="sm" @click="receiveOrder(order.id)">استلام</MButton> -->
-              </div>
+              <ActionMenu :items="getActions(order)" />
             </td>
           </tr>
         </MTable>
@@ -101,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchPurchaseOrders } from '../../api/purchaseOrders'
 import MButton from '../../components/ui/MButton.vue'
@@ -109,6 +106,12 @@ import MInput from '../../components/ui/MInput.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import ActionMenu from '../../components/ui/ActionMenu.vue'
+
+// Icons (reusing existing or importing new, define inline for simplicity)
+const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
+const IconPencil = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z' })]) })
+
 
 const router = useRouter()
 const orders = ref<any[]>([])
@@ -144,9 +147,22 @@ const clearFilters = () => { searchQuery.value = ''; statusFilter.value = 'all';
 
 const createOrder = () => router.push({ name: 'PurchaseOrderCreate' })
 const viewOrder = (id?: number) => id && router.push({ name: 'PurchaseOrderDetails', params: { id } })
+const editOrder = (id?: number) => id && router.push({ name: 'PurchaseOrderEdit', params: { id } })
 const receiveOrders = () => router.push({ name: 'PurchaseOrderReceives' })
-const receiveOrder = (id?: number) => id && router.push({ name: 'PurchaseOrderReceiveCreate', params: { id } })
-const canReceiveOrder = (o: any) => ['ordered', 'partially_received'].includes(o.status)
+// const receiveOrder = (id?: number) => id && router.push({ name: 'PurchaseOrderReceiveCreate', params: { id } })
+// const canReceiveOrder = (o: any) => ['ordered', 'partially_received'].includes(o.status)
+
+const getActions = (order: any) => {
+  const actions = [
+    { label: 'عرض التفاصيل', action: () => viewOrder(order.id), icon: IconEye }
+  ]
+  
+  if (['draft', 'pending'].includes(order.status)) {
+    actions.push({ label: 'تعديل', action: () => editOrder(order.id), icon: IconPencil })
+  }
+  
+  return actions
+}
 
 const getStatusText = (s: string) => {
   const m: any = { pending: 'معلق', ordered: 'تم الطلب', partially_received: 'مستلم جزئياً', received: 'مستلم', cancelled: 'ملغي' }

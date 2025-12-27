@@ -20,6 +20,10 @@ export async function updatePurchaseOrderStatus(id: number, status: string) {
   return request(`/purchase-orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) })
 }
 
+export async function updatePurchaseOrder(id: number, payload: any) {
+  return request(`/purchase-orders/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
+}
+
 export async function createPurchaseOrder(payload: any) {
   return request(`/purchase-orders`, { method: 'POST', body: JSON.stringify(payload) })
 }
