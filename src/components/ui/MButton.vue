@@ -17,7 +17,7 @@
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
-  variant?: 'primary' | 'secondary' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'warning' | 'success'
   size?: 'sm' | 'md' | 'lg'
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
@@ -43,6 +43,12 @@ const buttonClasses = computed(() => {
     base.push('bg-primary-600 text-white hover:bg-primary-700')
   } else if (props.variant === 'secondary') {
     base.push('bg-white text-gray-700 border border-gray-300 hover:bg-gray-50')
+  } else if (props.variant === 'danger') {
+    base.push('bg-red-600 text-white hover:bg-red-700')
+  } else if (props.variant === 'warning') {
+    base.push('bg-yellow-500 text-white hover:bg-yellow-600')
+  } else if (props.variant === 'success') {
+    base.push('bg-green-600 text-white hover:bg-green-700')
   } else {
     base.push('bg-transparent text-gray-600 hover:bg-gray-100')
   }

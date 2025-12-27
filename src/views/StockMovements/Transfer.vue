@@ -1,80 +1,130 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen" dir="rtl">
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h2 class="text-xl font-semibold mb-4">نقل مخزون بين المخازن</h2>
-
-      <form @submit.prevent="submit" class="space-y-4">
-        <div>
-          <label class="text-sm text-gray-600">من المخزن</label>
-          <select v-model.number="form.from_warehouse_id" class="w-full mt-1 p-2 border rounded">
-            <option value="">اختر المخزن المرسل</option>
-            <option v-for="w in warehouses" :key="w.id" :value="w.id">{{ w.name }} — #{{ w.id }}</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="text-sm text-gray-600">إلى المخزن</label>
-          <select v-model.number="form.to_warehouse_id" class="w-full mt-1 p-2 border rounded">
-            <option value="">اختر المخزن المستقبل</option>
-            <option v-for="w in warehouses" :key="w.id" :value="w.id">{{ w.name }} — #{{ w.id }}</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="text-sm text-gray-600">معرف متغير المنتج (product_variant_id)</label>
-          <div v-if="loadingVariants" class="text-sm text-gray-500 mt-1">جاري تحميل المتغيرات...</div>
-          <div v-else-if="variants.length">
-            <select v-model.number="form.product_variant_id" class="w-full mt-1 p-2 border rounded">
-              <option v-for="v in variants" :key="v.id" :value="v.id">{{ v.label }} (متاح: {{ v.available }})</option>
-            </select>
-          </div>
-          <div v-else class="text-sm text-gray-500 mt-1">لا توجد متغيرات متاحة في هذا المخزن</div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
+    <div class="max-w-2xl mx-auto space-y-6">
+       <!-- Header -->
+       <div class="flex items-center justify-between">
           <div>
-            <label class="text-sm text-gray-600">الكمية</label>
-            <input v-model.number="form.quantity" type="number" min="1" class="w-full mt-1 p-2 border rounded" />
+             <h1 class="text-2xl font-bold text-gray-900">نقل مخزون</h1>
+             <p class="text-sm text-gray-500 mt-1">نقل كميات من مخزن إلى آخر</p>
           </div>
-          <div>
-            <label class="text-sm text-gray-600">سعر الوحدة (اختياري)</label>
-            <input v-model.number="form.unit_cost" step="0.01" type="number" class="w-full mt-1 p-2 border rounded" />
-          </div>
-        </div>
+          <MButton variant="secondary" @click="cancel">إلغاء</MButton>
+       </div>
 
-        <div>
-          <label class="text-sm text-gray-600">ملاحظة</label>
-          <textarea v-model="form.note" rows="3" class="w-full mt-1 p-2 border rounded"></textarea>
-        </div>
+       <MCard>
+          <form @submit.prevent="submit" class="p-6 space-y-6">
+             <!-- Warehouses -->
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                   <label class="block text-sm font-medium text-gray-700 mb-2">من المخزن</label>
+                   <select 
+                      v-model.number="form.from_warehouse_id" 
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
+                   >
+                      <option :value="null">اختر المخزن المرسل</option>
+                      <option v-for="w in warehouses" :key="w.id" :value="w.id">{{ w.name }} (#{{ w.id }})</option>
+                   </select>
+                </div>
+                <div>
+                   <label class="block text-sm font-medium text-gray-700 mb-2">إلى المخزن</label>
+                   <select 
+                      v-model.number="form.to_warehouse_id" 
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
+                   >
+                      <option :value="null">اختر المخزن المستقبل</option>
+                       <!-- Filter out source warehouse if selected -->
+                      <option v-for="w in targetWarehouses" :key="w.id" :value="w.id">{{ w.name }} (#{{ w.id }})</option>
+                   </select>
+                </div>
+             </div>
 
-        <div class="flex items-center gap-3">
-          <button :disabled="submitting" type="submit" class="px-4 py-2 bg-green-600 text-white rounded">نقل المخزون</button>
-          <button type="button" @click="() => router.back()" class="px-4 py-2 bg-gray-200 rounded">إلغاء</button>
-        </div>
+             <!-- Product Selection (Filtered by source warehouse) -->
+             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">المنتج المراد نقله</label>
+                <div v-if="!form.from_warehouse_id" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-500 text-center">
+                   يرجى اختيار المخزن المرسل أولاً لعرض المنتجات المتاحة
+                </div>
+                <div v-else-if="loadingVariants" class="flex items-center gap-2 text-sm text-gray-500 p-2">
+                   <div class="animate-spin h-4 w-4 border-2 border-primary-500 rounded-full border-t-transparent"></div>
+                   جاري تحميل المنتجات...
+                </div>
+                <div v-else-if="variants.length === 0" class="p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm border border-yellow-200">
+                   لا توجد منتجات متاحة في هذا المخزن
+                </div>
+                <select 
+                   v-else
+                   v-model.number="form.product_variant_id"
+                   class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
+                >
+                   <option :value="null">اختر المنتج...</option>
+                   <option v-for="v in variants" :key="v.id" :value="v.id">
+                      {{ v.label }} (متاح: {{ v.available }})
+                   </option>
+                </select>
+             </div>
 
-        <div v-if="error" class="text-sm text-red-600">{{ error }}</div>
-        <div v-if="success" class="text-sm text-green-600">{{ success }}</div>
-      </form>
+             <!-- Quantity & Cost -->
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                   <label class="block text-sm font-medium text-gray-700 mb-2">الكمية</label>
+                   <input 
+                      v-model.number="form.quantity" 
+                      type="number" 
+                      min="1" 
+                      required
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                   />
+                </div>
+                <div>
+                   <label class="block text-sm font-medium text-gray-700 mb-2">سعر الوحدة (اختياري)</label>
+                   <input 
+                      v-model.number="form.unit_cost" 
+                      type="number" 
+                      step="0.01" 
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      placeholder="للحفاظ على نفس التكلفة اتركه فارغاً"
+                   />
+                </div>
+             </div>
+
+             <!-- Notes -->
+             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ملاحظات</label>
+                <textarea 
+                   v-model="form.note" 
+                   rows="3" 
+                   class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                ></textarea>
+             </div>
+
+             <div class="pt-4 flex justify-end gap-3 border-t border-gray-100">
+                <MButton variant="secondary" @click="cancel">إلغاء</MButton>
+                <MButton variant="primary" type="submit" :loading="submitting">نقل المخزون</MButton>
+             </div>
+          </form>
+       </MCard>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { fetchWarehouses, fetchWarehouseStockReport } from '../../api/warehouses'
 import { transferStockMovement } from '../../api/stockMovements'
+import MCard from '../../components/ui/MCard.vue'
+import MButton from '../../components/ui/MButton.vue'
+import { useToast } from '../../composables/useToast'
+
 
 const router = useRouter()
 const route = useRoute()
+const { addToast } = useToast()
+
 const warehouses = ref<any[]>([])
-const loading = ref(false)
-const submitting = ref(false)
-const error = ref('')
-const success = ref('')
 const variants = ref<any[]>([])
+const loading = ref(false)
 const loadingVariants = ref(false)
-const fromPrefilled = ref(false)
+const submitting = ref(false)
 
 const form = ref({
   from_warehouse_id: null as number | null,
@@ -85,121 +135,103 @@ const form = ref({
   note: ''
 })
 
+// Filter target warehouses to exclude source
+const targetWarehouses = computed(() => {
+   if (!form.value.from_warehouse_id) return warehouses.value
+   return warehouses.value.filter(w => w.id !== form.value.from_warehouse_id)
+})
+
 const loadWarehouses = async () => {
-  loading.value = true
-  try {
-    const res = await fetchWarehouses()
-    warehouses.value = res?.data || []
-  } catch (e) {
-    console.error('Failed to load warehouses', e)
-  } finally {
-    loading.value = false
-  }
+   loading.value = true
+   try {
+      const res = await fetchWarehouses()
+      warehouses.value = res?.data || []
+   } catch (e) {
+      console.error(e)
+   } finally {
+      loading.value = false
+   }
 }
 
-onMounted(loadWarehouses)
+const loadVariants = async (wId: number) => {
+   loadingVariants.value = true
+   variants.value = []
+   try {
+      const res = await fetchWarehouseStockReport(wId)
+      const data = res?.data?.stock_details || res?.data || []
+      variants.value = data.map((d: any) => ({
+         id: d.product_variant_id,
+         label: d.product_name || `Variant #${d.product_variant_id}`,
+         available: d.available_quantity || 0
+      }))
+      
+      // Auto select first if needed? Maybe better not to
+   } catch (e) {
+      console.error(e)
+   } finally {
+      loadingVariants.value = false
+   }
+}
 
-// prefill from/to warehouse if provided via query params
-onMounted(() => {
-  const q = route.query
-  const fromId = q.from_warehouse_id || q.warehouse_id
-  const toId = q.to_warehouse_id
-  if (fromId) {
-    form.value.from_warehouse_id = Number(fromId)
-    fromPrefilled.value = true
-    // fetch variants for this warehouse immediately
-    loadVariantsForWarehouse(Number(fromId))
-  }
-  if (toId) form.value.to_warehouse_id = Number(toId)
+watch(() => form.value.from_warehouse_id, (newVal) => {
+   if (newVal) {
+      loadVariants(newVal)
+      // Reset logic if needed
+      form.value.product_variant_id = null
+      if (form.value.to_warehouse_id === newVal) form.value.to_warehouse_id = null
+   } else {
+      variants.value = []
+   }
 })
 
-// watch for changes to the from_warehouse_id (when user selects) and load variants
-watch(() => form.value.from_warehouse_id, (val) => {
-  if (!val) { variants.value = []; return }
-  // if not prefilled (user selected), load variants
-  loadVariantsForWarehouse(Number(val))
+onMounted(async () => {
+   await loadWarehouses()
+   
+   // Query params
+   if (route.query.from_warehouse_id) {
+      form.value.from_warehouse_id = Number(route.query.from_warehouse_id)
+   }
+   if (route.query.to_warehouse_id) {
+      form.value.to_warehouse_id = Number(route.query.to_warehouse_id)
+   }
 })
-
-const loadVariantsForWarehouse = async (warehouseId: number) => {
-  loadingVariants.value = true
-  variants.value = []
-  try {
-    const res = await fetchWarehouseStockReport(warehouseId)
-    const details = (res?.data?.stock_details) || (res?.data) || []
-    variants.value = (details || []).map((d: any) => ({
-      id: d.product_variant_id,
-      label: `${d.product_name ? d.product_name : '#'+(d.product_variant_id ?? '')}${d.variant_attributes ? ' — ' + formatAttributes(d.variant_attributes) : ''}`,
-      available: d.available_quantity ?? d.quantity ?? 0
-    }))
-    // if there's at least one variant and no selected variant, pick the first
-    if (variants.value.length && !form.value.product_variant_id) {
-      form.value.product_variant_id = variants.value[0].id
-    }
-  } catch (e) {
-    console.error('Failed to load warehouse variants', e)
-  } finally {
-    loadingVariants.value = false
-  }
-}
-
-const formatAttributes = (attr: any) => {
-  if (!attr) return ''
-  if (typeof attr === 'string') {
-    try { const parsed = JSON.parse(attr); return Object.entries(parsed).map(([k, v]) => `${k}: ${v}`).join(', ') } catch { return attr }
-  }
-  if (typeof attr === 'object') { try { return Object.entries(attr).map(([k, v]) => `${k}: ${v}`).join(', ') } catch { return String(attr) } }
-  return String(attr)
-}
 
 const submit = async () => {
-  error.value = ''
-  success.value = ''
+   if (!form.value.from_warehouse_id || !form.value.to_warehouse_id) {
+      addToast('يرجى اختيار المخزنين', 'error')
+      return
+   }
+   if (!form.value.product_variant_id) {
+      addToast('يرجى اختيار المنتج', 'error')
+      return
+   }
+   if (form.value.quantity <= 0) {
+      addToast('الكمية يجب أن تكون أكبر من صفر', 'error')
+      return
+   }
 
-  if (!form.value.from_warehouse_id || !form.value.to_warehouse_id) {
-    error.value = 'يرجى اختيار كلا المخزنين (المرسل والمستقبل)'
-    return
-  }
-  if (!form.value.product_variant_id) {
-    error.value = 'يرجى إدخال معرف متغير المنتج'
-    return
-  }
-  if (!form.value.quantity || form.value.quantity <= 0) {
-    error.value = 'الكمية يجب أن تكون أكبر من صفر'
-    return
-  }
-
-  submitting.value = true
-  try {
-    const payload = {
-      from_warehouse_id: form.value.from_warehouse_id,
-      to_warehouse_id: form.value.to_warehouse_id,
-      product_variant_id: form.value.product_variant_id,
-      quantity: form.value.quantity,
-      unit_cost: form.value.unit_cost,
-      note: form.value.note
-    }
-    await transferStockMovement(payload)
-    success.value = 'تم إنشاء عملية النقل بنجاح'
-    // redirect to destination warehouse details
-    router.push({ name: 'WarehouseDetails', params: { id: form.value.to_warehouse_id } })
-  } catch (e: any) {
-    console.error('Transfer error', e)
-    // If API returns validation about insufficient stock, show specific Arabic message
-    const msg = (e?.message || '').toString()
-    // Show the requested error message when transfer failed due to insufficient stock
-    if (msg.toLowerCase().includes('stock') || msg.includes('insufficient') || (e?.response && e.response.status === 400)) {
-      error.value = 'تآكد من توفر المنتج في المخزون'
-    } else if (e?.response && e.response.data && e.response.data.message) {
-      error.value = e.response.data.message
-    } else {
-      error.value = 'فشل النقل. حاول مرة أخرى.'
-    }
-  } finally {
-    submitting.value = false
-  }
+   submitting.value = true
+   try {
+      await transferStockMovement({
+         ...form.value,
+         from_warehouse_id: form.value.from_warehouse_id,
+         to_warehouse_id: form.value.to_warehouse_id,
+         product_variant_id: form.value.product_variant_id
+      })
+      addToast('تم نقل المخزون بنجاح', 'success')
+      router.push({ name: 'WarehouseDetails', params: { id: form.value.to_warehouse_id } })
+   } catch (e: any) {
+      // Check for specific error message
+      const msg = e?.response?.data?.message || e?.message || ''
+      if (msg.toLowerCase().includes('stock') || msg.includes('insufficient')) {
+         addToast('الكمية غير متوفرة في المخزن المرسل', 'error')
+      } else {
+         addToast(msg || 'فشل عملية النقل', 'error')
+      }
+   } finally {
+      submitting.value = false
+   }
 }
-</script>
 
-<style scoped>
-/* small spacing overrides if needed */
-</style>
+const cancel = () => router.back()
+</script>

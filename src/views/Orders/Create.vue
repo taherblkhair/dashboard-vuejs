@@ -69,10 +69,10 @@
             <div v-for="(line, idx) in form.lines" :key="line._uid" class="border border-gray-100 rounded-lg p-4">
               <div class="flex justify-between items-start mb-3">
                 <span class="text-sm font-medium text-gray-700">
-                  {{ line.product_name || `البند #${idx + 1}` }}
+                  {{ line.product_name || `البند #${Number(idx) + 1}` }}
                   <span v-if="line.product_sku" class="text-gray-400">— {{ line.product_sku }}</span>
                 </span>
-                <button @click="removeLine(idx)" class="text-red-500 hover:text-red-700 text-sm">حذف</button>
+                <button @click="removeLine(Number(idx))" class="text-red-500 hover:text-red-700 text-sm">حذف</button>
               </div>
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="col-span-2">
@@ -80,7 +80,7 @@
                   <VariantAutocomplete 
                     v-model="line.product_variant_id" 
                     :selected-label="line.product_name || ''"
-                    @select="(v) => onVariantSelected(idx, v)" 
+                    @select="(v) => onVariantSelected(Number(idx), v)" 
                     placeholder="ابحث..."
                   />
                 </div>
@@ -239,11 +239,7 @@ const onVariantSelected = (idx: number, v: any) => {
   form.value.lines[idx].product_sku = v.sku_variant || ''
 }
 
-const addVariantLine = (v: any) => {
-  if (!v) return
-  form.value.lines.push({ _uid: uid(), product_variant_id: v.id, quantity: 1, unit_price: Number(v.sale_price || 0), discount_amount: 0, notes: '', product_name: v.product?.name || v.name || '', product_sku: v.sku_variant || '' })
-  showToast(`تمت إضافة: ${v.product?.name || v.name}`)
-}
+
 
 const lineTotal = (l: any) => (Number(l.quantity || 0) * Number(l.unit_price || 0)) - Number(l.discount_amount || 0)
 const subtotal = computed(() => form.value.lines.reduce((s: number, l: any) => s + lineTotal(l), 0))

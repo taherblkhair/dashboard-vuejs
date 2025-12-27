@@ -22,7 +22,7 @@
           class="fixed z-[9999] w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
         >
           <div class="py-1">
-            <template v-for="(item, index) in items" :key="index">
+            <template v-for="item in items" :key="item.label">
               <component
                 :is="item.to ? 'router-link' : 'button'"
                 :to="item.to"
@@ -53,6 +53,8 @@ const props = defineProps<{
     to?: any
     action?: () => void
     variant?: 'default' | 'danger'
+    disabled?: boolean
+    textClass?: string
   }>
 }>()
 

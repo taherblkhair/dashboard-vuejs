@@ -54,7 +54,7 @@ const labelMap: Record<string, string> = {
   Orders: 'الطلبات',
   OrderDetails: 'تفاصيل الطلب',
   Customers: 'العملاء',
-  Warehouses: 'المستودعات',
+  Warehouses: 'المخازن',
   Suppliers: 'الموردون',
   Reports: 'التقارير',
   Deliveries: 'التوصيلات',
