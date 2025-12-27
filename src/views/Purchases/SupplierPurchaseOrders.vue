@@ -67,9 +67,11 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchSupplierPurchaseOrders } from '../../api/suppliers'
+import { useToast } from '../../composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
+const { addToast } = useToast()
 const supplierId = Number(route.params.id || route.query?.supplier_id || 0)
 
 const orders = ref<any[]>([])
@@ -114,7 +116,10 @@ const escapeCsv = (val: any) => {
 }
 
 const exportCsv = () => {
-  if (!orders.value.length) return alert('لا توجد بيانات للتصدير')
+  if (!orders.value.length) {
+    addToast('لا توجد بيانات للتصدير', 'warning')
+    return
+  }
   const headers = ['id', 'code', 'status', 'total_amount', 'order_date', 'expected_delivery_date']
   const rows = orders.value.map(o => headers.map(h => escapeCsv(o[h] ?? '')))
   const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
@@ -130,7 +135,10 @@ const exportCsv = () => {
 }
 
 const exportExcel = () => {
-  if (!orders.value.length) return alert('لا توجد بيانات للتصدير')
+  if (!orders.value.length) {
+    addToast('لا توجد بيانات للتصدير', 'warning')
+    return
+  }
   const headers = ['الرمز', 'الحالة', 'إجمالي', 'تاريخ الطلب', 'تاريخ التوصيل المتوقع']
   const rows = orders.value.map(o => [o.code, o.status, o.total_amount, formatDate(o.order_date), formatDate(o.expected_delivery_date)])
   let table = '<table border="1"><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>'

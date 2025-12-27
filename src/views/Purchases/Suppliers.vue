@@ -70,8 +70,13 @@ import { fetchSuppliers, deleteSupplier } from '../../api/suppliers'
 import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MTable from '../../components/ui/MTable.vue'
+import { useToast } from '../../composables/useToast'
+import { useConfirm } from '../../composables/useConfirm'
 
 const router = useRouter()
+const { addToast } = useToast()
+const { confirm: confirmDialog } = useConfirm()
+
 const suppliers = ref<any[]>([])
 const loading = ref(false)
 const meta = ref<any>({ current_page: 1, last_page: 1 })
@@ -93,11 +98,24 @@ const editSupplier = (id?: number) => id && router.push({ name: 'PurchasesSuppli
 const viewPurchaseOrders = (id?: number) => id && router.push({ name: 'PurchasesSupplierPurchaseOrders', params: { id } })
 
 const removeSupplier = async (id?: number) => {
-  if (!id || !confirm('هل أنت متأكد من حذف هذا المورد؟')) return
+  if (!id) return
+  const ok = await confirmDialog({
+    title: 'تأكيد الحذف',
+    message: 'هل أنت متأكد من حذف هذا المورد؟',
+    type: 'danger',
+    confirmText: 'نعم، حذف'
+  })
+  
+  if (!ok) return
+  
   try {
     await deleteSupplier(id)
-    load(meta.value.current_page)
-  } catch (e) { alert('فشل الحذف') }
+    await load(meta.value.current_page)
+    addToast('تم حذف المورد بنجاح')
+  } catch (e) { 
+    console.error(e)
+    addToast('فشل حذف المورد', 'error') 
+  }
 }
 </script>
 

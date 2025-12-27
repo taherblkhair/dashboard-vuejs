@@ -448,7 +448,7 @@ import { ref, onMounted, computed, defineComponent, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchOrder, updateOrderStatus, checkOrderStock } from '../../api/orders'
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
-import { createDeliveryForOrder, fetchDeliveries, fetchDelivery, uploadProof, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
+import { createDeliveryForOrder, fetchDeliveries, uploadProof, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
 import { fetchRiders } from '../../api/riders'
 import { formatAttributes } from '../../utils/helpers'
 import { useToast } from '../../composables/useToast'
@@ -639,7 +639,7 @@ const changeDeliveryStatus = async () => {
   const s = String(delivery.value.status || '').toLowerCase()
   const allowed = deliveryTransitions[s] || []
   if (!allowed.includes(deliveryStatusToSet.value)) {
-     alert('غير مسموح')
+     addToast('غير مسموح', 'error')
      return
   }
   deliverySaving.value = true
@@ -699,10 +699,7 @@ const getStatusColor = (s?: string) => {
   const m: any = { delivered: 'bg-green-100 text-green-800', shipped: 'bg-blue-100 text-blue-800', processing: 'bg-indigo-100 text-indigo-800', confirmed: 'bg-blue-100 text-blue-800', pending: 'bg-yellow-100 text-yellow-800', cancelled: 'bg-red-100 text-red-800', returned: 'bg-gray-100 text-gray-800', draft: 'bg-gray-100 text-gray-600' }
   return m[String(s || '').toLowerCase()] || 'bg-gray-100 text-gray-800'
 }
-const getPaymentColor = (s?: string) => {
-  const m: any = { paid: 'text-green-600', pending: 'text-yellow-600', failed: 'text-red-600' }
-  return m[String(s || '').toLowerCase()] || 'text-gray-600'
-}
+
 const editOrder = () => { if (order.value?.id) router.push({ name: 'OrderEdit', params: { id: order.value.id } }) }
 const openInvoice = () => { if (order.value?.id) window.open(router.resolve({ name: 'OrderPrint', params: { id: order.value.id } }).href, '_blank') }
 
@@ -735,7 +732,7 @@ const submitCreateDelivery = async () => {
   if (!order.value?.id || !createForm.value.provider_id) return
   creating.value = true
   try {
-    const res = await createDeliveryForOrder(order.value.id, createForm.value)
+    await createDeliveryForOrder(order.value.id, createForm.value)
     closeCreate()
     // reload and switch tab
     await load()

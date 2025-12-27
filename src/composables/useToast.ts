@@ -1,12 +1,13 @@
 import { ref } from 'vue'
 
-type Toast = { id: number; message: string; type?: 'success' | 'error' }
+type ToastType = 'success' | 'error' | 'warning' | 'info'
+type Toast = { id: number; message: string; type?: ToastType }
 
 const toasts = ref<Toast[]>([])
 let nextId = 1
 
 export function useToast() {
-  const addToast = (message: string, type: 'success' | 'error' = 'success') => {
+  const addToast = (message: string, type: ToastType = 'success') => {
     const id = nextId++
     toasts.value.unshift({ id, message, type })
     // auto-remove after 4s

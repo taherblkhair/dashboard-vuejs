@@ -9,8 +9,6 @@
         </div>
       </div>
 
-      <!-- Quick Add (if needed, but keeping original flow) -->
-      
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Supplier & Info -->
         <div class="lg:col-span-2 space-y-6">
@@ -177,8 +175,10 @@ import { formatAttributes } from '../../utils/helpers'
 import ProductAutocomplete from '../../components/ProductAutocomplete.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
+import { useToast } from '../../composables/useToast'
 
 const router = useRouter()
+const { addToast } = useToast()
 const suppliers = ref<any[]>([])
 const products = ref<any[]>([])
 const loading = ref(false)
@@ -295,7 +295,8 @@ const submit = async () => {
     router.push(id ? { name: 'PurchaseOrderDetails', params: { id } } : { name: 'PurchaseOrders' })
   } catch (e: any) {
     console.error(e)
-    alert(e?.response?.data?.message || 'فشل في إنشاء الطلب')
+    const msg = e?.response?.data?.message || 'فشل في إنشاء الطلب'
+    addToast(msg, 'error')
   } finally {
     loading.value = false
   }

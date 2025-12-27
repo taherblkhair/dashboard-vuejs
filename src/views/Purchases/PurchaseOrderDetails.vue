@@ -165,10 +165,14 @@ import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import { useToast } from '../../composables/useToast'
+import { useConfirm } from '../../composables/useConfirm'
 
 const route = useRoute()
 const router = useRouter()
 const id = Number(route.params.id)
+const { addToast } = useToast()
+const { confirm: confirmDialog } = useConfirm()
 
 const order = ref<any>({})
 const loading = ref(false)
@@ -205,7 +209,7 @@ const allowedStatusOptions = computed(() => {
   return arr.map((v: string) => ({ value: v, text: statusMap[v] || v }))
 })
 
-const allowedStatusText = computed(() => allowedStatusOptions.value.map((o: any) => o.text).join('، '))
+
 
 const getStatusVariant = (s?: string): any => {
   const m: any = { received: 'success', ordered: 'info', pending: 'warning', approved: 'success', cancelled: 'error', partially_received: 'warning' }
@@ -250,19 +254,32 @@ const load = async () => {
 
 const saveStatus = async () => {
   if (!id || !selectedStatus.value) return
-  // ensure transition is allowed on client side as well
   const cur = (order.value.status || '').toLowerCase()
   const allowed = allowedTransitions[cur] || []
   if (!allowed.includes(selectedStatus.value)) {
-    alert('هذا الانتقال غير مسموح')
+    addToast('هذا الانتقال غير مسموح', 'error')
     return
   }
-  if (!confirm(`تغيير الحالة إلى ${getStatusText(selectedStatus.value)}؟`)) return
+  
+  const ok = await confirmDialog({
+    title: 'تأكيد تغيير الحالة',
+    message: `هل أنت متأكد من تغيير حالة الطلب إلى ${getStatusText(selectedStatus.value)}؟`,
+    type: 'warning',
+    confirmText: 'نعم، تغيير',
+    cancelText: 'تراجع'
+  })
+  
+  if (!ok) return
+  
   savingStatus.value = true
   try {
     await updatePurchaseOrderStatus(id, selectedStatus.value)
     await load()
-  } catch (e) { console.error(e) }
+    addToast('تم تحديث حالة الطلب بنجاح')
+  } catch (e) { 
+    console.error(e) 
+    addToast('فشل تحديث الحالة', 'error')
+  }
   finally { savingStatus.value = false }
 }
 
