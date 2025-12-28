@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen bg-slate-50">
+  <div class="flex h-screen bg-slate-50" dir="rtl">
     <Sidebar
       :isOpen="sidebarOpen"
       @close="sidebarOpen = false"
