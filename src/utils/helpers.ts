@@ -29,11 +29,11 @@ export function formatCurrency(val?: string | number): string {
 export function formatDate(iso?: string): string {
   if (!iso) return '-'
   try {
-    return new Date(iso).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    const date = new Date(iso)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
   } catch {
     return iso
   }
@@ -52,4 +52,22 @@ export function formatTime(iso?: string): string {
   }
 }
 
-export default { formatAttributes, formatCurrency, formatDate, formatTime }
+export function formatDateTime(iso?: string): string {
+  if (!iso) return '-'
+  try {
+    const date = new Date(iso)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    const time = date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    })
+    return `${day}/${month}/${year} ${time}`
+  } catch {
+    return iso
+  }
+}
+
+export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime }

@@ -1,12 +1,12 @@
 <template>
-  <div class="p-6 space-y-8 bg-[#f8fafc] min-h-screen font-sans" dir="rtl">
+  <div class="p-6 space-y-8 bg-[#f8fafc] min-h-screen " dir="rtl">
     <div class="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
       
       <!-- Premium Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
         <div>
           <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">نظرة عامة</h1>
-          <p class="text-slate-500 mt-1 font-medium italic">أهلاً بك، إليك نبذة عن أداء اليوم</p>
+          <p class="text-slate-500 mt-1 font-medium ">أهلاً بك، إليك نبذة عن أداء اليوم</p>
         </div>
         
         <div class="flex items-center gap-4">

@@ -101,23 +101,7 @@
       <!-- User Profile & Toggle -->
       <div class="p-6 border-t border-slate-100 space-y-6">
         <!-- Collapse Toggle -->
-        <button
-          @click="toggleCollapse"
-          class="w-full h-11 flex items-center justify-center gap-3 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all group"
-        >
-          <div class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-50 group-hover:bg-indigo-50 transition-colors">
-            <svg
-              class="w-5 h-5 transition-transform duration-500"
-              :class="{ 'rotate-180': isCollapsed }"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
-          </div>
-          <span v-if="!isCollapsed || hovered" class="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-indigo-600 transition-colors">طي القائمة</span>
-        </button>
+      
 
         <!-- User Profile Card -->
         <div 
@@ -168,12 +152,7 @@ const showUserMenu = ref(false);
 const searchQuery = ref("");
 
 // Menu state
-const toggleCollapse = () => {
-  isCollapsed.value = !isCollapsed.value;
-  if (isCollapsed.value) {
-    showUserMenu.value = false;
-  }
-};
+
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;

@@ -6,8 +6,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'Tajawal', 'sans-serif'],
-        arabic: ['Tajawal', 'sans-serif'],
+        sans: ['Cairo', 'Inter', 'Tajawal', 'sans-serif'],
+        arabic: ['Cairo', 'Tajawal', 'sans-serif'],
       },
       colors: {
         primary: {
