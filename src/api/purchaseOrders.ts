@@ -28,4 +28,8 @@ export async function createPurchaseOrder(payload: any) {
   return request(`/purchase-orders`, { method: 'POST', body: JSON.stringify(payload) })
 }
 
+export async function fetchPurchaseOrderDashboard(): Promise<{ data: any }> {
+  return request(`/purchase-orders/dashboard`)
+}
+
 export default { fetchPurchaseOrders, fetchPurchaseOrder }

@@ -2,39 +2,90 @@
   <div class="p-6 bg-gray-50 min-h-screen" dir="rtl">
     <div class="max-w-7xl mx-auto space-y-6">
       <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-semibold text-gray-900">إدارة الطلبات</h1>
-          <p class="text-sm text-gray-500 mt-1">قائمة جميع طلبات المبيعات</p>
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1">
+          <h1 class="text-3xl font-black text-slate-900 tracking-tight">إدارة الطلبات</h1>
+          <p class="text-slate-500 font-medium">قائمة وشاملة لجميع طلبات المبيعات وتحصيلها</p>
         </div>
-        <div class="flex items-center gap-3">
-          <MButton variant="secondary" @click="loadOrders(1)" :loading="loading">
+        <div class="flex items-center gap-4">
+          <MButton
+            variant="secondary"
+            size="sm"
+            @click="loadOrders(1)"
+            :loading="loading"
+            class="!rounded-xl"
+          >
+            <template #icon>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </template>
             تحديث
           </MButton>
-          <MButton variant="primary" @click="createOrder">
-            إنشاء طلب
+          <MButton
+            variant="primary"
+            class="!rounded-2xl shadow-lg shadow-indigo-200"
+            @click="createOrder"
+          >
+            <template #icon>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+            </template>
+            إنشاء طلب جديد
           </MButton>
         </div>
       </div>
 
-      <!-- Stats -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MCard padding="p-4">
-          <p class="text-sm text-gray-500">إجمالي الطلبات</p>
-          <p class="text-2xl font-semibold text-gray-900 mt-1">{{ stats.total_orders || 0 }}</p>
-        </MCard>
-        <MCard padding="p-4">
-          <p class="text-sm text-gray-500">طلبات اليوم</p>
-          <p class="text-2xl font-semibold text-gray-900 mt-1">{{ stats.today_orders || 0 }}</p>
-        </MCard>
-        <MCard padding="p-4">
-          <p class="text-sm text-gray-500">قيد المعالجة</p>
-          <p class="text-2xl font-semibold text-gray-900 mt-1">{{ stats.processing_orders || 0 }}</p>
-        </MCard>
-        <MCard padding="p-4">
-          <p class="text-sm text-gray-500">معلقة</p>
-          <p class="text-2xl font-semibold text-gray-900 mt-1">{{ stats.pending_orders || 0 }}</p>
-        </MCard>
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MStatsCard
+          label="إجمالي الطلبات"
+          :value="stats.total_orders || 0"
+          variant="indigo"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="طلبات اليوم"
+          :value="stats.today_orders || 0"
+          variant="emerald"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2z" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="قيد المعالجة"
+          :value="stats.processing_orders || 0"
+          variant="amber"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="طلبات معلقة"
+          :value="stats.pending_orders || 0"
+          variant="rose"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </template>
+        </MStatsCard>
       </div>
 
       <!-- Filters -->
@@ -142,6 +193,7 @@ import MTable from '../../components/ui/MTable.vue'
 import MInput from '../../components/ui/MInput.vue'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
 import MBadge from '../../components/ui/MBadge.vue'
+import MStatsCard from '../../components/ui/MStatsCard.vue'
 
 // Icons
 const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })

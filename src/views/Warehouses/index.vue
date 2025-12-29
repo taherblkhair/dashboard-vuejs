@@ -1,55 +1,67 @@
 <template>
-  <div class="p-6 space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-semibold text-gray-900">المخازن</h1>
-        <p class="text-sm text-gray-500 mt-1">إدارة جميع مخازن الشركة وتتبع سعتها واستخداماتها</p>
-      </div>
-      <MButton variant="primary" @click="router.push({ name: 'WarehouseCreate' })">
-        <span class="flex items-center gap-2">
-          <span>+</span>
-          <span>إضافة مخزن</span>
-        </span>
-      </MButton>
-    </div>
+  <div dir="rtl" class="min-h-screen bg-slate-50/50 p-4 lg:p-8">
+    <div class="max-w-[1600px] mx-auto space-y-8">
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1">
+          <h1 class="text-3xl font-black text-slate-900 tracking-tight">إدارة المخازن</h1>
+          <p class="text-slate-500 font-medium">إدارة جميع مخازن الشركة وتتبع سعتها واستخداماتها</p>
+        </div>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <MCard>
-        <div class="p-4 flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500 mb-1">المخازن النشطة</p>
-            <p class="text-2xl font-bold text-gray-900">{{ activeCount }}</p>
-          </div>
-          <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          </div>
+        <div class="flex items-center gap-4">
+          <MButton
+            variant="primary"
+            class="!rounded-2xl shadow-lg shadow-indigo-200"
+            @click="() => router.push({ name: 'WarehouseCreate' })"
+          >
+            <template #icon>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+            </template>
+            إضافة مخزن جديد
+          </MButton>
         </div>
-      </MCard>
-      <MCard>
-        <div class="p-4 flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500 mb-1">المخازن غير النشطة</p>
-            <p class="text-2xl font-bold text-gray-900">{{ inactiveCount }}</p>
-          </div>
-          <div class="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-          </div>
-        </div>
-      </MCard>
-      <MCard>
-        <div class="p-4 flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500 mb-1">السعة الإجمالية</p>
-            <p class="text-2xl font-bold text-gray-900">{{ formatNumber(totalCapacity) }}</p>
-          </div>
-          <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-          </div>
-        </div>
-      </MCard>
-    </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <MStatsCard
+          label="المخازن النشطة"
+          :value="activeCount"
+          variant="emerald"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="المخازن غير النشطة"
+          :value="inactiveCount"
+          variant="slate"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="السعة الإجمالية"
+          :value="formatNumber(totalCapacity)"
+          variant="blue"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </template>
+        </MStatsCard>
+      </div>
 
     <!-- Main Content -->
     <MCard title="قائمة المخازن" class="min-h-[500px]">
@@ -168,6 +180,7 @@
           </div>
       </div>
     </MCard>
+    </div>
   </div>
 </template>
 
@@ -180,6 +193,7 @@ import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MTable from '../../components/ui/MTable.vue'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
+import MStatsCard from '../../components/ui/MStatsCard.vue'
 import { useConfirm } from '../../composables/useConfirm'
 import { useToast } from '../../composables/useToast'
 

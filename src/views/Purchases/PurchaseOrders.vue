@@ -1,16 +1,90 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen" dir="rtl">
     <div class="max-w-7xl mx-auto space-y-6">
-      <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-semibold text-gray-900">طلبات الشراء</h1>
-          <p class="text-sm text-gray-500 mt-1">إدارة جميع طلبات الشراء من الموردين</p>
+      <!-- Header Section -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1">
+          <h1 class="text-3xl font-black text-slate-900 tracking-tight">إدارة طلبات الشراء</h1>
+          <p class="text-slate-500 font-medium">إدارة ومتابعة جميع طلبات التوريد والمشتريات من الموردين</p>
         </div>
-        <div class="flex gap-3">
-          <MButton variant="secondary" @click="receiveOrders">استلام الطلبات</MButton>
-          <MButton variant="primary" @click="createOrder">إنشاء طلب شراء</MButton>
+
+        <div class="flex items-center gap-4">
+          <MButton
+            variant="secondary"
+            size="sm"
+            @click="receiveOrders"
+            class="!rounded-xl"
+          >
+            <template #icon>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0l-8 4-8-4m8 4v6"/>
+              </svg>
+            </template>
+            استلام الطلبات
+          </MButton>
+          <MButton
+            variant="primary"
+            class="!rounded-2xl shadow-lg shadow-indigo-200"
+            @click="createOrder"
+          >
+            <template #icon>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+            </template>
+            إنشاء طلب شراء
+          </MButton>
         </div>
+      </div>
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <MStatsCard
+          label="إجمالي الطلبات"
+          :value="dashboardData.total_orders || 0"
+          variant="indigo"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="المبالغ المستلمة"
+          :value="formatCurrency(dashboardData.total_received_amount || 0)"
+          variant="emerald"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="طلبات معلقة"
+          :value="dashboardData.pending_orders || 0"
+          variant="amber"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </template>
+        </MStatsCard>
+
+        <MStatsCard
+          label="متأخرة"
+          :value="dashboardData.overdue_orders || 0"
+          variant="rose"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </template>
+        </MStatsCard>
       </div>
 
       <!-- Filters -->
@@ -100,13 +174,15 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchPurchaseOrders } from '../../api/purchaseOrders'
+import { fetchPurchaseOrders, fetchPurchaseOrderDashboard } from '../../api/purchaseOrders'
 import MButton from '../../components/ui/MButton.vue'
 import MInput from '../../components/ui/MInput.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
+import MStatsCard from '../../components/ui/MStatsCard.vue'
+import { formatCurrency, formatDate as globalFormatDate } from '../../utils/helpers'
 
 // Icons (reusing existing or importing new, define inline for simplicity)
 const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
@@ -116,6 +192,7 @@ const IconPencil = defineComponent({ render: () => h('svg', { fill:'none', viewB
 const router = useRouter()
 const orders = ref<any[]>([])
 const loading = ref(false)
+const dashboardData = ref<any>({})
 const meta = ref<any>({ current_page: 1, last_page: 1, total: 0 })
 const searchQuery = ref('')
 const statusFilter = ref('all')
@@ -135,9 +212,13 @@ const hasActiveFilters = computed(() => searchQuery.value || statusFilter.value 
 const load = async (page = 1) => {
   loading.value = true
   try {
-    const res = await fetchPurchaseOrders(page)
+    const [res, dashboardRes] = await Promise.all([
+      fetchPurchaseOrders(page),
+      fetchPurchaseOrderDashboard()
+    ])
     orders.value = res?.data || []
     meta.value = res?.meta || meta.value
+    dashboardData.value = dashboardRes?.data || {}
   } catch (e) { console.error(e) }
   finally { loading.value = false }
 }
@@ -181,7 +262,7 @@ const formatCurrency = (v?: number) => {
 
 const formatDate = (iso?: string) => {
   if (!iso) return '-'
-  try { return new Date(iso).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }) } catch { return iso }
+  return globalFormatDate(iso)
 }
 
 onMounted(() => load())

@@ -26,50 +26,41 @@
 
       <!-- Quick Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MCard class="!p-6 !rounded-[2rem] border-none shadow-sm bg-white overflow-hidden relative group">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-500"></div>
-          <div class="relative flex items-center gap-5">
-            <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">إجمالي المنتجات</p>
-              <h3 class="text-3xl font-black text-slate-900 tracking-tight">{{ totalProducts }}</h3>
-            </div>
-          </div>
-        </MCard>
+        <MStatsCard
+          label="إجمالي المنتجات"
+          :value="totalProducts"
+          variant="indigo"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+          </template>
+        </MStatsCard>
 
-        <MCard class="!p-6 !rounded-[2rem] border-none shadow-sm bg-white overflow-hidden relative group">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-500"></div>
-          <div class="relative flex items-center gap-5">
-            <div class="w-14 h-14 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-100">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">منتجات نشطة</p>
-              <h3 class="text-3xl font-black text-slate-900 tracking-tight">{{ activeProducts }}</h3>
-            </div>
-          </div>
-        </MCard>
+        <MStatsCard
+          label="منتجات نشطة"
+          :value="activeProducts"
+          variant="emerald"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </template>
+        </MStatsCard>
 
-        <MCard class="!p-6 !rounded-[2rem] border-none shadow-sm bg-white overflow-hidden relative group">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-500"></div>
-          <div class="relative flex items-center gap-5">
-            <div class="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-amber-100">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">إجمالي المتغيرات</p>
-              <h3 class="text-3xl font-black text-slate-900 tracking-tight">{{ totalVariants }}</h3>
-            </div>
-          </div>
-        </MCard>
+        <MStatsCard
+          label="إجمالي المتغيرات"
+          :value="totalVariants"
+          variant="amber"
+        >
+          <template #icon>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+          </template>
+        </MStatsCard>
       </div>
 
       <!-- Filters & Table Section -->
@@ -256,6 +247,7 @@ import MButton from '../../components/ui/MButton.vue'
 import MInput from '../../components/ui/MInput.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import MStatsCard from '../../components/ui/MStatsCard.vue'
 
 // Icons
 const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
