@@ -151,6 +151,17 @@ const hovered = ref(false);
 const showUserMenu = ref(false);
 const searchQuery = ref("");
 
+// All defined routes in the sidebar for best-match detection
+const allRoutes = computed(() => {
+  const routes = ["/"];
+  menuItems.value.forEach((group) => {
+    group.children?.forEach((child: any) => {
+      if (child.route) routes.push(child.route);
+    });
+  });
+  return routes;
+});
+
 // Menu state
 
 
@@ -160,7 +171,23 @@ const toggleUserMenu = () => {
 
 const isActiveRoute = (routePath?: string) => {
   if (!routePath) return false;
-  return route.path === routePath || (routePath !== '/' && route.path.startsWith(routePath));
+  
+  // Exact match
+  if (route.path === routePath) return true;
+  
+  // Prefix match (for sub-pages like /orders/1)
+  // We only highlight if this is the "best match" among all sidebar links
+  if (routePath !== "/" && route.path.startsWith(routePath)) {
+    const hasBetterMatch = allRoutes.value.some(
+      (r) =>
+        r !== routePath &&
+        r !== "/" &&
+        route.path.startsWith(r) &&
+        r.length > routePath.length
+    );
+    return !hasBetterMatch;
+  }
+  return false;
 };
 
 const handleNavigate = (item: any) => {
