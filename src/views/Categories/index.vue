@@ -1,84 +1,114 @@
 <template>
-  <div class="p-6 bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen" dir="rtl">
-    <div class="max-w-6xl mx-auto">
-      <!-- رأس الصفحة -->
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
-        <div class="mb-4 md:mb-0">
-          <h1 class="text-3xl font-bold text-gray-800">إدارة الفئات</h1>
-          <p class="text-gray-600 mt-2">قم بإضافة وتعديل وحذف الفئات في نظامك</p>
-          
-          <!-- إحصائيات سريعة -->
-          <div class="flex flex-wrap gap-4 mt-4">
-            <div class="bg-white rounded-lg shadow-sm p-3 min-w-[120px]">
-              <div class="text-sm text-gray-500">عدد الفئات</div>
-              <div class="text-xl font-bold text-blue-600">{{ categories.length }}</div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-3 min-w-[120px]">
-              <div class="text-sm text-gray-500">الفئات الرئيسية</div>
-              <div class="text-xl font-bold text-green-600">{{ rootCategories.length }}</div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-3 min-w-[120px]">
-              <div class="text-sm text-gray-500">الفئات الفرعية</div>
-              <div class="text-xl font-bold text-purple-600">{{ childCategories.length }}</div>
-            </div>
-          </div>
+  <div dir="rtl" class="min-h-screen bg-slate-50/50 p-4 lg:p-8">
+    <div class="max-w-6xl mx-auto space-y-8">
+      <!-- Header Area -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-1">
+          <h1 class="text-3xl font-black text-slate-900 tracking-tight">إدارة الفئات</h1>
+          <p class="text-slate-500 font-medium">نظم منتجاتك من خلال تصنيفات هرمية مرنة</p>
         </div>
-        
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <button 
-            @click="() => openModal()" 
-            class="px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2 hover:from-blue-700 hover:to-blue-800"
+
+        <div class="flex items-center gap-3">
+          <MButton
+            variant="secondary"
+            size="sm"
+            @click="load"
+            :loading="loading"
+            class="!rounded-xl"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-            إضافة فئة جديدة
-          </button>
-          
-          <button 
-            @click="load" 
-            class="px-5 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-lg shadow-sm hover:shadow transition-all duration-300 flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-            </svg>
+            <template #icon>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </template>
             تحديث
-          </button>
+          </MButton>
+          <MButton
+            variant="primary"
+            class="!rounded-2xl shadow-lg shadow-indigo-100"
+            @click="() => openModal()"
+          >
+            <template #icon>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+            </template>
+            إضافة فئة جديدة
+          </MButton>
         </div>
       </div>
 
-      <!-- محتوى الصفحة -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <!-- فلترة وعناصر تحكم -->
-        <div class="p-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div class="flex items-center gap-3">
-            <div class="relative">
-              <input 
-                type="text" 
-                v-model="searchQuery" 
-                placeholder="بحث عن فئة..." 
-                class="pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-2.5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-              </svg>
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <MCard class="!p-6 !rounded-[2rem] border-none shadow-sm bg-white flex items-center gap-4">
+          <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+             </svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">إجمالي الفئات</p>
+            <p class="text-2xl font-black text-slate-900 leading-none">{{ categories.length }}</p>
+          </div>
+        </MCard>
+
+        <MCard class="!p-6 !rounded-[2rem] border-none shadow-sm bg-white flex items-center gap-4">
+          <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+             </svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">فئات رئيسية</p>
+            <p class="text-2xl font-black text-slate-900 leading-none">{{ rootCategories.length }}</p>
+          </div>
+        </MCard>
+
+        <MCard class="!p-6 !rounded-[2rem] border-none shadow-sm bg-white flex items-center gap-4">
+          <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+             </svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">فئات فرعية</p>
+            <p class="text-2xl font-black text-slate-900 leading-none">{{ childCategories.length }}</p>
+          </div>
+        </MCard>
+      </div>
+
+      <!-- Filters Row -->
+      <MCard class="!p-4 !rounded-[2rem] border-none shadow-sm bg-white/60 backdrop-blur-md">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+            <div class="relative flex-1 max-w-md">
+              <span class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </span>
+              <MInput
+                v-model="searchQuery"
+                placeholder="ابحث عن اسم الفئة..."
+                class="!pr-12 !rounded-2xl"
+              />
             </div>
-            
+
             <select 
-              v-model="filterParent" 
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              v-model="filterParent"
+              class="h-12 px-4 rounded-2xl border-none bg-white ring-1 ring-slate-100 focus:ring-2 focus:ring-indigo-600 transition-all font-bold text-sm text-slate-700 max-w-[200px]"
             >
-              <option value="all">جميع الفئات</option>
-              <option value="root">الفئات الرئيسية فقط</option>
-              <option value="child">الفئات الفرعية فقط</option>
+              <option value="all">الكل</option>
+              <option value="root">الرئيسية</option>
+              <option value="child">الفرعية</option>
             </select>
           </div>
-          
+
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-600">ترتيب حسب:</span>
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">ترتيب:</span>
             <select 
-              v-model="sortBy" 
-              class="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
+              v-model="sortBy"
+              class="px-3 py-2 rounded-xl border-none bg-transparent font-bold text-xs text-slate-600 focus:ring-0 cursor-pointer"
             >
               <option value="name">الاسم</option>
               <option value="children">عدد الفروع</option>
@@ -86,288 +116,148 @@
             </select>
           </div>
         </div>
-        
-        <!-- حالة التحميل -->
-        <template v-if="loading">
-          <div class="flex flex-col items-center justify-center py-12">
-            <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-            <div class="text-lg text-gray-700">جاري تحميل الفئات...</div>
-            <div class="text-sm text-gray-500 mt-1">يرجى الانتظار قليلاً</div>
-          </div>
-        </template>
+      </MCard>
 
-        <!-- حالة عدم وجود فئات -->
-        <template v-else-if="filteredCategories.length === 0">
-          <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-            <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      <!-- Content -->
+      <div v-if="loading" class="flex flex-col items-center justify-center py-20 gap-4">
+        <div class="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest">جاري التحميل...</p>
+      </div>
+
+      <div v-else-if="filteredCategories.length === 0" class="flex flex-col items-center justify-center py-32 bg-white rounded-[3rem] shadow-sm border border-slate-50 space-y-6">
+        <div class="w-24 h-24 bg-slate-50 rounded-[2.5rem] flex items-center justify-center text-slate-200">
+          <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+          </svg>
+        </div>
+        <div class="text-center space-y-2">
+          <h3 class="text-xl font-black text-slate-900">لا توجد فئات مطابقة</h3>
+          <p class="text-slate-400 font-medium">ابدأ بإضافة فئات جديدة لبناء هيكل منتجاتك</p>
+        </div>
+        <MButton variant="primary" size="lg" @click="() => openModal()" class="!rounded-2xl">
+          إضافة أول فئة
+        </MButton>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div 
+          v-for="cat in filteredCategories" 
+          :key="cat.id"
+          class="group bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 hover:border-indigo-100 flex flex-col"
+        >
+          <div class="flex items-start justify-between mb-6">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm"
+              :class="cat.parent_id ? 'bg-emerald-50 text-emerald-600 shadow-emerald-50' : 'bg-indigo-50 text-indigo-600 shadow-indigo-50'"
+            >
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-800 mb-2">لا توجد فئات</h3>
-            <p class="text-gray-600 mb-6 max-w-md">لم تقم بإضافة أي فئات بعد. يمكنك البدء بإضافة فئة جديدة للنظام.</p>
-            <button 
-              @click="() => openModal()" 
-              class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              إضافة فئة جديدة
-            </button>
+            
+            <ActionMenu :items="[
+              { label: 'تعديل البيانات', action: () => openModal(cat), icon: 'Edit' },
+              { label: 'عرض المنتجات', action: () => goToCategoryProducts(cat.id), icon: 'Eye' },
+              { label: 'حذف الفئة', action: () => remove(cat), variant: 'danger', icon: 'Trash' }
+            ]" />
           </div>
-        </template>
 
-        <!-- عرض الفئات -->
-        <template v-else>
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 p-5">
-            <div 
-              v-for="cat in filteredCategories" 
-              :key="cat.id" 
-              class="border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300 bg-white hover:border-blue-200"
-              :class="{ 'border-r-4 border-r-blue-500': !cat.parent_id, 'border-r-4 border-r-green-500': cat.parent_id }"
-            >
-              <div class="flex items-start justify-between mb-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-lg flex items-center justify-center"
-                    :class="cat.parent_id ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 class="font-bold text-lg text-gray-800">{{ cat.name }}</h3>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span 
-                        class="px-2 py-0.5 text-xs rounded-full"
-                        :class="cat.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                      >
-                        {{ cat.is_active ? 'نشط' : 'غير نشط' }}
-                      </span>
-                      <span 
-                        v-if="cat.parent_id" 
-                        class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full"
-                      >
-                        فرعي
-                      </span>
-                      <span 
-                        v-else 
-                        class="px-2 py-0.5 text-xs bg-purple-100 text-purple-800 rounded-full"
-                      >
-                        رئيسي
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="relative">
-                  <button 
-                    @click="toggleActions(cat.id)"
-                    class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                    </svg>
-                  </button>
-                  
-                  <!-- قائمة الإجراءات -->
-                  <div 
-                    v-if="activeActions === cat.id" 
-                    class="absolute left-0 mt-1 w-32 bg-white rounded-lg shadow-lg border border-gray-200 z-10 overflow-hidden"
-                  >
-                    <button 
-                      @click="() => { openModal(cat); toggleActions(null); }" 
-                      class="w-full text-right px-4 py-2.5 text-sm hover:bg-blue-50 text-gray-700 flex items-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                      </svg>
-                      تعديل
-                    </button>
-                    <button
-                      @click="() => { goToCategoryProducts(cat.id); toggleActions(null); }"
-                      class="w-full text-right px-4 py-2.5 text-sm hover:bg-blue-50 text-gray-700 flex items-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M3 3h14v2H3V3zm0 4h14v10H3V7zm2 2v6h10V9H5z" />
-                      </svg>
-                      عرض المنتجات
-                    </button>
-                    <button 
-                      @click="() => { remove(cat); toggleActions(null); }" 
-                      class="w-full text-right px-4 py-2.5 text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                      </svg>
-                      حذف
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ cat.description || 'لا يوجد وصف' }}</p>
-              
-              <div class="border-t border-gray-100 pt-4">
-                <div class="flex items-center justify-between">
-                  <div class="text-sm text-gray-500">
-                    <div v-if="cat.parent" class="flex items-center gap-1">
-                      <span>الفئة الأصل:</span>
-                      <span class="font-medium text-gray-700">{{ cat.parent.name }}</span>
-                    </div>
-                    <div v-else class="text-gray-500">فئة رئيسية</div>
-                  </div>
-                  
-                          <div class="flex items-center gap-4">
-                              <div class="flex items-center gap-1 text-sm" :class="cat.children?.length ? 'text-blue-600' : 'text-gray-400'">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-                                </svg>
-                                <span>{{ cat.children?.length || 0 }} فروع</span>
-                              </div>
+          <div class="space-y-1 mb-4 flex-1">
+            <h3 class="text-xl font-black text-slate-900 tracking-tight leading-tight">{{ cat.name }}</h3>
+            <div class="flex flex-wrap gap-2">
+              <MBadge :variant="cat.is_active ? 'success' : 'danger'" class="!rounded-lg !px-2.5 !py-0.5 !text-[10px] !font-black uppercase tracking-widest leading-none">
+                {{ cat.is_active ? 'نشط' : 'غير نشط' }}
+              </MBadge>
+              <MBadge :variant="cat.parent_id ? 'info' : 'neutral'" class="!rounded-lg !px-2.5 !py-0.5 !text-[10px] !font-black uppercase tracking-widest leading-none">
+                {{ cat.parent_id ? 'فرعي' : 'رئيسي' }}
+              </MBadge>
+            </div>
+            <p class="text-slate-500 text-sm font-medium mt-3 leading-relaxed line-clamp-2">{{ cat.description || 'لا يوجد وصف تعريفي لهذه الفئة.' }}</p>
+          </div>
 
-                            </div>
-                </div>
-                
-                <!-- عرض الفروع المصغرة -->
-                <div v-if="cat.children && cat.children.length > 0" class="mt-3">
-                  <div class="text-xs text-gray-500 mb-1">الفروع:</div>
-                  <div class="flex flex-wrap gap-1">
-                    <span 
-                      v-for="child in cat.children.slice(0, 3)" 
-                      :key="child.id" 
-                      class="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
-                    >
-                      {{ child.name }}
-                    </span>
-                    <span 
-                      v-if="cat.children.length > 3" 
-                      class="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-xs"
-                    >
-                      +{{ cat.children.length - 3 }}
-                    </span>
-                  </div>
-                </div>
-              </div>
+          <div class="mt-auto space-y-4 pt-6 border-t border-slate-50">
+            <div class="flex items-center justify-between">
+               <div class="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  {{ cat.parent ? 'يتبع لـ: ' + cat.parent.name : 'فئة مستقلة' }}
+               </div>
+               <div class="flex items-center gap-1.5 text-indigo-600">
+                  <span class="text-lg font-black leading-none">{{ cat.children?.length || 0 }}</span>
+                  <span class="text-[10px] font-black uppercase tracking-widest">فرع</span>
+               </div>
+            </div>
+
+            <div v-if="cat.children && cat.children.length > 0" class="flex flex-wrap gap-1.5">
+              <span v-for="child in cat.children.slice(0, 3)" :key="child.id" class="px-2 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500 hover:bg-white transition-colors cursor-default">
+                {{ child.name }}
+              </span>
+              <span v-if="cat.children.length > 3" class="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black">
+                +{{ cat.children.length - 3 }}
+              </span>
             </div>
           </div>
-        </template>
+        </div>
       </div>
     </div>
 
-    <!-- مودال إضافة/تعديل الفئة -->
-    <div 
-      v-if="show" 
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300"
-      :class="show ? 'bg-black/50' : 'bg-black/0'"
-      @click.self="closeModal"
-    >
-      <div 
-        class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300"
-        :class="show ? 'scale-100 opacity-100' : 'scale-95 opacity-0'"
-      >
-        <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-xl font-bold">{{ editingId ? 'تعديل الفئة' : 'إضافة فئة جديدة' }}</h3>
-              <p class="text-blue-100 text-sm mt-1">{{ editingId ? 'قم بتعديل بيانات الفئة' : 'أدخل بيانات الفئة الجديدة' }}</p>
-            </div>
-            <button 
-              @click="closeModal" 
-              class="p-1.5 rounded-full hover:bg-white/20 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+    <!-- Modal Layout Refactor to match Form Premium Style -->
+    <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeModal"></div>
+      <MCard class="relative w-full max-w-lg !p-0 !rounded-[2.5rem] border-none shadow-2xl bg-white overflow-hidden animate-in zoom-in duration-300">
+        <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+          <div class="space-y-1">
+            <h3 class="text-2xl font-black text-slate-900 tracking-tight">{{ editingId ? 'تعديل الفئة' : 'إضافة فئة' }}</h3>
+            <p class="text-slate-400 text-xs font-medium">أكمل البيانات الأساسية للفئة لحفظ التغييرات</p>
           </div>
+          <button @click="closeModal" class="p-2 text-slate-400 hover:bg-white rounded-xl transition-all shadow-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        
-        <form @submit.prevent="submit" class="p-6 space-y-5">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">اسم الفئة *</label>
-            <input 
-              v-model="form.name" 
-              required 
-              placeholder="أدخل اسم الفئة" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-            />
+
+        <form @submit.prevent="submit" class="p-8 space-y-6">
+          <div class="space-y-1.5">
+            <label class="text-sm font-black text-slate-700 block px-1">اسم الفئة <span class="text-rose-500">*</span></label>
+            <MInput v-model="form.name" placeholder="مثلاً: ملابس رجالية" class="!rounded-2xl" required />
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">وصف الفئة</label>
+          <div class="space-y-1.5">
+            <label class="text-sm font-black text-slate-700 block px-1">الوصف</label>
             <textarea 
               v-model="form.description" 
-              placeholder="أدخل وصفاً للفئة (اختياري)" 
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
-              rows="3"
+              rows="3" 
+              placeholder="اكتب وصفاً مختصراً للفئة..."
+              class="w-full p-4 rounded-2xl border-none bg-slate-50 ring-1 ring-slate-100 focus:ring-2 focus:ring-indigo-600 transition-all font-medium text-slate-600 resize-none"
             ></textarea>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">الفئة الرئيسية</label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1.5">
+              <label class="text-sm font-black text-slate-700 block px-1">الفئة الأب</label>
               <select 
                 v-model="form.parent_id" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                class="w-full h-14 px-4 rounded-2xl border-none bg-slate-50 ring-1 ring-slate-100 focus:ring-2 focus:ring-indigo-600 transition-all font-bold text-sm text-slate-700"
               >
-                <option :value="null">فئة رئيسية (بدون أب)</option>
-                <option 
-                  v-for="c in availableParents" 
-                  :key="c.id" 
-                  :value="c.id"
-                  :disabled="c.id === editingId"
-                >
-                  {{ c.name }}
-                </option>
+                <option :value="null">فئة رئيسية</option>
+                <option v-for="c in availableParents" :key="c.id" :value="c.id" :disabled="c.id === editingId">{{ c.name }}</option>
               </select>
             </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">حالة الفئة</label>
-              <div class="flex items-center h-12">
-                <label class="inline-flex items-center gap-3 cursor-pointer">
-                  <div class="relative">
-                    <input 
-                      type="checkbox" 
-                      v-model="form.is_active" 
-                      class="sr-only" 
-                      :true-value="true"
-                      :false-value="false"
-                    />
-                    <div 
-                      class="block w-14 h-8 rounded-full transition-colors duration-300"
-                      :class="form.is_active ? 'bg-green-500' : 'bg-gray-300'"
-                    ></div>
-                    <div 
-                      class="absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform duration-300"
-                      :class="form.is_active ? 'transform translate-x-6' : ''"
-                    ></div>
-                  </div>
-                  <span class="text-gray-700 font-medium">{{ form.is_active ? 'نشطة' : 'غير نشطة' }}</span>
-                </label>
+            <div class="space-y-1.5">
+              <label class="text-sm font-black text-slate-700 block px-1">الحالة</label>
+              <div class="flex items-center h-14 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <input type="checkbox" v-model="form.is_active" id="modal-active" class="w-5 h-5 rounded-lg text-indigo-600 focus:ring-indigo-600 transition-all" />
+                <label for="modal-active" class="mr-3 text-sm font-black text-slate-700">{{ form.is_active ? 'نشطة' : 'غير نشطة' }}</label>
               </div>
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-            <button 
-              type="button" 
-              @click="closeModal" 
-              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
-            >
-              إلغاء
-            </button>
-            <button 
-              type="submit" 
-              class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-              </svg>
-              {{ editingId ? 'تحديث الفئة' : 'إضافة الفئة' }}
-            </button>
+          <div class="pt-6 flex gap-3">
+             <MButton variant="secondary" size="lg" type="button" @click="closeModal" class="flex-1 !rounded-2xl">إلغاء</MButton>
+             <MButton variant="primary" size="lg" type="submit" class="flex-[2] !rounded-2xl shadow-lg shadow-indigo-100" :loading="loading">
+                {{ editingId ? 'حفظ التغييرات' : 'إضافة الفئة' }}
+             </MButton>
           </div>
         </form>
-      </div>
+      </MCard>
     </div>
   </div>
 </template>
@@ -377,12 +267,16 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories'
 import type { Category } from '../../api/categories'
+import MCard from '../../components/ui/MCard.vue'
+import MButton from '../../components/ui/MButton.vue'
+import MInput from '../../components/ui/MInput.vue'
+import MBadge from '../../components/ui/MBadge.vue'
+import ActionMenu from '../../components/ui/ActionMenu.vue'
 
 const categories = ref<Category[]>([])
 const loading = ref(false)
 const show = ref(false)
 const editingId = ref<number | null>(null)
-const activeActions = ref<number | null>(null)
 const searchQuery = ref('')
 const filterParent = ref('all')
 const sortBy = ref('name')
@@ -394,49 +288,28 @@ const form = ref({
   is_active: true 
 })
 
-// الحسابات المحسوبة
-const rootCategories = computed(() => {
-  return categories.value.filter(c => !c.parent_id)
-})
-
-const childCategories = computed(() => {
-  return categories.value.filter(c => c.parent_id)
-})
-
-const availableParents = computed(() => {
-  return categories.value.filter(c => c.id !== editingId.value)
-})
+// Calculations
+const rootCategories = computed(() => categories.value.filter(c => !c.parent_id))
+const childCategories = computed(() => categories.value.filter(c => c.parent_id))
+const availableParents = computed(() => categories.value.filter(c => c.id !== editingId.value))
 
 const filteredCategories = computed(() => {
   let filtered = [...categories.value]
-  
-  // فلترة حسب البحث
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(c => 
-      c.name.toLowerCase().includes(query) || 
-      (c.description && c.description.toLowerCase().includes(query))
-    )
+    const q = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(c => c.name.toLowerCase().includes(q) || (c.description && c.description.toLowerCase().includes(q)))
   }
+  if (filterParent.value === 'root') filtered = filtered.filter(c => !c.parent_id)
+  else if (filterParent.value === 'child') filtered = filtered.filter(c => c.parent_id)
   
-  // فلترة حسب النوع (رئيسي/فرعي)
-  if (filterParent.value === 'root') {
-    filtered = filtered.filter(c => !c.parent_id)
-  } else if (filterParent.value === 'child') {
-    filtered = filtered.filter(c => c.parent_id)
-  }
-  
-  // الترتيب
-  if (sortBy.value === 'name') {
-    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ar'))
-  } else if (sortBy.value === 'children') {
-    filtered.sort((a, b) => (b.children?.length || 0) - (a.children?.length || 0))
-  }
+  if (sortBy.value === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name, 'ar'))
+  else if (sortBy.value === 'children') filtered.sort((a, b) => (b.children?.length || 0) - (a.children?.length || 0))
+  else if (sortBy.value === 'created') filtered.sort((a, b) => (b.id - a.id)) // Fallback if no created_at
   
   return filtered
 })
 
-// الدوال
+// Methods
 const load = async () => {
   loading.value = true
   try {
@@ -448,8 +321,6 @@ const load = async () => {
     loading.value = false
   }
 }
-
-onMounted(load)
 
 const router = useRouter()
 const goToCategoryProducts = (catId?: number) => {
@@ -479,73 +350,47 @@ const closeModal = () => {
 }
 
 const submit = async () => {
+  loading.value = true
   try {
     const payload = { ...form.value }
-    if (editingId.value) {
-      await updateCategory(editingId.value, payload)
-    } else {
-      await createCategory(payload)
-    }
+    if (editingId.value) await updateCategory(editingId.value, payload)
+    else await createCategory(payload)
     closeModal()
     await load()
   } catch (e) {
-    console.error('Create/update category failed', e)
+    console.error('Submit failed', e)
+  } finally {
+    loading.value = false
   }
 }
 
 const remove = async (cat: Category) => {
-  if (!confirm(`هل أنت متأكد من حذف الفئة "${cat.name}"؟ هذا الإجراء لا يمكن التراجع عنه.`)) return
+  if (!confirm(`هل أنت متأكد من حذف الفئة "${cat.name}"؟`)) return
   try {
     await deleteCategory(cat.id)
     await load()
   } catch (e) {
-    console.error('Delete category failed', e)
+    console.error('Delete failed', e)
   }
 }
 
-const toggleActions = (id: number | null) => {
-  activeActions.value = activeActions.value === id ? null : id
-}
-
-// إغلاق قائمة الإجراءات عند النقر خارجها
-onMounted(() => {
-  const handler = (e: MouseEvent) => {
-    const target = e.target as Element | null
-    if (!target || !target.closest('.relative')) {
-      activeActions.value = null
-    }
-  }
-  document.addEventListener('click', handler)
-  onUnmounted(() => {
-    document.removeEventListener('click', handler)
-  })
-})
+onMounted(load)
 </script>
 
 <style scoped>
+.animate-in {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+}
+@keyframes zoom-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.zoom-in { animation-name: zoom-in; }
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* تأثيرات التمرير */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* تأثيرات الحركة */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s;
-}
-.fade-enter, .fade-leave-to {
-  opacity: 0;
 }
 </style>

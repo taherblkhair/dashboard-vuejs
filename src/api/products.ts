@@ -44,9 +44,15 @@ export interface ProductsResponse {
   }
 }
 
-export async function fetchProducts(page = 1): Promise<ProductsResponse> {
-  // use relative endpoints; BASE_URL will include any /api prefix
-  return request(`/products?page=${page}`)
+export async function fetchProducts(page = 1, filters: { search?: string, category_id?: string, is_active?: string } = {}): Promise<ProductsResponse> {
+  const params = new URLSearchParams()
+  params.append('page', String(page))
+  
+  if (filters.search) params.append('search', filters.search)
+  if (filters.category_id) params.append('category_id', filters.category_id)
+  if (filters.is_active) params.append('is_active', filters.is_active)
+
+  return request(`/products?${params.toString()}`)
 }
 
 export async function fetchCategories(): Promise<{ data: Category[] }>

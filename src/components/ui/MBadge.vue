@@ -8,7 +8,7 @@
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
-  variant?: 'success' | 'warning' | 'error' | 'neutral' | 'info'
+  variant?: 'success' | 'warning' | 'error' | 'neutral' | 'info' | 'danger'
 }>(), {
   variant: 'neutral',
 })
@@ -18,7 +18,8 @@ const badgeClasses = computed(() => {
     success: 'bg-green-50 text-green-700',
     warning: 'bg-yellow-50 text-yellow-700',
     error: 'bg-red-50 text-red-700',
-    info: 'bg-primary-50 text-primary-700',
+    danger: 'bg-red-50 text-red-700',
+    info: 'bg-indigo-50 text-indigo-700',
     neutral: 'bg-gray-100 text-gray-700',
   }
   return variants[props.variant] || variants.neutral
