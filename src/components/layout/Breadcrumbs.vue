@@ -49,62 +49,98 @@ type Crumb = { label: string; name?: string; path?: string }
 const labelMap: Record<string, string> = {
   Dashboard: 'لوحة التحكم',
   Products: 'المنتجات',
+  ProductCreate: 'إضافة منتج',
   ProductDetails: 'تفاصيل المنتج',
   Categories: 'الفئات',
+  CategoryProducts: 'منتجات الفئة',
   Orders: 'الطلبات',
+  OrderCreate: 'إنشاء طلب',
   OrderDetails: 'تفاصيل الطلب',
+  OrderEdit: 'تعديل الطلب',
   Customers: 'العملاء',
+  CustomersCreate: 'إضافة عميل',
+  CustomersView: 'عرض العميل',
   Warehouses: 'المخازن',
+  WarehouseCreate: 'إضافة مخزن',
+  WarehouseDetails: 'تفاصيل المخزن',
   Suppliers: 'الموردون',
   Reports: 'التقارير',
+  ReportsLowStock: 'النواقص',
+  ReportsPurchases: 'تقارير المشتريات',
+  ReportsSales: 'تقارير المبيعات',
   Deliveries: 'التوصيلات',
+  DeliveryDetails: 'تفاصيل التوصيل',
   DeliveryProviders: 'شركات التوصيل',
+  DeliveryProviderCreate: 'إضافة شركة توصيل',
+  DeliveryProviderDetails: 'تفاصيل شركة التوصيل',
   Riders: 'مندوبي التوصيل',
+  RiderCreate: 'إضافة مندوب',
   Settings: 'الإعدادات',
   Addresses: 'العناوين',
   Users: 'المستخدمون',
   Cities: 'المدن',
   PurchaseOrders: 'طلبات الشراء',
-  PurchasesSuppliers: 'الموردون (مشتريات)'
+  PurchaseOrderCreate: 'إنشاء طلب شراء',
+  PurchaseOrderDetails: 'تفاصيل طلب الشراء',
+  PurchaseOrderReceives: 'استلامات الشراء',
+  PurchaseOrderReceiveCreate: 'استلام طلب شراء',
+  PurchasesSuppliers: 'الموردون (مشتريات)',
+  PurchasesSupplierCreate: 'إضافة مورد',
+  PurchasesSupplierEdit: 'تعديل مورد',
+  PurchasesSupplierPurchaseOrders: 'طلبات المورد',
+  StockMovementCreate: 'حركة مخزنية',
+  StockMovementTransfer: 'تحويل مخزني'
 }
 
 // parent mapping when detail pages should show a parent link
 const parentMap: Record<string, string> = {
+  ProductCreate: 'Products',
   ProductDetails: 'Products',
-  OrderDetails: 'Orders'
+  CategoryProducts: 'Categories',
+  OrderCreate: 'Orders',
+  OrderDetails: 'Orders',
+  OrderEdit: 'OrderDetails',
+  CustomersCreate: 'Customers',
+  CustomersView: 'Customers',
+  WarehouseCreate: 'Warehouses',
+  WarehouseDetails: 'Warehouses',
+  ReportsLowStock: 'Reports',
+  ReportsPurchases: 'Reports',
+  ReportsSales: 'Reports',
+  DeliveryDetails: 'Deliveries',
+  DeliveryProviderCreate: 'DeliveryProviders',
+  DeliveryProviderDetails: 'DeliveryProviders',
+  RiderCreate: 'Riders',
+  PurchaseOrderCreate: 'PurchaseOrders',
+  PurchaseOrderDetails: 'PurchaseOrders',
+  PurchaseOrderReceives: 'PurchaseOrders',
+  PurchaseOrderReceiveCreate: 'PurchaseOrders',
+  PurchasesSupplierCreate: 'PurchasesSuppliers',
+  PurchasesSupplierEdit: 'PurchasesSuppliers',
+  PurchasesSupplierPurchaseOrders: 'PurchasesSuppliers'
 }
 
 const crumbs = computed<Crumb[]>(() => {
-  const parts: Crumb[] = []
-
-  // Try to use route.matched for hierarchical records first
-  if (route.matched && route.matched.length > 0) {
-    route.matched.forEach((rec) => {
-      const n = rec.name as string | undefined
-      if (n && n !== 'Dashboard') {
-        const label = labelMap[n] || (rec.meta && (rec.meta as any).title) || n
-        parts.push({ label: String(label), name: n })
-      }
-    })
-  }
-
-  // Fallback: use route.name if nothing from matched
-  if (parts.length === 0 && route.name) {
-    const rn = String(route.name)
-    parts.push({ label: labelMap[rn] || rn, name: rn })
-  }
-
-  // If current is a detail route, ensure parent exists first
-  const last = parts[parts.length - 1]
-  if (last) {
-    const parent = parentMap[last.name as string]
+  const result: Crumb[] = []
+  
+  const buildTrail = (name: string) => {
+    if (!name || name === 'Dashboard') return
+    
+    // Check parent first to maintain order (parent > child)
+    const parent = parentMap[name]
     if (parent) {
-      // insert parent before last
-      parts.splice(parts.length - 1, 0, { label: labelMap[parent] || parent, name: parent })
+      buildTrail(parent)
     }
+    
+    const label = labelMap[name] || name
+    result.push({ label, name })
   }
 
-  return parts
+  if (route.name) {
+    buildTrail(String(route.name))
+  }
+
+  return result
 })
 
 function goTo(path: string | { name?: string; path?: string }, name?: string) {
