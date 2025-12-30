@@ -194,18 +194,24 @@ import MInput from '../../components/ui/MInput.vue'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MStatsCard from '../../components/ui/MStatsCard.vue'
+import { formatCurrency, formatDate } from '../../utils/helpers'
+import { getOrderStatusLabel, getOrderStatusBadgeVariant, getPaymentStatusLabel, getPaymentStatusBadgeVariant } from '../../constants'
+import { useToast } from '../../composables/useToast'
+import type { Order, PaginationMeta } from '../../types'
 
 // Icons
 const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
 const IconPencil = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z' })]) })
 
-
 const router = useRouter()
+const { addToast } = useToast()
 
-const orders = ref<any[]>([])
+const orders = ref<Order[]>([])
 const loading = ref(false)
-const stats = ref<any>({})
-const meta = ref({ current_page: 1, last_page: 1, total: 0 })
+const stats = ref<{ total_orders: number; today_orders: number; processing_orders: number; pending_orders: number }>({
+  total_orders: 0, today_orders: 0, processing_orders: 0, pending_orders: 0
+})
+const meta = ref<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 25, total: 0 })
 const filters = ref({ q: '', status: '', payment_status: '' })
 
 const loadOrders = async (page = 1) => {
@@ -221,17 +227,17 @@ const loadOrders = async (page = 1) => {
     meta.value = res?.meta || meta.value
     calculateStats()
   } catch (e) {
-    console.error('Failed to load orders', e)
+    addToast('فشل تحميل الطلبات', 'error')
   } finally {
     loading.value = false
   }
 }
 
 const calculateStats = () => {
-  const today = new Date().toISOString().split('T')[0]
+  const today: string = new Date().toISOString().split('T')[0] || ''
   stats.value = {
     total_orders: meta.value.total || 0,
-    today_orders: orders.value.filter(o => o.order_date?.startsWith(today)).length,
+    today_orders: orders.value.filter(o => o.order_date && o.order_date.startsWith(today)).length,
     processing_orders: orders.value.filter(o => o.status === 'processing').length,
     pending_orders: orders.value.filter(o => o.status === 'pending').length,
   }
@@ -240,35 +246,11 @@ const calculateStats = () => {
 const applyFilters = () => loadOrders(1)
 const createOrder = () => router.push({ name: 'OrderCreate' })
 
-const getStatusText = (s?: string) => {
-  const map: any = { pending: 'معلق', confirmed: 'تم التأكيد', processing: 'قيد المعالجة', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي' }
-  return map[s || ''] || s || '-'
-}
-
-const getStatusVariant = (s?: string): 'success' | 'warning' | 'error' | 'neutral' | 'info' => {
-  const map: any = { pending: 'warning', confirmed: 'info', processing: 'info', shipped: 'info', delivered: 'success', cancelled: 'error' }
-  return map[s || ''] || 'neutral'
-}
-
-const getPaymentText = (s?: string) => {
-  const map: any = { pending: 'معلق', partial: 'جزئي', paid: 'مدفوع', failed: 'فشل' }
-  return map[s || ''] || s || '-'
-}
-
-const getPaymentVariant = (s?: string): 'success' | 'warning' | 'error' | 'neutral' => {
-  const map: any = { pending: 'warning', partial: 'warning', paid: 'success', failed: 'error' }
-  return map[s || ''] || 'neutral'
-}
-
-const formatDate = (iso?: string) => {
-  if (!iso) return '-'
-  try { return new Date(iso).toLocaleDateString('ar-SA') } catch { return iso }
-}
-
-const formatCurrency = (val?: number) => {
-  if (val == null) return '0.00 د.ل'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(val) + ' د.ل'
-}
+// Use centralized helpers
+const getStatusText = (s?: string) => getOrderStatusLabel(s || '')
+const getStatusVariant = (s?: string) => getOrderStatusBadgeVariant(s || '')
+const getPaymentText = (s?: string) => getPaymentStatusLabel(s || '')
+const getPaymentVariant = (s?: string) => getPaymentStatusBadgeVariant(s || '')
 
 onMounted(() => loadOrders())
 </script>

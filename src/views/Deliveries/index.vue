@@ -153,6 +153,9 @@ import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
 import MStatsCard from '../../components/ui/MStatsCard.vue'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
+import { formatCurrency, formatDate } from '../../utils/helpers'
+import { DELIVERY_STATUSES } from '../../constants'
+import type { Delivery, PaginationMeta } from '../../types'
 
 // Icons
 const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
@@ -161,13 +164,13 @@ const IconRefresh = defineComponent({ render: () => h('svg', { fill:'none', view
 
 const router = useRouter()
 
-const deliveries = ref<any[]>([])
-const meta = ref<any>(null)
+const deliveries = ref<Delivery[]>([])
+const meta = ref<PaginationMeta | null>(null)
 const loading = ref(false)
 
 const { addToast } = useToast()
 
-const statuses = ['pending', 'assigned', 'picked_up', 'in_transit', 'delivered', 'failed', 'returned']
+const statuses = Object.values(DELIVERY_STATUSES)
 
 const getStatusVariant = (status: string) => {
   switch (status) {
@@ -186,18 +189,6 @@ const pendingCount = computed(() => deliveries.value.filter(d => d.status === 'p
 const inTransitCount = computed(() => deliveries.value.filter(d => ['in_transit', 'picked_up'].includes(d.status)).length)
 const deliveredCount = computed(() => deliveries.value.filter(d => d.status === 'delivered').length)
 
-const formatDate = (d?: string) => {
-  if (!d) return '-'
-  try { return new Date(d).toLocaleString('EN-US') } catch (e) { return d }
-}
-
-const formatCurrency = (v?: any) => {
-  if (v === null || v === undefined || v === '') return '-' 
-  const num = Number(v)
-  if (Number.isNaN(num)) return String(v)
-  return new Intl.NumberFormat('EN-US', { style: 'currency', currency: 'LYD' }).format(num)
-}
-
 const load = async (page = 1) => {
   loading.value = true
   try {
@@ -208,7 +199,7 @@ const load = async (page = 1) => {
     else deliveries.value.push(...d)
     meta.value = m
   } catch (e) {
-    console.error('Failed to load deliveries', e)
+    addToast('فشل تحميل عمليات التوصيل', 'error')
   } finally {
     loading.value = false
   }
@@ -244,7 +235,6 @@ const onAssignConfirm = async (riderId: number) => {
     addToast('تم تعيين المندوب', 'success')
   } catch (err) {
     Object.assign(d, prev)
-    console.error('Failed to assign rider', err)
     addToast('فشل تعيين المندوب', 'error')
   }
 }
@@ -268,7 +258,6 @@ const onStatusApply = async () => {
     addToast('تم تحديث الحالة', 'success')
   } catch (err) {
     d.status = prev
-    console.error('Failed to change status', err)
     addToast('فشل تحديث الحالة', 'error')
   }
 }
@@ -288,7 +277,6 @@ const onConfirm = async () => {
     addToast('تم تحديث الحالة', 'success')
   } catch (err) {
     d.status = prev
-    console.error('Failed to change status', err)
     addToast('فشل تحديث الحالة', 'error')
   }
 }

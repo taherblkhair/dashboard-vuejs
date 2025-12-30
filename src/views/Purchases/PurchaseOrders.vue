@@ -182,14 +182,15 @@ import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
 import MStatsCard from '../../components/ui/MStatsCard.vue'
-import { formatCurrency, formatDate as globalFormatDate } from '../../utils/helpers'
+import { formatCurrency, formatDate } from '../../utils/helpers'
+import { useToast } from '../../composables/useToast'
 
 // Icons (reusing existing or importing new, define inline for simplicity)
 const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15 12a3 3 0 11-6 0 3 3 0 016 0z' }), h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' })]) })
 const IconPencil = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z' })]) })
 
-
 const router = useRouter()
+const { addToast } = useToast()
 const orders = ref<any[]>([])
 const loading = ref(false)
 const dashboardData = ref<any>({})
@@ -219,7 +220,9 @@ const load = async (page = 1) => {
     orders.value = res?.data || []
     meta.value = res?.meta || meta.value
     dashboardData.value = dashboardRes?.data || {}
-  } catch (e) { console.error(e) }
+  } catch (e) { 
+    addToast('فشل تحميل طلبات الشراء', 'error')
+  }
   finally { loading.value = false }
 }
 
@@ -230,8 +233,6 @@ const createOrder = () => router.push({ name: 'PurchaseOrderCreate' })
 const viewOrder = (id?: number) => id && router.push({ name: 'PurchaseOrderDetails', params: { id } })
 const editOrder = (id?: number) => id && router.push({ name: 'PurchaseOrderEdit', params: { id } })
 const receiveOrders = () => router.push({ name: 'PurchaseOrderReceives' })
-// const receiveOrder = (id?: number) => id && router.push({ name: 'PurchaseOrderReceiveCreate', params: { id } })
-// const canReceiveOrder = (o: any) => ['ordered', 'partially_received'].includes(o.status)
 
 const getActions = (order: any) => {
   const actions = [
@@ -253,16 +254,6 @@ const getStatusText = (s: string) => {
 const getStatusVariant = (s: string): 'success' | 'warning' | 'error' | 'info' | 'neutral' => {
   const m: any = { pending: 'warning', ordered: 'info', partially_received: 'warning', received: 'success', cancelled: 'error' }
   return m[s] || 'neutral'
-}
-
-const formatCurrency = (v?: number) => {
-  if (v == null) return '0.00 د.ل'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(v) + ' د.ل'
-}
-
-const formatDate = (iso?: string) => {
-  if (!iso) return '-'
-  return globalFormatDate(iso)
 }
 
 onMounted(() => load())
