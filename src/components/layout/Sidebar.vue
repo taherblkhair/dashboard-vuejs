@@ -26,7 +26,7 @@
             </svg>
           </div>
           <div class="min-w-0" v-show="!isCollapsed || hovered">
-            <h1 class="text-xl font-black text-slate-900 leading-tight tracking-tight">سـابـيـن</h1>
+            <h1 class="text-xl font-black text-slate-900 leading-tight tracking-tight">بالخير</h1>
             <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mt-0.5">نظام الإدارة المتكامل</p>
           </div>
         </div>

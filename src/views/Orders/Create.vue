@@ -58,7 +58,7 @@
       <MCard title="عناصر الفاتورة">
         <div class="p-4">
           <div class="flex justify-end mb-4">
-            <MButton variant="primary" size="sm" @click="addLine">+ إضافة بند</MButton>
+            <MButton variant="primary" size="sm" @click="addLine">+ إضافة صنف</MButton>
           </div>
 
           <div v-if="form.lines.length === 0" class="text-center py-8 text-gray-400">
@@ -69,7 +69,7 @@
             <div v-for="(line, idx) in form.lines" :key="line._uid" class="border border-gray-100 rounded-lg p-4">
               <div class="flex justify-between items-start mb-3">
                 <span class="text-sm font-medium text-gray-700">
-                  {{ line.product_name || `البند #${Number(idx) + 1}` }}
+                  {{ line.product_name || `الصنف #${Number(idx) + 1}` }}
                   <span v-if="line.product_sku" class="text-gray-400">— {{ line.product_sku }}</span>
                 </span>
                 <button @click="removeLine(Number(idx))" class="text-red-500 hover:text-red-700 text-sm">حذف</button>

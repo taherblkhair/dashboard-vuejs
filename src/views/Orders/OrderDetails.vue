@@ -309,19 +309,8 @@
                 <span class="font-medium text-gray-900 font-mono">{{ delivery.weight_kg || 0 }} كجم</span>
              </div>
            </div>
-           
-           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-             <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">تحديث حالة التوصيل</h3>
-             <div class="space-y-4">
-                 <select v-model="deliveryStatusToSet" :disabled="allowedDeliveryStatusOptions.length === 0" class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="" disabled>{{ allowedDeliveryStatusOptions.length ? 'اختر الحالة...' : 'لا توجد حالات متاحة' }}</option>
-                    <option v-for="opt in allowedDeliveryStatusOptions" :key="opt.value" :value="opt.value">{{ opt.text }}</option>
-                 </select>
-                 <button @click="changeDeliveryStatus" :disabled="deliverySaving || !deliveryStatusToSet" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none disabled:opacity-50">تحديث الحالة</button>
-             </div>
-           </div>
-           
-           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
              <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">إدارة المندوب</h3>
              <div v-if="ridersForProvider.length" class="space-y-3">
                  <select v-model.number="selectedRider" :disabled="!canAssignRider && !canReassignRider" class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -334,6 +323,19 @@
              </div>
              <div v-else class="text-sm text-gray-500 text-center py-4 bg-gray-50 rounded-lg">لا يوجد مناديب متاحين</div>
           </div>
+           
+           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+             <h3 class="text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">تحديث حالة التوصيل</h3>
+             <div class="space-y-4">
+                 <select v-model="deliveryStatusToSet" :disabled="allowedDeliveryStatusOptions.length === 0" class="block w-full px-3 py-2 text-sm border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="" disabled>{{ allowedDeliveryStatusOptions.length ? 'اختر الحالة...' : 'لا توجد حالات متاحة' }}</option>
+                    <option v-for="opt in allowedDeliveryStatusOptions" :key="opt.value" :value="opt.value">{{ opt.text }}</option>
+                 </select>
+                 <button @click="changeDeliveryStatus" :disabled="deliverySaving || !deliveryStatusToSet" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none disabled:opacity-50">تحديث الحالة</button>
+             </div>
+           </div>
+           
+          
           
            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
              <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">إثبات التسليم</h3>
@@ -500,7 +502,7 @@ const statusLabels: Record<string, string> = {
 }
 
 const deliveryStatusLabels: Record<string, string> = {
-  pending: 'قيد الانتظار', assigned: 'معين', picked_up: 'تم الاستلام', in_transit: 'قيد التوصيل', delivered: 'تم التسليم', failed: 'فشل التسليم', cancelled: 'ملغي', returned: 'معاد'
+  pending: 'قيد الانتظار', assigned: 'معين', picked_up: 'لدى المندوب', in_transit: 'قيد التوصيل', delivered: 'تم التسليم', failed: 'فشل التسليم', cancelled: 'ملغي', returned: 'معاد'
 }
 
 const deliveryTransitions: Record<string, string[]> = {
@@ -537,7 +539,7 @@ const orderProgressPercentage = computed(() => {
 const deliveryTimelineSteps = [
   { key: 'pending', label: 'قيد الانتظار', icon: IconClock },
   { key: 'assigned', label: 'تم التعيين', icon: IconUser },
-  { key: 'picked_up', label: 'تم الاستلام', icon: IconBox },
+  { key: 'picked_up', label: 'لدى المندوب', icon: IconBox },
   { key: 'in_transit', label: 'في الطريق', icon: IconTruck },
   { key: 'delivered', label: 'تم التسليم', icon: IconCheck },
 ]

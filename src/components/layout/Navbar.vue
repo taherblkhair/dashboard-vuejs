@@ -163,7 +163,7 @@ const currentPageTitle = computed(() => {
     '/delivery-providers': 'شركات التوصيل',
     '/riders': 'المناديب والموصلون'
   }
-  return titles[route.path] || 'نظام سـابـيـن المتكامل'
+  return titles[route.path] || 'نظام بالخير المتكامل'
 })
 
 const { state, logout } = useAuth()
