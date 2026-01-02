@@ -1,12 +1,7 @@
 <template>
   <div class="p-6 bg-gray-50 min-h-screen" dir="rtl">
     <div class="max-w-5xl mx-auto space-y-6">
-      <!-- Toast -->
-      <div v-if="toast.visible" 
-           :class="['fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-white text-sm',
-                    toast.type === 'success' ? 'bg-green-600' : 'bg-gray-700']">
-        {{ toast.message }}
-      </div>
+      <!-- Toast removed, using global toaster -->
 
       <!-- Header -->
       <div class="flex items-center justify-between">
@@ -160,8 +155,11 @@ import { fetchAddresses } from '../../api/addresses'
 import VariantAutocomplete from '../../components/VariantAutocomplete.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
+import { formatCurrency } from '../../utils/helpers'
+import { useToast } from '../../composables/useToast'
 
 const router = useRouter()
+const { addToast } = useToast()
 const customers = ref<any[]>([])
 const products = ref<any[]>([])
 const customerAddresses = ref<any[]>([])
@@ -180,25 +178,18 @@ const form = ref<any>({
   lines: []
 })
 
-const toast = ref<{ visible: boolean; message: string; type: string }>({ visible: false, message: '', type: 'success' })
-
-const showToast = (message: string, type = 'success', ms = 2500) => {
-  toast.value = { visible: true, message, type }
-  setTimeout(() => { toast.value.visible = false }, ms)
-}
-
 const loadCustomers = async () => {
   try {
     const res = await fetchCustomers(1)
     customers.value = res?.data || []
-  } catch (e) { console.error(e) }
+  } catch (e) { addToast('فشل تحميل العملاء', 'error') }
 }
 
 const loadProducts = async () => {
   try {
     const res = await fetchProducts(1)
     products.value = res?.data || []
-  } catch (e) { console.error(e) }
+  } catch (e) { addToast('فشل تحميل المنتجات', 'error') }
 }
 
 const onCustomerChange = async () => {
@@ -239,22 +230,15 @@ const onVariantSelected = (idx: number, v: any) => {
   form.value.lines[idx].product_sku = v.sku_variant || ''
 }
 
-
-
 const lineTotal = (l: any) => (Number(l.quantity || 0) * Number(l.unit_price || 0)) - Number(l.discount_amount || 0)
 const subtotal = computed(() => form.value.lines.reduce((s: number, l: any) => s + lineTotal(l), 0))
 const grandTotal = computed(() => subtotal.value - Number(form.value.discount_amount || 0) + Number(form.value.shipping_fee || 0))
 
-const formatCurrency = (val?: number) => {
-  if (val == null) return '0.00 د.ل'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(val) + ' د.ل'
-}
-
 const submit = async () => {
-  if (!form.value.customer_id) return showToast('اختر عميل', 'error')
-  if (!form.value.lines.length) return showToast('أضف بند واحد على الأقل', 'error')
+  if (!form.value.customer_id) return addToast('اختر عميل', 'error')
+  if (!form.value.lines.length) return addToast('أضف بند واحد على الأقل', 'error')
   for (const l of form.value.lines) {
-    if (!l.product_variant_id) return showToast('اختر منتج لكل بند', 'error')
+    if (!l.product_variant_id) return addToast('اختر منتج لكل بند', 'error')
   }
   try {
     submitting.value = true
@@ -277,11 +261,10 @@ const submit = async () => {
       }))
     }
     const res = await createOrder(payload)
-    showToast('تم إنشاء الفاتورة', 'success')
+    addToast('تم إنشاء الفاتورة', 'success')
     setTimeout(() => router.push(res?.data?.id ? { name: 'OrderDetails', params: { id: res.data.id } } : { name: 'Orders' }), 1000)
   } catch (e) {
-    console.error(e)
-    showToast('فشل إنشاء الفاتورة', 'error')
+    addToast('فشل إنشاء الفاتورة', 'error')
   } finally {
     submitting.value = false
   }

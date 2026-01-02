@@ -93,7 +93,7 @@
                 <td colspan="4" class="px-6 py-12 text-slate-400 italic">لا توجد بيانات متاحة للموردين حالياً.</td>
               </tr>
               <tr v-for="(s, idx) in data.top_suppliers" :key="s.supplier_id" class="hover:bg-slate-50/50 transition-colors group">
-                <td class="px-6 py-4 text-slate-400 font-bold">{{ idx + 1 }}</td>
+                <td class="px-6 py-4 text-slate-400 font-bold">{{ Number(idx) + 1 }}</td>
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
@@ -124,9 +124,11 @@
 import { ref, onMounted } from 'vue'
 import { fetchPurchasesReport } from '../../api/reports'
 import { formatCurrency } from '../../utils/helpers'
+import { useToast } from '../../composables/useToast'
 
 const data = ref<any>({})
 const loading = ref(false)
+const { addToast } = useToast()
 
 const load = async () => {
   loading.value = true
@@ -134,7 +136,7 @@ const load = async () => {
     const res = await fetchPurchasesReport()
     data.value = res?.data?.data || res?.data || {}
   } catch (e) {
-    console.error('Failed to fetch purchases report', e)
+    addToast('فشل تحميل تقرير المشتريات', 'error')
   } finally {
     setTimeout(() => { loading.value = false }, 500)
   }

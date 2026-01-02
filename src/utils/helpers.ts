@@ -70,4 +70,11 @@ export function formatDateTime(iso?: string): string {
   }
 }
 
-export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime }
+export function formatNumber(val?: string | number): string {
+  if (val === null || val === undefined || val === '') return '0'
+  const num = typeof val === 'number' ? val : Number(String(val))
+  if (Number.isNaN(num)) return String(val)
+  return new Intl.NumberFormat('en-US').format(num)
+}
+
+export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime, formatNumber }

@@ -105,7 +105,7 @@
 
         <!-- Table View -->
         <div class="relative min-h-[400px]">
-          <div v-if="loading && items.length === 0" class="flex flex-col items-center justify-center py-20 gap-4">
+          <div v-if="loading && products.length === 0" class="flex flex-col items-center justify-center py-20 gap-4">
             <div class="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
             <p class="text-sm font-black text-slate-400 uppercase tracking-widest">جاري التحميل...</p>
           </div>

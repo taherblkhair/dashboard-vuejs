@@ -96,22 +96,14 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchOrder } from '../../api/orders'
-import { formatAttributes } from '../../utils/helpers'
+import { formatAttributes, formatCurrency, formatDate } from '../../utils/helpers'
 
 const route = useRoute()
 const id = Number(route.params.id)
 const order = ref<any>(null)
 const loading = ref(true)
 
-const formatCurrency = (val?: number) => {
-  if (val == null) return '0.00 د.ل'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(val) + ' د.ل'
-}
-
-const formatDate = (iso?: string) => {
-  if (!iso) return '-'
-  return new Date(iso).toLocaleDateString('en-us' , { year: 'numeric', month: 'long', day: 'numeric' })
-}
+// local helpers removed
 
 onMounted(async () => {
   try {
@@ -125,7 +117,7 @@ onMounted(async () => {
       // window.close()
     }, 500)
   } catch (e) {
-    console.error(e)
+    // console.error(e) silenced
   } finally {
     loading.value = false
   }

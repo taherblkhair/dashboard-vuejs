@@ -401,17 +401,7 @@ watch(() => form.sku, (newSku) => {
 })
 
 // Helper functions
-const getColorCode = (colorCode: string) => {
-  const colors: Record<string, string> = {
-    'red': '#ef4444',
-    'blue': '#3b82f6',
-    'black': '#000000',
-    'white': '#ffffff',
-    'green': '#10b981',
-    'yellow': '#f59e0b'
-  }
-  return colors[colorCode] || colorCode
-}
+
 
 // Helper for attributes display
 const formatAttributes = (attrs: any) => {

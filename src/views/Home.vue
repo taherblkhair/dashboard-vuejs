@@ -256,16 +256,19 @@ import { fetchDashboard } from '../api/dashboard'
 import MCard from '../components/ui/MCard.vue'
 import MButton from '../components/ui/MButton.vue'
 import MTable from '../components/ui/MTable.vue'
-import { formatCurrency, formatDate } from '../utils/helpers'
+import { formatCurrency, formatDate, formatTime } from '../utils/helpers'
+import { getOrderStatusLabel, getOrderStatusColor } from '../constants'
+import { useToast } from '../composables/useToast'
 
 const router = useRouter()
 const dashboard = ref<any>({})
 const loading = ref(false)
 const lastUpdateTime = ref<string>('')
+const { addToast } = useToast()
 
 const meta = computed(() => dashboard.value.meta || {})
 
-// Stat Metrics Generator
+// Stat Metrics Generator ... (unchanged)
 const statMetrics = computed(() => [
   { 
     label: 'إجمالي الطلبات', 
@@ -333,34 +336,11 @@ const initials = (name?: string) => name ? name.split(' ').map(n=>n[0]).slice(0,
 
 const getProductName = (id: number) => `منتج متغير #${id}`
 
-const getStatusText = (status: string) => {
-  const texts: any = {
-    'draft': 'مسودة',
-    'pending': 'انتظار',
-    'confirmed': 'مؤكد',
-    'delivered': 'مكتمل',
-    'shipped': 'شحن',
-    'cancelled': 'ملغي'
-  }
-  return texts[status] || status
-}
-
-const getStatusBadgeClass = (status: string) => {
-  const classes: any = {
-    'draft': 'bg-slate-100 text-slate-500',
-    'pending': 'bg-amber-50 text-amber-600',
-    'confirmed': 'bg-indigo-50 text-indigo-600',
-    'delivered': 'bg-emerald-50 text-emerald-600',
-    'shipped': 'bg-sky-50 text-sky-600',
-    'cancelled': 'bg-rose-50 text-rose-600'
-  }
-  return classes[status] || 'bg-slate-50 text-slate-500'
-}
+const getStatusText = getOrderStatusLabel
+const getStatusBadgeClass = getOrderStatusColor
 
 const updateTime = () => {
-  lastUpdateTime.value = new Date().toLocaleTimeString('en-US', {
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  })
+  lastUpdateTime.value = formatTime(new Date().toISOString())
 }
 
 const load = async () => {
@@ -370,7 +350,7 @@ const load = async () => {
     dashboard.value = res?.data ?? res ?? {}
     updateTime()
   } catch (e) {
-    console.error('Failed', e)
+    addToast('فشل تحميل لوحة التحكم', 'error')
   } finally {
     loading.value = false
   }

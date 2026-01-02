@@ -452,8 +452,13 @@ import { fetchOrder, updateOrderStatus, checkOrderStock } from '../../api/orders
 import { fetchDeliveryProviders } from '../../api/deliveryProviders'
 import { createDeliveryForOrder, fetchDeliveries, uploadProof, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
 import { fetchRiders } from '../../api/riders'
-import { formatAttributes } from '../../utils/helpers'
+import { formatAttributes, formatCurrency, formatDate } from '../../utils/helpers'
 import { useToast } from '../../composables/useToast'
+import { 
+  ORDER_STATUS_LABELS, ORDER_VALID_TRANSITIONS,
+  DELIVERY_STATUS_LABELS, DELIVERY_VALID_TRANSITIONS,
+  getOrderStatusColor
+} from '../../constants'
 
 // Icons
 const IconClipboard = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' })]) })
@@ -486,35 +491,11 @@ const selectedFile = ref<File | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 
 // --- Mappings & options ---
-const validOrderTransitions: Record<string, string[]> = {
-  draft: ['pending', 'cancelled'],
-  pending: ['confirmed', 'cancelled'],
-  confirmed: ['processing', 'cancelled'],
-  processing: ['delivered', 'cancelled'],
-  shipped: ['delivered', 'returned'],
-  delivered: ['returned'],
-  cancelled: [],
-  returned: []
-}
-
-const statusLabels: Record<string, string> = {
-  draft: 'مسودة', status: 'الحالة', pending: 'قيد الانتظار', confirmed: 'معتمد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', returned: 'معاد', cancelled: 'ملغي'
-}
-
-const deliveryStatusLabels: Record<string, string> = {
-  pending: 'قيد الانتظار', assigned: 'معين', picked_up: 'لدى المندوب', in_transit: 'قيد التوصيل', delivered: 'تم التسليم', failed: 'فشل التسليم', cancelled: 'ملغي', returned: 'معاد'
-}
-
-const deliveryTransitions: Record<string, string[]> = {
-  pending: ['assigned', 'cancelled'],
-  assigned: ['picked_up', 'cancelled'],
-  picked_up: ['in_transit', 'failed', 'cancelled'],
-  in_transit: ['delivered', 'failed', 'returned'],
-  delivered: [],
-  failed: ['assigned'],
-  cancelled: [],
-  returned: ['assigned'],
-}
+// Using centralized constants (casted for compatibility if needed or direct usage)
+const validOrderTransitions = ORDER_VALID_TRANSITIONS as any
+const statusLabels = ORDER_STATUS_LABELS as any
+const deliveryStatusLabels = DELIVERY_STATUS_LABELS as any
+const deliveryTransitions = DELIVERY_VALID_TRANSITIONS as any
 
 // --- Timelines ---
 const orderTimelineSteps = computed(() => {
@@ -557,7 +538,8 @@ const allowedDeliveryStatusOptions = computed(() => {
    const s = String(delivery.value?.status || '').toLowerCase()
    const arr = deliveryTransitions[s] || []
    // disable 'assigned' via dropdown
-   return arr.filter(x => x !== 'assigned').map(x => ({ value: x, text: deliveryStatusLabels[x] || x }))
+   // Force type x as string to avoid implicit any since arr is any
+   return arr.filter((x: string) => x !== 'assigned').map((x: string) => ({ value: x, text: deliveryStatusLabels[x] || x }))
 })
 const canAssignRider = computed(() => (delivery.value?.status || '') === 'pending')
 const canReassignRider = computed(() => ['assigned', 'picked_up', 'failed', 'returned'].includes((delivery.value?.status || '')))
@@ -594,7 +576,9 @@ const load = async () => {
        // If no tab selected, maybe switch to order. But if user just created delivery, they might want to see it? keping default 'order'.
     }
 
-  } catch (e) { console.error(e) }
+  } catch (e) { 
+    addToast('فشل تحميل تفاصيل الطلب', 'error')
+  }
 }
 
 onMounted(() => load())
@@ -614,7 +598,6 @@ const changeOrderStatus = async () => {
              return
           }
       } catch (e) {
-         console.error('Stock check failed', e)
          // Decide if we should block or warn. For now let's just log and maybe proceed or alert.
          // Let's safe-fail: if check fails (e.g. network), maybe allow? OR block?
          // Optimally we should alert user check failed.
@@ -628,7 +611,9 @@ const changeOrderStatus = async () => {
     await load()
     orderStatusToSet.value = ''
     addToast('تم تحديث حالة الطلب', 'success')
-  } catch (e) { console.error(e) }
+  } catch (e) { 
+    addToast('فشل تحديث حالة الطلب', 'error')
+  }
 }
 
 const closeStockError = () => {
@@ -651,8 +636,7 @@ const changeDeliveryStatus = async () => {
      deliveryStatusToSet.value = ''
      addToast('تم تحديث حالة التوصيل', 'success')
   } catch (e) {
-     console.error(e) 
-     addToast('حدث خطأ', 'error')
+     addToast('حدث خطأ أثناء تحديث حالة التوصيل', 'error')
   } finally { deliverySaving.value = false }
 }
 
@@ -688,18 +672,10 @@ const uploadDeliveryProof = async () => {
 }
 
 // Helpers
-const formatDate = (iso?: string) => {
-  if (!iso) return '—'
-  try { return new Date(iso).toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' }) } catch { return iso }
-}
-const formatCurrency = (val?: number) => {
-  if (val == null) return '0.00 د.ل'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(val) + ' د.ل'
-}
+// formatDate and formatCurrency are imported
 // Removed recursive formatAttributes definition to use imported one
 const getStatusColor = (s?: string) => {
-  const m: any = { delivered: 'bg-green-100 text-green-800', shipped: 'bg-blue-100 text-blue-800', processing: 'bg-indigo-100 text-indigo-800', confirmed: 'bg-blue-100 text-blue-800', pending: 'bg-yellow-100 text-yellow-800', cancelled: 'bg-red-100 text-red-800', returned: 'bg-gray-100 text-gray-800', draft: 'bg-gray-100 text-gray-600' }
-  return m[String(s || '').toLowerCase()] || 'bg-gray-100 text-gray-800'
+  return getOrderStatusColor(s || '')
 }
 
 const editOrder = () => { if (order.value?.id) router.push({ name: 'OrderEdit', params: { id: order.value.id } }) }
@@ -740,7 +716,9 @@ const submitCreateDelivery = async () => {
     await load()
     if (delivery.value) activeTab.value = 'delivery'
     addToast('تم إنشاء التوصيل', 'success')
-  } catch (e) { console.error(e) }
+  } catch (e) { 
+    addToast('فشل إنشاء التوصيل', 'error')
+  }
   finally { creating.value = false }
 }
 </script>

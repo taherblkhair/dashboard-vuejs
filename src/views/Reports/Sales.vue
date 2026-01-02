@@ -194,9 +194,11 @@
 import { ref, onMounted } from 'vue'
 import { fetchSalesReport } from '../../api/reports'
 import { formatCurrency, formatDate } from '../../utils/helpers'
+import { useToast } from '../../composables/useToast'
 
 const data = ref<any>({})
 const loading = ref(false)
+const { addToast } = useToast()
 
 const load = async () => {
   loading.value = true
@@ -204,7 +206,7 @@ const load = async () => {
     const res = await fetchSalesReport()
     data.value = res?.data?.data || res?.data || {}
   } catch (e) {
-    console.error('Failed to load sales report', e)
+    addToast('فشل تحميل تقرير المبيعات', 'error')
   } finally {
     setTimeout(() => { loading.value = false }, 500)
   }

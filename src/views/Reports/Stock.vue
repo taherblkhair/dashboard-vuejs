@@ -124,11 +124,13 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { fetchStockReport } from '../../api/reports'
-import { formatCurrency } from '../../utils/helpers'
+import { formatCurrency, formatNumber } from '../../utils/helpers'
+import { useToast } from '../../composables/useToast'
 
 const report = ref<any>({})
 const loading = ref(false)
 const searchQuery = ref('')
+const { addToast } = useToast()
 
 const load = async () => {
   loading.value = true
@@ -136,7 +138,7 @@ const load = async () => {
     const res = await fetchStockReport()
     report.value = res?.data?.data || res?.data || {}
   } catch (e) {
-    console.error('Failed to fetch stock report', e)
+    addToast('فشل تحميل تقرير المخزون', 'error')
   } finally {
     setTimeout(() => (loading.value = false), 500)
   }
@@ -144,12 +146,6 @@ const load = async () => {
 
 onMounted(load)
 
-function formatNumber(value: any): string {
-  if (value === null || value === undefined) return '0'
-  const num = typeof value === 'number' ? value : Number(String(value))
-  if (Number.isNaN(num)) return String(value)
-  return new Intl.NumberFormat('en-US').format(num)
-}
 
 const filteredItems = computed(() => {
   const items = report.value?.items || []

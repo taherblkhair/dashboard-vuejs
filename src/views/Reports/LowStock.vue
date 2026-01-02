@@ -125,7 +125,6 @@ const load = async () => {
     report.value = res || {}
     items.value = (res?.data?.items) || (res?.data) || []
   } catch (e) {
-    console.error('Failed to fetch low-stock report', e)
     addToast('فشل تحميل التقرير', 'error')
   } finally {
     loading.value = false

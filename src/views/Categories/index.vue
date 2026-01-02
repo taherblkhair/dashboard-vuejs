@@ -263,7 +263,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories'
 import type { Category } from '../../api/categories'

@@ -168,7 +168,7 @@
               </div>
               
               <button @click="changeStatus" 
-                   :disabled="saving || !newStatus || !allowedStatusOptions.map(o => o.value).includes(newStatus)"
+                   :disabled="saving || isStatusInvalid"
                    class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
                 تحديث الحالة
               </button>
@@ -248,6 +248,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { fetchDelivery, uploadProof, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
 import { fetchRiders } from '../../api/riders'
 import { useToast } from '../../composables/useToast'
+import { formatCurrency, formatDate } from '../../utils/helpers'
+import { 
+  DELIVERY_VALID_TRANSITIONS, 
+  DELIVERY_STATUS_LABELS, 
+  getDeliveryStatusColor 
+} from '../../constants'
 
 // Icons
 const IconClock = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' })]) })
@@ -266,28 +272,9 @@ const saving = ref(false)
 const ridersForProvider = ref<any[]>([])
 const selectedRider = ref<number | null>(null)
 
-// backend-allowed transitions for delivery statuses
-const allowedTransitions: Record<string, string[]> = {
-  pending: ['assigned', 'cancelled'],
-  assigned: ['picked_up', 'cancelled'],
-  picked_up: ['in_transit', 'failed', 'cancelled'],
-  in_transit: ['delivered', 'failed', 'returned'],
-  delivered: [],
-  failed: ['assigned'],
-  cancelled: [],
-  returned: ['assigned'],
-}
-
-const statusLabels: any = {
-  pending: 'قيد الانتظار',
-  assigned: 'معين',
-  picked_up: 'عند المندوب',
-  in_transit: 'قيد التوصيل',
-  delivered: 'تم التسليم',
-  failed: 'فشل التسليم',
-  cancelled: 'ملغي',
-  returned: 'معاد',
-}
+// constants
+const allowedTransitions: any = DELIVERY_VALID_TRANSITIONS
+const statusLabels: any = DELIVERY_STATUS_LABELS
 
 // Timeline Steps
 const timelineSteps = [
@@ -317,15 +304,16 @@ const progressPercentage = computed(() => {
 
 const newStatus = ref<string>('')
 
-const allowedStatusOptions = computed(() => {
+const allowedStatusOptions = computed<{value:string, text:string}[]>(() => {
   const cur = String(delivery.value?.status || '').toLowerCase()
-  const arr = allowedTransitions[cur] || []
+  const arr: string[] = allowedTransitions[cur] || []
   return arr
     .filter((s: string) => s !== 'assigned')
     .map((s: string) => ({ value: s, text: statusLabels[s] || s }))
 })
 
-const allowedStatusText = computed(() => allowedStatusOptions.value.map((o: any) => o.text).join('، '))
+const allowedStatusText = computed(() => allowedStatusOptions.value.map((o) => o.text).join('، '))
+const isStatusInvalid = computed(() => !newStatus.value || !allowedStatusOptions.value.some(o => o.value === newStatus.value))
 
 const canAssign = computed(() => (delivery.value?.status || '') === 'pending')
 const canReassign = computed(() => ['assigned', 'picked_up', 'failed', 'returned'].includes((delivery.value?.status || '')))
@@ -334,31 +322,7 @@ const selectedFile = ref<File | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const { addToast } = useToast()
 
-const formatDate = (d?: string) => {
-  if (!d) return '-'
-  try { return new Date(d).toLocaleString('ar-SA', { month: '2-digit', day: '2-digit', hour:'2-digit', minute:'2-digit' }) } catch (e) { return d }
-}
-
-const formatCurrency = (v?: any) => {
-  if (v === null || v === undefined || v === '') return '-' 
-  const num = Number(v)
-  if (Number.isNaN(num)) return String(v)
-  return new Intl.NumberFormat('en-uk', { style: 'currency', currency: 'LYD' }).format(num)
-}
-
-const getStatusColor = (s?: string) => {
-  const m: any = { 
-    delivered: 'bg-green-100 text-green-800', 
-    picked_up: 'bg-indigo-100 text-indigo-800', 
-    in_transit: 'bg-blue-100 text-blue-800', 
-    assigned: 'bg-purple-100 text-purple-800',
-    pending: 'bg-yellow-100 text-yellow-800', 
-    cancelled: 'bg-red-100 text-red-800', 
-    failed: 'bg-red-50 text-red-600',
-    returned: 'bg-gray-100 text-gray-800'
-  }
-  return m[String(s || '').toLowerCase()] || 'bg-gray-100 text-gray-800'
-}
+const getStatusColor = getDeliveryStatusColor
 
 const load = async () => {
   loading.value = true
@@ -374,7 +338,7 @@ const load = async () => {
       if (delivery.value.rider_id) selectedRider.value = delivery.value.rider_id
     }
   } catch (e) {
-    console.error('Failed to load delivery', e)
+    // console.error('Failed to load delivery', e) // removed
   } finally {
     loading.value = false
   }
@@ -385,7 +349,8 @@ const changeStatus = async () => {
   const cur = String(delivery.value.status || '').toLowerCase()
   const allowed = allowedTransitions[cur] || []
   if (!newStatus.value || !allowed.includes(newStatus.value)) {
-    alert('هذا الانتقال غير مسموح من ' + (statusLabels[cur] || cur) + ' إلى ' + (statusLabels[newStatus.value] || newStatus.value))
+    // alert('هذا الانتقال غير مسموح...') // Use toast instead?
+    addToast('هذا الانتقال غير مسموح', 'error')
     return
   }
 
@@ -400,7 +365,6 @@ const changeStatus = async () => {
     newStatus.value = ''
   } catch (err) {
     delivery.value.status = prev // revert
-    console.error('Failed to update status', err)
     addToast('فشل تحديث الحالة', 'error')
   } finally {
     saving.value = false
@@ -412,7 +376,7 @@ const reassign = async () => {
 
   const st = String(delivery.value.status || '').toLowerCase()
   if (!(st === 'pending' || ['assigned', 'picked_up', 'failed', 'returned'].includes(st))) {
-    alert('لا يمكن (تعيين/إعادة تعيين) المندوب في هذه الحالة: ' + (statusLabels[st] || st))
+    addToast('لا يمكن (تعيين/إعادة تعيين) المندوب في هذه الحالة', 'error')
     return
   }
 
@@ -426,7 +390,6 @@ const reassign = async () => {
     addToast('تم تعيين المندوب بنجاح', 'success')
   } catch (err) {
     delivery.value.rider = prevRider
-    console.error('Failed to reassign rider', err)
     addToast('فشل إعادة التعيين', 'error')
   } finally {
     saving.value = false
@@ -450,7 +413,6 @@ const upload = async () => {
     if (fileInput.value) fileInput.value.value = ''
     selectedFile.value = null
   } catch (err) {
-    console.error('Failed to upload proof', err)
     addToast('فشل رفع الملف', 'error')
   } finally {
     saving.value = false
