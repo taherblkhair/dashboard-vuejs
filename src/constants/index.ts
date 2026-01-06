@@ -135,7 +135,7 @@ export const DELIVERY_VALID_TRANSITIONS: Record<DeliveryStatus, DeliveryStatus[]
   assigned: ['picked_up', 'cancelled'],
   picked_up: ['in_transit', 'failed', 'cancelled'],
   in_transit: ['delivered', 'failed', 'returned'],
-  delivered: [],
+  delivered: ['returned'],
   failed: ['assigned'],
   cancelled: [],
   returned: ['assigned'],

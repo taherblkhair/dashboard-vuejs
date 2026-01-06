@@ -1,4 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api'
+// production: 'https://karamstore.ly/api'
 
 // دالة مساعدة لجلب الهيدرز مع التوكن من الـ LocalStorage تلقائياً
 const getAuthHeaders = () => {
