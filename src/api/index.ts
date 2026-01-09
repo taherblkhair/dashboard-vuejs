@@ -5,10 +5,12 @@ type RequestOptions = RequestInit & { query?: Record<string, any> }
 async function request(path: string, options: RequestOptions = {}) {
   // normalize headers to a plain object for easy merging
   const headers: Record<string, string> = Object.assign(
-    { 
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
+    (options.body instanceof FormData) 
+      ? { 'Accept': 'application/json' }
+      : { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
     (options.headers as Record<string, string>) || {}
   )
 

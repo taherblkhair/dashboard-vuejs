@@ -146,11 +146,12 @@
           class="group bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 hover:border-indigo-100 flex flex-col"
         >
           <div class="flex items-start justify-between mb-6">
-            <div class="w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm"
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm overflow-hidden"
               :class="cat.parent_id ? 'bg-emerald-50 text-emerald-600 shadow-emerald-50' : 'bg-indigo-50 text-indigo-600 shadow-indigo-50'"
             >
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+              <img v-if="cat.images && cat.images.length > 0" :src="getImageUrl(cat.images[0]?.url || '')" class="w-full h-full object-cover" />
+              <svg v-else class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012 2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
             </div>
             
@@ -250,6 +251,52 @@
             </div>
           </div>
 
+          <!-- Image Upload -->
+          <div class="space-y-3">
+            <label class="text-sm font-black text-slate-700 block px-1">صورة الفئة</label>
+            <div class="flex items-start gap-4">
+              <div 
+                class="w-24 h-24 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden group/img relative cursor-pointer"
+                @click="fileInput?.click()"
+              >
+                <img v-if="imagePreview" :src="imagePreview" class="w-full h-full object-cover" />
+                <div v-else class="text-slate-300 group-hover/img:text-indigo-400 transition-colors">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+                <div class="absolute inset-0 bg-indigo-600/10 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                  <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 space-y-2">
+                <input 
+                  type="file" 
+                  ref="fileInput" 
+                  class="hidden" 
+                  accept="image/*"
+                  @change="handleFileChange"
+                />
+                <p class="text-[10px] font-medium text-slate-400 leading-relaxed">
+                  ارفع صورة تعبيرية للفئة (JPG, PNG).<br>
+                  الحد الأقصى للحجم: 2MB.
+                </p>
+                <MButton 
+                  v-if="imagePreview" 
+                  variant="secondary" 
+                  size="sm" 
+                  type="button" 
+                  @click="clearImage"
+                  class="!py-1 !px-3 !h-8 !text-[10px] !rounded-lg !text-rose-600 hover:!bg-rose-50 border-none"
+                >
+                  إزالة الصورة
+                </MButton>
+              </div>
+            </div>
+          </div>
+
           <div class="pt-6 flex gap-3">
              <MButton variant="secondary" size="lg" type="button" @click="closeModal" class="flex-1 !rounded-2xl">إلغاء</MButton>
              <MButton variant="primary" size="lg" type="submit" class="flex-[2] !rounded-2xl shadow-lg shadow-indigo-100" :loading="loading">
@@ -287,6 +334,29 @@ const form = ref({
   parent_id: null as number | null, 
   is_active: true 
 })
+const imageFile = ref<File | null>(null)
+const imagePreview = ref<string | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const getImageUrl = (url: string) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return `http://127.0.0.1:8000${url}`
+}
+
+const handleFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    imageFile.value = target.files[0]
+    imagePreview.value = URL.createObjectURL(target.files[0])
+  }
+}
+
+const clearImage = () => {
+  imageFile.value = null
+  imagePreview.value = null
+  if (fileInput.value) fileInput.value.value = ''
+}
 
 // Calculations
 const rootCategories = computed(() => categories.value.filter(c => !c.parent_id))
@@ -337,9 +407,13 @@ const openModal = (cat?: Category) => {
       parent_id: cat.parent_id ?? null,
       is_active: cat.is_active ?? true,
     }
+    imagePreview.value = (cat.images && cat.images.length > 0) ? getImageUrl(cat.images[0]?.url || '') : null
+    imageFile.value = null
   } else {
     editingId.value = null
     form.value = { name: '', description: '', parent_id: null, is_active: true }
+    imagePreview.value = null
+    imageFile.value = null
   }
   show.value = true
 }
@@ -352,13 +426,43 @@ const closeModal = () => {
 const submit = async () => {
   loading.value = true
   try {
-    const payload = { ...form.value }
-    if (editingId.value) await updateCategory(editingId.value, payload)
-    else await createCategory(payload)
+    const fd = new FormData()
+    fd.append('name', form.value.name)
+    if (form.value.description) {
+      fd.append('description', form.value.description)
+    }
+    fd.append('is_active', form.value.is_active ? '1' : '0')
+    
+    if (form.value.parent_id !== null && form.value.parent_id !== undefined) {
+      fd.append('parent_id', String(form.value.parent_id))
+    }
+    
+    if (imageFile.value) {
+      fd.append('image', imageFile.value)
+    }
+
+    if (editingId.value) {
+      fd.append('_method', 'PUT')
+      await updateCategory(editingId.value, fd)
+    } else {
+      await createCategory(fd)
+    }
     closeModal()
     await load()
-  } catch (e) {
-    console.error('Submit failed', e)
+  } catch (e: any) {
+    console.error('Submit failed details:', e)
+    let errorMessage = 'فشل في حفظ الفئة'
+    try {
+      const errorData = JSON.parse(e.message)
+      if (errorData.message) errorMessage += ': ' + errorData.message
+      if (errorData.errors) {
+        const firstError = Object.values(errorData.errors)[0] as string[]
+        if (firstError) errorMessage += ' (' + firstError[0] + ')'
+      }
+    } catch {
+      errorMessage += ': ' + (e.message || 'خطأ غير معروف')
+    }
+    alert(errorMessage)
   } finally {
     loading.value = false
   }
