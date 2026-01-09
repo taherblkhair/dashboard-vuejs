@@ -17,6 +17,18 @@ export interface Variant {
   sale_price: string
   expiry_date: string
   is_active: boolean
+  images?: ProductImage[]
+  created_at?: string
+  updated_at?: string
+}
+
+export interface ProductImage {
+  id: number
+  url: string
+  path: string
+  type: string
+  imageable_type: string
+  imageable_id: number
   created_at?: string
   updated_at?: string
 }
@@ -30,6 +42,7 @@ export interface Product {
   is_active: boolean
   category?: Category
   variants: Variant[]
+  images?: ProductImage[]
   created_at?: string
   updated_at?: string
 }
@@ -64,9 +77,10 @@ export async function fetchProduct(id: number): Promise<{ data: Product } | Prod
   return request(`/products/${id}`)
 }
 
-export async function createProduct(payload: Partial<Product>): Promise<{ data: Product }> {
+export async function createProduct(payload: Partial<Product> | FormData): Promise<{ data: Product }> {
   // Expect API to return shape: { data: Product }
-  return request(`/products`, { method: 'POST', body: JSON.stringify(payload) }) as Promise<{ data: Product }>
+  const body = payload instanceof FormData ? payload : JSON.stringify(payload)
+  return request(`/products`, { method: 'POST', body }) as Promise<{ data: Product }>
 }
 
 export async function deleteProduct(id: number): Promise<{ message?: string } | any> {

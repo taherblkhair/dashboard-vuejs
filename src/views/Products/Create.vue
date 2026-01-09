@@ -99,31 +99,43 @@
                       <!-- Product Summary -->
                       <div>
                         <h4 class="font-medium text-gray-700 mb-4">ملخص المنتج</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div class="space-y-3">
-                            <div class="flex items-center gap-3">
-                              <span class="text-gray-500 text-sm w-24">الاسم:</span>
-                              <span class="font-medium">{{ previewData.name || 'لم يتم التحديد' }}</span>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <!-- Main Image Preview -->
+                          <div class="col-span-1">
+                            <div v-if="previewData.main_image" class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                              <img :src="getImageUrl(previewData.main_image)" class="w-full h-full object-cover" />
                             </div>
-                            <div class="flex items-center gap-3">
-                              <span class="text-gray-500 text-sm w-24">SKU:</span>
-                              <span class="font-mono text-sm">{{ previewData.sku || 'لم يتم التحديد' }}</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                              <span class="text-gray-500 text-sm w-24">الفئة:</span>
-                              <span>{{ getCategoryName(previewData.category_id) || 'لم يتم التحديد' }}</span>
+                            <div v-else class="aspect-square rounded-xl flex items-center justify-center bg-gray-50 border border-dashed border-gray-200 text-gray-400 text-xs">
+                              لا توجد صورة رئيسية
                             </div>
                           </div>
-                          <div class="space-y-3">
-                            <div class="flex items-center gap-3">
-                              <span class="text-gray-500 text-sm w-24">الحالة:</span>
-                              <span :class="previewData.is_active ? 'text-green-600' : 'text-red-600'">
-                                {{ previewData.is_active ? 'نشط' : 'غير نشط' }}
-                              </span>
+                          
+                          <div class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                              <div class="flex items-center gap-3">
+                                <span class="text-gray-500 text-sm w-24">الاسم:</span>
+                                <span class="font-medium">{{ previewData.name || 'لم يتم التحديد' }}</span>
+                              </div>
+                              <div class="flex items-center gap-3">
+                                <span class="text-gray-500 text-sm w-24">SKU:</span>
+                                <span class="font-mono text-sm">{{ previewData.sku || 'لم يتم التحديد' }}</span>
+                              </div>
+                              <div class="flex items-center gap-3">
+                                <span class="text-gray-500 text-sm w-24">الفئة:</span>
+                                <span>{{ getCategoryName(previewData.category_id) || 'لم يتم التحديد' }}</span>
+                              </div>
                             </div>
-                            <div class="flex items-center gap-3">
-                              <span class="text-gray-500 text-sm w-24">الوصف:</span>
-                              <span class="text-sm">{{ previewData.description ? previewData.description.substring(0, 50) + '...' : 'لا يوجد وصف' }}</span>
+                            <div class="space-y-3">
+                              <div class="flex items-center gap-3">
+                                <span class="text-gray-500 text-sm w-24">الحالة:</span>
+                                <span :class="previewData.is_active ? 'text-green-600' : 'text-red-600'">
+                                  {{ previewData.is_active ? 'نشط' : 'غير نشط' }}
+                                </span>
+                              </div>
+                              <div class="flex items-center gap-3">
+                                <span class="text-gray-500 text-sm w-24">الوصف:</span>
+                                <span class="text-sm truncate block max-w-[150px]">{{ previewData.description || 'لا يوجد وصف' }}</span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -138,7 +150,12 @@
                           <div v-for="(variant, index) in previewData.variants" :key="index"
                                class="border border-gray-100 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                             <div class="flex items-center justify-between mb-2">
-                              <div class="font-medium text-sm">{{ variant.sku_variant }}</div>
+                              <div class="flex items-center gap-3">
+                                <div v-if="variant.image" class="w-10 h-10 rounded bg-gray-100 overflow-hidden border">
+                                  <img :src="getImageUrl(variant.image)" class="w-full h-full object-cover" />
+                                </div>
+                                <div class="font-medium text-sm">{{ variant.sku_variant }}</div>
+                              </div>
                               <div class="flex items-center gap-2">
                                 <span class="px-2 py-1 text-xs rounded-full"
                                       :class="variant.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
@@ -358,6 +375,13 @@ const getColorName = (colorCode: string) => {
   return colors[colorCode] || colorCode
 }
 
+const getImageUrl = (file: File | string) => {
+  if (file instanceof File) {
+    return URL.createObjectURL(file)
+  }
+  return file // If it's already a URL
+}
+
 const goToNextStep = async () => {
   if (productFormRef.value) {
     const formData = productFormRef.value.getFormData()
@@ -382,31 +406,55 @@ const goToPrevStep = () => {
 }
 
 const sanitizePayload = (formData: any) => {
-  const payload: any = {
-    sku: formData.sku,
-    name: formData.name,
-    description: formData.description,
-    category_id: formData.category_id ? Number(formData.category_id) : undefined,
-    is_active: !!formData.is_active,
-    variants: (formData.variants || []).map((v: any) => ({
-      // include only API-relevant fields
-      attributes: v.attributes || {},
-      purchase_price: Number(v.purchase_price) || 0,
-      sale_price: Number(v.sale_price) || 0,
-      expiry_date: v.expiry_date || undefined,
-      is_active: typeof v.is_active === 'boolean' ? v.is_active : true,
-      // optional: include sku_variant if present
-      ...(v.sku_variant ? { sku_variant: v.sku_variant } : {})
-    }))
+  const data = new FormData()
+  
+  data.append('sku', formData.sku)
+  data.append('name', formData.name)
+  if (formData.description) data.append('description', formData.description)
+  if (formData.category_id) data.append('category_id', String(formData.category_id))
+  data.append('is_active', formData.is_active ? '1' : '0')
+  
+  if (formData.main_image) {
+    data.append('main_image', formData.main_image)
   }
-  return payload
+  
+  if (formData.images && formData.images.length > 0) {
+    formData.images.forEach((img: File, idx: number) => {
+      data.append(`images[${idx}]`, img)
+    })
+  }
+  
+  if (formData.variants && formData.variants.length > 0) {
+    formData.variants.forEach((v: any, idx: number) => {
+      data.append(`variants[${idx}][sku_variant]`, v.sku_variant || `${formData.sku}-${idx + 1}`)
+      data.append(`variants[${idx}][purchase_price]`, String(v.purchase_price || 0))
+      data.append(`variants[${idx}][sale_price]`, String(v.sale_price || 0))
+      if (v.expiry_date) data.append(`variants[${idx}][expiry_date]`, v.expiry_date)
+      data.append(`variants[${idx}][is_active]`, v.is_active ? '1' : '0')
+      
+      // Attributes
+      if (v.attributes) {
+        Object.entries(v.attributes).forEach(([key, val]) => {
+          if (val) data.append(`variants[${idx}][attributes][${key}]`, String(val))
+        })
+      }
+      
+      // Variant Image
+      if (v.image) {
+        data.append(`variants[${idx}][image]`, v.image)
+      }
+    })
+  }
+  
+  return data
 }
 
 const saveAsDraft = async () => {
   if (productFormRef.value) {
     const formData = productFormRef.value.getFormData()
     const payload = sanitizePayload(formData)
-    await onSave({ ...payload, is_draft: true })
+    payload.append('is_draft', '1')
+    await onSave(payload)
   }
 }
 

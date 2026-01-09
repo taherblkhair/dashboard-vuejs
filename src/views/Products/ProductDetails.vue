@@ -73,6 +73,49 @@
             </MCard>
           </div>
 
+          <!-- Product Images Gallery -->
+          <MCard class="!p-8 !rounded-[2rem] border-none shadow-sm bg-white space-y-6">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <h3 class="text-xl font-black text-slate-900 tracking-tight">معرض الصور</h3>
+            </div>
+            
+            <div v-if="product?.images?.length || hasVariantImages(product)" class="space-y-6">
+              <!-- Feature Image -->
+              <div class="relative aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden bg-slate-100 border border-slate-100 group">
+                <img 
+                  :src="getImageUrl(getMainImage(product)?.url)" 
+                  class="w-full h-full object-contain bg-white"
+                />
+                <div class="absolute bottom-4 right-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-black text-indigo-600 shadow-lg border border-white/50">
+                  الصورة الرئيسية
+                </div>
+              </div>
+
+              <!-- Gallery Grid -->
+              <div v-if="product?.images && product.images.length > 1" class="grid grid-cols-3 sm:grid-cols-6 gap-4">
+                <div 
+                  v-for="img in (product?.images || []).filter(i => i.type !== 'main')" 
+                  :key="img.id"
+                  class="aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all cursor-zoom-in"
+                >
+                  <img :src="getImageUrl(img.url)" class="w-full h-full object-cover" />
+                </div>
+              </div>
+            </div>
+            
+            <div v-else class="py-12 flex flex-col items-center justify-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200 text-slate-400">
+              <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <p class="font-bold text-xs uppercase tracking-widest">لا توجد صور لهذا المنتج</p>
+            </div>
+          </MCard>
+
           <!-- Description -->
           <MCard class="!p-8 !rounded-[2rem] border-none shadow-sm bg-white space-y-4">
             <div class="flex items-center gap-3 mb-2">
@@ -106,7 +149,7 @@
 
             <MTable v-if="product?.variants?.length">
               <template #header>
-                <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">SKU</th>
+                <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">المتغير</th>
                 <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">الخصائص</th>
                 <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">سعر البيع</th>
                 <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">الحالة</th>
@@ -114,9 +157,14 @@
               
               <tr v-for="item in product.variants" :key="item.id" class="group hover:bg-slate-50/50 transition-colors">
                 <td class="px-8 py-5">
-                  <code class="text-xs font-mono font-black text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200/50">
-                    {{ item.sku_variant }}
-                  </code>
+                  <div class="flex items-center gap-3">
+                    <div v-if="item.images && item.images.length > 0" class="w-10 h-10 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 shrink-0">
+                      <img :src="getImageUrl(item.images?.[0]?.url)" class="w-full h-full object-cover" />
+                    </div>
+                    <code class="text-[10px] font-mono font-black text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/50">
+                      {{ item.sku_variant }}
+                    </code>
+                  </div>
                 </td>
                 <td class="px-8 py-5">
                   <div class="flex flex-wrap gap-1.5 py-1">
@@ -269,6 +317,25 @@ const fetchStock = async () => {
 }
 
 const goBack = () => router.back()
+
+const getImageUrl = (url?: string) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return `http://127.0.0.1:8000${url}`
+}
+
+const getMainImage = (product: Product | null) => {
+  if (product?.images?.length) {
+    return product.images.find(img => img.type === 'main') || product.images[0]
+  }
+  // Fallback to first variant image
+  const firstVariantWithImage = product?.variants?.find(v => v.images?.length)
+  return firstVariantWithImage?.images?.[0]
+}
+
+const hasVariantImages = (product: Product | null) => {
+  return product?.variants?.some(v => v.images?.length)
+}
 
 onMounted(async () => {
   await fetchProductData()

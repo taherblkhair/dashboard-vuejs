@@ -123,7 +123,10 @@
             <tr v-for="item in filteredProducts" :key="item.id" class="group hover:bg-slate-50/50 transition-colors">
               <td class="px-8 py-5">
                 <div class="flex items-center gap-4">
-                  <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-black text-xl shadow-sm border border-white">
+                  <div v-if="getProductImageUrl(item)" class="w-14 h-14 rounded-2xl overflow-hidden border border-white shadow-sm shrink-0">
+                    <img :src="getProductImageUrl(item)" class="w-full h-full object-cover" />
+                  </div>
+                  <div v-else class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-black text-xl shadow-sm border border-white shrink-0">
                     {{ item.name.charAt(0) }}
                   </div>
                   <div class="space-y-1">
@@ -325,6 +328,18 @@ watch([categoryFilter, statusFilter], () => {
 const getMinPrice = (variants: Variant[]) => {
   if (!variants || variants.length === 0) return 0
   return Math.min(...variants.map(v => parseFloat(String(v.sale_price) || '0')))
+}
+
+const getProductImageUrl = (product: Product): string | undefined => {
+  const mainImage = product.images?.find(img => img.type === 'main')
+  if (mainImage) {
+    const url = mainImage.url
+    if (url.startsWith('http')) return url
+    // Use the same base as Categories (root domain, usually 8000)
+    const baseUrl = 'http://127.0.0.1:8000'
+    return `${baseUrl}${url}`
+  }
+  return undefined
 }
 
 const viewProductDetails = (product: Product) => {

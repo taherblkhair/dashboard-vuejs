@@ -37,6 +37,80 @@
 
     <!-- Step 1: Basic Information -->
     <div v-if="currentStep === 0" class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <!-- Image Upload Section -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Main Image -->
+        <div class="space-y-2 col-span-1">
+          <label class="text-sm font-black text-slate-700 block px-1">الصورة الرئيسية</label>
+          <div 
+            class="relative w-full aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden group"
+            @click="$refs.mainImageInput.click()"
+          >
+            <input 
+              type="file" 
+              ref="mainImageInput" 
+              class="hidden" 
+              accept="image/*"
+              @change="handleMainImageChange"
+            />
+            <div v-if="mainImagePreview" class="absolute inset-0">
+              <img :src="mainImagePreview" class="w-full h-full object-cover" />
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span class="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">تغيير الصورة</span>
+              </div>
+            </div>
+            <div v-else class="text-center p-4">
+              <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-400 mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <p class="text-[11px] font-black text-slate-500 uppercase tracking-wider">اختر الصورة</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gallery Images -->
+        <div class="space-y-2 col-span-2">
+          <label class="text-sm font-black text-slate-700 block px-1">صور المعرض</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div 
+              v-for="(img, idx) in galleryPreviews" 
+              :key="idx"
+              class="relative aspect-square rounded-xl border border-slate-200 overflow-hidden group"
+            >
+              <img :src="img" class="w-full h-full object-cover" />
+              <button 
+                type="button"
+                @click="removeGalleryImage(idx)"
+                class="absolute top-1 left-1 w-6 h-6 bg-rose-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-lg"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div 
+              v-if="galleryPreviews.length < 10"
+              class="aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all"
+              @click="$refs.galleryInput.click()"
+            >
+              <input 
+                type="file" 
+                ref="galleryInput" 
+                class="hidden" 
+                multiple 
+                accept="image/*"
+                @change="handleGalleryChange"
+              />
+              <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- Product Name -->
         <div class="space-y-2">
@@ -183,17 +257,41 @@
           <div v-show="v._open" class="px-8 pb-8 pt-2 space-y-6 border-t border-slate-50 animate-in fade-in duration-300">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-4">
-                <h5 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">البيانات الأساسية</h5>
-                <div class="space-y-4">
-                  <div class="space-y-1.5">
-                    <label class="text-[11px] font-black text-slate-500 block px-1">SKU المتغير</label>
-                    <MInput v-model="v.sku_variant" class="!rounded-xl bg-slate-50/50" disabled />
+                <h5 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">البيانات الأساسية والصورة</h5>
+                <div class="flex gap-4">
+                  <!-- Variant Image -->
+                  <div 
+                    class="relative w-24 h-24 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden group shrink-0"
+                    @click="$refs[`variantImageInput-${i}`][0].click()"
+                  >
+                    <input 
+                      type="file" 
+                      :ref="`variantImageInput-${i}`" 
+                      class="hidden" 
+                      accept="image/*"
+                      @change="(e) => handleVariantImageChange(e, i)"
+                    />
+                    <div v-if="v.imagePreview" class="absolute inset-0">
+                      <img :src="v.imagePreview" class="w-full h-full object-cover" />
+                    </div>
+                    <div v-else class="text-center p-2">
+                      <svg class="w-6 h-6 text-slate-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div class="space-y-1.5">
-                    <label class="text-[11px] font-black text-slate-500 block px-1">تاريخ الانتهاء (اختياري)</label>
-                    <input v-model="v.expiry_date" 
-                           type="date" 
-                           class="w-full h-11 px-4 rounded-xl border-none bg-slate-50/50 ring-1 ring-slate-100 focus:ring-2 focus:ring-indigo-600 transition-all font-bold text-sm text-slate-700" />
+
+                  <div class="flex-1 space-y-4">
+                    <div class="space-y-1.5">
+                      <label class="text-[11px] font-black text-slate-500 block px-1">SKU المتغير</label>
+                      <MInput v-model="v.sku_variant" class="!rounded-xl bg-slate-50/50" disabled />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-[11px] font-black text-slate-500 block px-1">تاريخ الانتهاء (اختياري)</label>
+                      <input v-model="v.expiry_date" 
+                             type="date" 
+                             class="w-full h-11 px-4 rounded-xl border-none bg-slate-50/50 ring-1 ring-slate-100 focus:ring-2 focus:ring-indigo-600 transition-all font-bold text-sm text-slate-700" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -363,8 +461,42 @@ const form = reactive({
   description: '',
   category_id: '',
   is_active: true,
+  main_image: null as File | null,
+  images: [] as File[],
   variants: [] as any[]
 })
+
+const mainImagePreview = ref('')
+const galleryPreviews = ref<string[]>([])
+
+const handleMainImageChange = (e: Event) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) {
+    form.main_image = file
+    mainImagePreview.value = URL.createObjectURL(file)
+  }
+}
+
+const handleGalleryChange = (e: Event) => {
+  const files = Array.from((e.target as HTMLInputElement).files || [])
+  files.forEach(file => {
+    form.images.push(file)
+    galleryPreviews.value.push(URL.createObjectURL(file))
+  })
+}
+
+const removeGalleryImage = (index: number) => {
+  form.images.splice(index, 1)
+  galleryPreviews.value.splice(index, 1)
+}
+
+const handleVariantImageChange = (e: Event, index: number) => {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) {
+    form.variants[index].image = file
+    form.variants[index].imagePreview = URL.createObjectURL(file)
+  }
+}
 
 const errors = reactive({
   name: '',
@@ -423,6 +555,8 @@ const addVariant = async () => {
     sale_price: 0,
     expiry_date: '',
     is_active: true,
+    image: null as File | null,
+    imagePreview: '',
     attributes: {
       color: '',
       size: '',
@@ -546,13 +680,16 @@ const onSubmit = () => {
     description: form.description,
     category_id: form.category_id || undefined,
     is_active: form.is_active,
+    main_image: form.main_image,
+    images: form.images,
     variants: form.variants.map(v => ({
       sku_variant: v.sku_variant,
       purchase_price: v.purchase_price,
       sale_price: v.sale_price,
       expiry_date: v.expiry_date,
       is_active: v.is_active,
-      attributes: v.attributes
+      attributes: v.attributes,
+      image: v.image
     }))
   })
 }
@@ -565,6 +702,8 @@ const getFormData = () => {
     description: form.description,
     category_id: form.category_id,
     is_active: form.is_active,
+    main_image: form.main_image,
+    images: form.images,
     variants: form.variants
   }
 }
