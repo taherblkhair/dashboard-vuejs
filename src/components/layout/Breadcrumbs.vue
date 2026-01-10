@@ -85,7 +85,8 @@ const labelMap: Record<string, string> = {
   PurchasesSupplierEdit: 'تعديل مورد',
   PurchasesSupplierPurchaseOrders: 'طلبات المورد',
   StockMovementCreate: 'حركة مخزنية',
-  StockMovementTransfer: 'تحويل مخزني'
+  StockMovementTransfer: 'تحويل مخزني',
+  Profile: 'الملف الشخصي'
 }
 
 // parent mapping when detail pages should show a parent link

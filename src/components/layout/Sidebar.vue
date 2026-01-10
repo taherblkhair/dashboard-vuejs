@@ -104,27 +104,62 @@
       
 
         <!-- User Profile Card -->
-        <div 
-          class="flex items-center gap-3 p-2 bg-slate-900 rounded-[2rem] shadow-xl shadow-slate-200/50 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer relative overflow-hidden"
-          @click="toggleUserMenu"
-        >
-          <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent"></div>
-          <div class="relative flex-shrink-0">
-            <img
-              class="w-10 h-10 rounded-2xl object-cover ring-2 ring-white/10"
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
-              alt="User"
-            />
-            <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900 shadow-sm"></div>
+        <div class="relative">
+          <div 
+            class="flex items-center gap-3 p-2 bg-slate-900 rounded-[2rem] shadow-xl shadow-slate-200/50 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer relative overflow-hidden"
+            @click="toggleUserMenu"
+          >
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent"></div>
+            <div class="relative flex-shrink-0">
+              <img
+                class="w-10 h-10 rounded-2xl object-cover ring-2 ring-white/10"
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80"
+                alt="User"
+              />
+              <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900 shadow-sm"></div>
+            </div>
+            <div class="min-w-0 flex-1 relative" v-show="!isCollapsed || hovered">
+               <p class="text-[9px] font-black text-indigo-400 uppercase leading-none mb-1">أهلاً بك</p>
+               <p class="text-sm font-bold text-white truncate">{{ authUser?.name || 'المستخدم' }}</p>
+            </div>
+            <div v-show="!isCollapsed || hovered" class="p-2 relative transition-transform duration-300" :class="{ 'rotate-180': showUserMenu }">
+               <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+               </svg>
+            </div>
           </div>
-          <div class="min-w-0 flex-1 relative" v-show="!isCollapsed || hovered">
-             <p class="text-[9px] font-black text-indigo-400 uppercase leading-none mb-1">أهلاً بك</p>
-             <p class="text-sm font-bold text-white truncate">أحمد محمد</p>
-          </div>
-          <div v-show="!isCollapsed || hovered" class="p-2 relative">
-             <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-             </svg>
+
+          <!-- User Dropdown Menu -->
+          <div 
+            v-if="showUserMenu" 
+            class="absolute bottom-full right-0 left-0 mb-4 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-in slide-in-from-bottom-2 duration-200"
+          >
+            <div class="p-2">
+              <router-link
+                to="/profile"
+                class="flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all group"
+                @click="showUserMenu = false"
+              >
+                <div class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <span class="text-sm font-bold">الملف الشخصي</span>
+              </router-link>
+
+              <button
+                @click="handleLogout"
+                class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 transition-all group"
+              >
+                <div class="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </div>
+                <span class="text-sm font-bold">تسجيل الخروج</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -133,8 +168,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { logout } from "../../api/auth";
 
 const props = defineProps<{ isOpen: boolean }>();
 const emit = defineEmits<{
@@ -150,6 +186,7 @@ const isCollapsed = ref(false);
 const hovered = ref(false);
 const showUserMenu = ref(false);
 const searchQuery = ref("");
+const authUser = ref<any>(null);
 
 // All defined routes in the sidebar for best-match detection
 const allRoutes = computed(() => {
@@ -167,6 +204,15 @@ const allRoutes = computed(() => {
 
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;
+};
+
+const handleLogout = async () => {
+  try {
+    await logout();
+    router.push("/login");
+  } catch (e) {
+    console.error("Logout failed:", e);
+  }
 };
 
 const isActiveRoute = (routePath?: string) => {
@@ -334,6 +380,18 @@ const filteredMenuItems = computed(() => {
 
 watch(() => route.path, () => {
   if (window.innerWidth < 1024) emit("close");
+  showUserMenu.value = false;
+});
+
+onMounted(() => {
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    try {
+      authUser.value = JSON.parse(userStr);
+    } catch (e) {
+      console.error('Error parsing user data', e);
+    }
+  }
 });
 </script>
 

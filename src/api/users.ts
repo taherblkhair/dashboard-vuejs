@@ -40,6 +40,10 @@ export async function fetchRoles(): Promise<any> {
   return request('/roles')
 }
 
+export async function fetchUserProfile(): Promise<any> {
+  return request('/users/profile')
+}
+
 export async function toggleUserStatus(id: number): Promise<any> {
   return request(`/users/${id}/toggle-active`, {
     method: 'PATCH'
@@ -53,4 +57,5 @@ export default {
   deleteUser,
   toggleUserStatus,
   fetchRoles,
+  fetchUserProfile,
 }
