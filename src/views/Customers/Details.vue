@@ -113,6 +113,7 @@ import MInput from '../../components/ui/MInput.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import { formatCurrency, formatDate } from '../../utils/helpers'
 
 const route = useRoute()
 const router = useRouter()
@@ -170,22 +171,9 @@ const loadAddresses = async () => {
 }
 
 // small presentation helpers
-const formatDate = (iso?: string) => {
-  if (!iso) return '—'
-  try {
-    const d = new Date(iso)
-    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-  } catch {
-    return iso
-  }
-}
 
-const formatCurrency = (val?: string | number) => {
-  if (val === null || val === undefined || val === '') return '0.00'
-  const num = typeof val === 'number' ? val : Number(String(val))
-  if (Number.isNaN(num)) return String(val)
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(num)
-}
+
+
 
 onMounted(async () => {
   await loadCustomer()

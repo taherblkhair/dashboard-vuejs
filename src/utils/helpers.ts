@@ -19,8 +19,8 @@ export function formatCurrency(val?: string | number): string {
   
   // Using en-US ensures English numerals (0-9)
   const formatted = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(num)
   
   return `${formatted} د.ل`

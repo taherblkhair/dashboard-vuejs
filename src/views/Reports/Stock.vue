@@ -25,7 +25,7 @@
       </div>
 
       <!-- KPI Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
           <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
           <div class="flex items-center gap-4">
@@ -52,7 +52,7 @@
             </div>
             <div>
               <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">إجمالي الكمية</p>
-              <h3 class="text-3xl font-black text-slate-800">{{ formatNumber(report.data?.total_quantity) }}</h3>
+              <h3 class="text-3xl font-black text-slate-800">{{   (report.data?.total_quantity) }}</h3>
             </div>
           </div>
         </div>

@@ -176,6 +176,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { fetchStockReport } from '../api/reports'
+import { formatCurrency, formatAttributes  } from '../utils/helpers'
 
 const report = ref<any>({})
 const items = ref<any[]>([])
@@ -209,19 +210,8 @@ const filteredItems = computed(() => {
   )
 })
 
-const formatCurrency = (v: any) => {
-  const val = Number(v) || 0
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'LYD' }).format(val).replace('LYD', 'د.ل')
-}
 
-const formatAttributes = (attr: any) => {
-  if (!attr) return ''
-  if (typeof attr === 'string') {
-    try { const parsed = JSON.parse(attr); return Object.entries(parsed).map(([k, v]) => `${k}: ${v}`).join(', ') } catch { return attr }
-  }
-  if (typeof attr === 'object') { try { return Object.entries(attr).map(([k, v]) => `${k}: ${v}`).join(', ') } catch { return String(attr) } }
-  return String(attr)
-}
+
 
 const downloadFile = (content: BlobPart, filename: string, type = 'text/csv;charset=utf-8;') => {
   const blob = new Blob([content], { type })

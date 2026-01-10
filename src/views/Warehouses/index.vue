@@ -196,6 +196,7 @@ import ActionMenu from '../../components/ui/ActionMenu.vue'
 import MStatsCard from '../../components/ui/MStatsCard.vue'
 import { useConfirm } from '../../composables/useConfirm'
 import { useToast } from '../../composables/useToast'
+import { formatNumber  } from '../../utils/helpers'
 
 const router = useRouter()
 const { confirm } = useConfirm()
@@ -245,10 +246,7 @@ const initials = (name?: string) => {
   return name.split(' ').map(s => s.charAt(0)).slice(0, 2).join('').toUpperCase()
 }
 
-const formatNumber = (v: any) => {
-  if (v === null || v === undefined || v === '') return '0'
-  return Number(v).toLocaleString('ar-SA')
-}
+
 
 const getUtilizationColor = (utilization: any) => {
   const u = Number(utilization) || 0
