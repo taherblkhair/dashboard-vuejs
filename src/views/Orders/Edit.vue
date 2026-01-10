@@ -77,7 +77,7 @@
                   </div>
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div class="col-span-2">
-                      <label class="block text-xs text-gray-500 mb-1">المنتج</label>
+                      <label class="block text-xs text-gray-500 mb-1">الصنف</label>
                       <VariantAutocomplete 
                         v-model="line.product_variant_id" 
                         :selected-label="line.product_name || ''"
@@ -225,7 +225,7 @@ const loadOrder = async () => {
           unit_price: l.unit_price,
           discount_amount: l.discount_amount || 0,
           notes: l.notes || '',
-          product_name: l.product_variant?.product?.name || l.product_variant?.name || 'المنتج',
+          product_name: l.product_variant?.product?.name || l.product_variant?.name || 'الصنف',
           product_sku: l.product_variant?.sku_variant || ''
         }))
       }
@@ -289,7 +289,7 @@ const onVariantSelected = (idx: number, v: any) => {
   if (!v) return
   form.value.lines[idx].product_variant_id = v.id
   form.value.lines[idx].unit_price = Number(v.sale_price || 0)
-  form.value.lines[idx].product_name = v.product?.name || v.name || 'المنتج'
+  form.value.lines[idx].product_name = v.product?.name || v.name || 'الصنف'
   form.value.lines[idx].product_sku = v.sku_variant || ''
 }
 
@@ -301,7 +301,7 @@ const submit = async () => {
   if (!form.value.customer_id) return addToast('اختر عميل', 'error')
   if (!form.value.lines.length) return addToast('أضف بند واحد على الأقل', 'error')
   for (const l of form.value.lines) {
-    if (!l.product_variant_id) return addToast('اختر منتج لكل بند', 'error')
+    if (!l.product_variant_id) return addToast('اختر صنف لكل بند', 'error')
   }
   try {
     submitting.value = true

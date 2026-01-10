@@ -74,7 +74,7 @@
           <MCard title="عناصر الطلب" padding="p-0">
             <MTable>
               <template #header>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">المنتج</th>
+                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الصنف</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الكمية</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">المستلم</th>
                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">السعر</th>

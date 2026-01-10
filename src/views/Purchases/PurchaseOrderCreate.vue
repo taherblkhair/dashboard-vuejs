@@ -71,7 +71,7 @@
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-xs text-gray-500 mb-1">المنتج</label>
+                      <label class="block text-xs text-gray-500 mb-1">الصنف</label>
                       <ProductAutocomplete
                         v-model="line.product_id"
                         @select="(p) => onProductSelected(idx, p)"
@@ -270,7 +270,7 @@ const validate = () => {
   if (!form.expected_delivery_date) { errors.expected_delivery_date = 'تاريخ التوصيل مطلوب'; ok = false }
   
   form.lines.forEach((l: any, i: number) => {
-    if (!l.product_variant_id) { errors[`line_${i}`] = `البند ${i+1}: المنتج مطلوب`; ok = false }
+    if (!l.product_variant_id) { errors[`line_${i}`] = `البند ${i+1}: الصنف مطلوب`; ok = false }
     if (l.quantity_ordered <= 0) { errors[`line_qty_${i}`] = `البند ${i+1}: الكمية يجب أن تكون أكبر من 0`; ok = false }
   })
   return ok

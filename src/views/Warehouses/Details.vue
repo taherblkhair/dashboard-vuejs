@@ -92,13 +92,13 @@
        <MCard title="تفاصيل المخزون">
           <template #actions>
              <div class="w-64">
-                <input v-model="searchStock" type="text" placeholder="بحث باسم المنتج أو SKU..." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none" />
+                <input v-model="searchStock" type="text" placeholder="بحث باسم الصنف أو SKU..." class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:outline-none" />
              </div>
           </template>
 
           <MTable :loading="loading" :empty="!filteredStock.length">
             <template #header>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المنتج</th>
+              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الصنف</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المواصفات</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الكمية الكلية</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">محجوز</th>
@@ -108,7 +108,7 @@
             <tr v-for="(s, idx) in filteredStock" :key="idx" class="hover:bg-gray-50">
                <td class="px-6 py-4">
                   <div>
-                     <p class="text-sm font-medium text-gray-900">{{ s.product_name || 'منتج غير معروف' }}</p>
+                     <p class="text-sm font-medium text-gray-900">{{ s.product_name || 'صنف غير معروف' }}</p>
                      <p class="text-xs text-gray-500 font-mono">{{ s.sku }}</p>
                   </div>
                </td>

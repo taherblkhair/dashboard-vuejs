@@ -19,7 +19,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
               </svg>
             </template>
-            إضافة منتج جديد
+            إضافة صنف جديد
           </MButton>
         </div>
       </div>
@@ -189,10 +189,10 @@
             </div>
             <div class="space-y-1">
               <h3 class="text-xl font-black text-slate-900">لا توجد أصناف مضافة</h3>
-              <p class="text-slate-500">ابدأ بإضافة أول منتج لنظام المخزون الخاص بك</p>
+              <p class="text-slate-500">ابدأ بإضافة أول صنف لنظام المخزون الخاص بك</p>
             </div>
             <MButton variant="primary" size="lg" @click="() => router.push({ name: 'ProductCreate' })" class="!rounded-2xl">
-              إضافة منتج جديد
+              إضافة صنف جديد
             </MButton>
           </div>
         </div>
@@ -347,7 +347,7 @@ const viewProductDetails = (product: Product) => {
 }
 
 const deleteProduct = async (product: Product) => {
-  if (!confirm(`هل أنت متأكد من حذف المنتج "${product.name}"؟`)) return
+  if (!confirm(`هل أنت متأكد من حذف الصنف "${product.name}"؟`)) return
 
   try {
     await apiDeleteProduct(product.id)

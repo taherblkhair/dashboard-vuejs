@@ -23,12 +23,12 @@
               </div>
 
               <div>
-                 <label class="block text-sm font-medium text-gray-700 mb-2">المنتج</label>
+                 <label class="block text-sm font-medium text-gray-700 mb-2">الصنف</label>
                  <VariantAutocomplete 
                     v-model="form.product_variant_id" 
                     :selected-label="selectedVariantLabel"
                     @select="onVariantSelect"
-                    placeholder="ابحث عن المنتج (الاسم أو SKU)"
+                    placeholder="ابحث عن الصنف (الاسم أو SKU)"
                  />
                  <p v-if="form.product_variant_id && selectedVariantSku" class="text-xs text-gray-500 mt-1">
                     SKU: {{ selectedVariantSku }}

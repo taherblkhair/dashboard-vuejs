@@ -31,7 +31,7 @@
         <div class="relative hidden xl:block group">
           <input
             type="text"
-            placeholder="بحث عن طلب، عميل أو منتج..."
+            placeholder="بحث عن طلب، عميل أو صنف..."
             class="w-96 bg-slate-50 border border-transparent rounded-[1.25rem] py-3 pl-12 pr-5 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-100 transition-all duration-300 placeholder:text-slate-400"
           />
           <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

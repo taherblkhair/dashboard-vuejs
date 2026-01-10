@@ -14,12 +14,12 @@
           <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-8">
             <div class="flex items-center justify-between mb-8">
               <div>
-                <h2 class="text-2xl font-bold text-gray-800">إضافة منتج جديد</h2>
-                <p class="text-gray-500 mt-1">املأ بيانات المنتج بالتفصيل للحصول على أفضل نتائج</p>
+                <h2 class="text-2xl font-bold text-gray-800">إضافة صنف جديد</h2>
+                <p class="text-gray-500 mt-1">املأ بيانات الصنف بالتفصيل للحصول على أفضل نتائج</p>
               </div>
               <div class="flex items-center gap-2">
                 <div class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-medium">
-                  {{ createdProducts.length }} منتج
+                  {{ createdProducts.length }} صنف
                 </div>
               </div>
             </div>
@@ -71,7 +71,7 @@
                       </div>
                       <div class="flex-1">
                         <p class="text-sm text-blue-800 font-medium">إدارة المتغيرات</p>
-                        <p class="text-xs text-blue-600 mt-1">يمكنك إضافة متغيرات مختلفة للمنتج حسب اللون، المقاس، الوزن، وغيرها من الخصائص</p>
+                        <p class="text-xs text-blue-600 mt-1">يمكنك إضافة متغيرات مختلفة للصنف حسب اللون، المقاس، الوزن، وغيرها من الخصائص</p>
                       </div>
                     </div>
                   </div>
@@ -98,7 +98,7 @@
                     <div class="space-y-6">
                       <!-- Product Summary -->
                       <div>
-                        <h4 class="font-medium text-gray-700 mb-4">ملخص المنتج</h4>
+                        <h4 class="font-medium text-gray-700 mb-4">ملخص الصنف</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <!-- Main Image Preview -->
                           <div class="col-span-1">
@@ -209,7 +209,7 @@
                           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                         </svg>
-                        <span>إضافة المنتج</span>
+                        <span>إضافة الصنف</span>
                       </button>
                     </div>
                   </div>
@@ -487,7 +487,7 @@ const saveFromForm = async () => {
       await onSave(payload)
       return
     }
-    return alert('نموذج المنتج غير متاح')
+    return alert('نموذج الصنف غير متاح')
   }
 
   // Run validation exposed by ProductForm (validateAll)
@@ -501,7 +501,7 @@ const saveFromForm = async () => {
     // Fallback: basic checks
     const tmp = productFormRef.value.getFormData()
     if (!tmp.name || !tmp.sku) {
-      alert('يرجى ملء الحقول الأساسية للمنتج قبل الحفظ')
+      alert('يرجى ملء الحقول الأساسية للصنف قبل الحفظ')
       return
     }
   }

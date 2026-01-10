@@ -91,7 +91,7 @@
               <table class="w-full text-right">
                 <thead>
                   <tr class="bg-gray-50/50 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <th class="px-6 py-3">المنتج</th>
+                    <th class="px-6 py-3">الصنف</th>
                     <th class="px-6 py-3 text-center">الكمية</th>
                     <th class="px-6 py-3">سعر الوحدة</th>
                     <th class="px-6 py-3">الإجمالي</th>
@@ -417,7 +417,7 @@
                 <table class="w-full text-right text-sm">
                    <thead class="bg-gray-50 font-semibold text-gray-600">
                       <tr>
-                        <th class="px-4 py-3">المنتج</th>
+                        <th class="px-4 py-3">الصنف</th>
                         <th class="px-4 py-3 text-center">الكمية المطلوبة</th>
                         <th class="px-4 py-3 text-center">المتوفر</th>
                       </tr>

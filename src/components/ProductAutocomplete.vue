@@ -6,7 +6,7 @@
       @keydown.down.prevent="onKeyDown(1)"
       @keydown.up.prevent="onKeyDown(-1)"
       @keydown.enter.prevent="onEnter"
-      :placeholder="placeholder || 'ابحث عن منتج...'
+      :placeholder="placeholder || 'ابحث عن صنف...'
       "
       aria-autocomplete="list"
       role="combobox"

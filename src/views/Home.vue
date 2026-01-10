@@ -334,7 +334,7 @@ const getCompletionRate = () => {
 
 const initials = (name?: string) => name ? name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase() : '??'
 
-const getProductName = (id: number) => `منتج متغير #${id}`
+const getProductName = (id: number) => `صنف متغير #${id}`
 
 const getStatusText = getOrderStatusLabel
 const getStatusBadgeClass = getOrderStatusColor

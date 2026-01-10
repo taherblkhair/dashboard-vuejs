@@ -238,7 +238,7 @@ const submit = async () => {
   if (!form.value.customer_id) return addToast('اختر عميل', 'error')
   if (!form.value.lines.length) return addToast('أضف بند واحد على الأقل', 'error')
   for (const l of form.value.lines) {
-    if (!l.product_variant_id) return addToast('اختر منتج لكل بند', 'error')
+    if (!l.product_variant_id) return addToast('اختر صنف لكل بند', 'error')
   }
   try {
     submitting.value = true

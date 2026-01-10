@@ -91,7 +91,7 @@
             <thead>
               <tr class="bg-slate-50/50 text-slate-500 text-xs font-semibold uppercase tracking-wider">
                 <th class="px-6 py-4 text-right">SKU</th>
-                <th class="px-6 py-4 text-right">المنتج</th>
+                <th class="px-6 py-4 text-right">الصنف</th>
                 <th class="px-6 py-4 text-center">الكمية</th>
                 <th class="px-6 py-4 text-center">المحجوز</th>
                 <th class="px-6 py-4 text-center">المتاح</th>

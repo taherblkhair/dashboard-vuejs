@@ -59,7 +59,7 @@
 
       <MTable :loading="loading" :empty="!filteredItems.length">
          <template #header>
-            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المنتج</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الصنف</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المتغير</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المخزن</th>
             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الكمية</th>
@@ -156,7 +156,7 @@ const downloadFile = (content: BlobPart, filename: string, type = 'text/csv;char
 const exportCsv = () => {
   if (!items.value || !items.value.length) return addToast('لا توجد بيانات للتصدير', 'warning')
   
-  const headers = ['SKU', 'المنتج', 'متغير', 'المخزن', 'كمية', 'محجوز', 'متاح', 'حالة']
+  const headers = ['SKU', 'الصنف', 'متغير', 'المخزن', 'كمية', 'محجوز', 'متاح', 'حالة']
   const rows = items.value.map((it: any) => {
     const sku = it.product_variant?.product?.sku ?? it.product_variant?.sku_variant ?? ''
     const product = it.product_variant?.product?.name ?? ''
@@ -178,7 +178,7 @@ const exportCsv = () => {
 const exportExcel = () => {
   if (!items.value || !items.value.length) return addToast('لا توجد بيانات للتصدير', 'warning')
   
-  const headerRow = `<tr style="background:#fef2f2"><th>SKU</th><th>المنتج</th><th>متغير</th><th>المخزن</th><th>كمية</th><th>محجوز</th><th>متاح</th><th>حالة</th></tr>`
+  const headerRow = `<tr style="background:#fef2f2"><th>SKU</th><th>الصنف</th><th>متغير</th><th>المخزن</th><th>كمية</th><th>محجوز</th><th>متاح</th><th>حالة</th></tr>`
   const bodyRows = items.value.map((it: any) => {
     const sku = it.product_variant?.product?.sku ?? it.product_variant?.sku_variant ?? ''
     const product = it.product_variant?.product?.name ?? ''

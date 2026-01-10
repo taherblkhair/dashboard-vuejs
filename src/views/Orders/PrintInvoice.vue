@@ -34,7 +34,7 @@
     <table class="invoice-table">
       <thead>
         <tr>
-          <th>المنتج</th>
+          <th>الصنف</th>
           <th class="text-center">الكمية</th>
           <th class="text-left">السعر</th>
           <th class="text-left">الإجمالي</th>

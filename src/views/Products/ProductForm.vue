@@ -115,10 +115,10 @@
         <!-- Product Name -->
         <div class="space-y-2">
           <label class="text-sm font-black text-slate-700 block px-1">
-            اسم المنتج <span class="text-rose-500">*</span>
+            اسم الصنف <span class="text-rose-500">*</span>
           </label>
           <MInput v-model="form.name" 
-                 placeholder="أدخل اسم المنتج"
+                 placeholder="أدخل اسم الصنف"
                  :error="errors.name" />
         </div>
 
@@ -169,10 +169,10 @@
         <label class="text-sm font-black text-slate-700 block px-1">الوصف</label>
         <textarea v-model="form.description" 
                   rows="4"
-                  placeholder="أدخل وصفاً تفصيلياً للمنتج..."
+                  placeholder="أدخل وصفاً تفصيلياً للصنف..."
                   class="w-full p-4 rounded-2xl border-none bg-slate-50 ring-1 ring-slate-100 focus:ring-2 focus:ring-indigo-600 transition-all font-medium text-slate-600 resize-none"></textarea>
         <div class="flex justify-between items-center mt-1">
-          <span class="text-[10px] font-black text-slate-300 uppercase">يمكنك إضافة وصف مفصل للمنتج</span>
+          <span class="text-[10px] font-black text-slate-300 uppercase">يمكنك إضافة وصف مفصل للصنف</span>
           <span class="text-[10px] font-bold text-slate-400">{{ form.description.length }}/500</span>
         </div>
       </div>
@@ -183,7 +183,7 @@
       <div class="flex items-center justify-between">
         <div class="space-y-1">
           <h4 class="text-xl font-black text-slate-900 tracking-tight">قائمة المتغيرات</h4>
-          <p class="text-sm font-medium text-slate-400">أضف متغيرات مختلفة للمنتج حسب الخصائص</p>
+          <p class="text-sm font-medium text-slate-400">أضف متغيرات مختلفة للصنف حسب الخصائص</p>
         </div>
         <MButton type="button"
                 variant="secondary"
@@ -209,7 +209,7 @@
         </div>
         <div class="space-y-1">
           <p class="font-black text-slate-900">لا توجد متغيرات مضافة</p>
-          <p class="text-sm text-slate-400 font-medium">ابدأ بإضافة متغيرات لتعريف خصائص المنتج</p>
+          <p class="text-sm text-slate-400 font-medium">ابدأ بإضافة متغيرات لتعريف خصائص الصنف</p>
         </div>
       </div>
 
@@ -424,7 +424,7 @@
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
             </svg>
           </template>
-          {{ loading ? 'جاري الحفظ...' : 'حفظ المنتج' }}
+          {{ loading ? 'جاري الحفظ...' : 'حفظ الصنف' }}
         </MButton>
       </div>
     </div>
@@ -613,7 +613,7 @@ const validateForm = () => {
   errors.sku = ''
   
   if (!form.name.trim()) {
-    errors.name = 'اسم المنتج مطلوب'
+    errors.name = 'اسم الصنف مطلوب'
     valid = false
   }
   
