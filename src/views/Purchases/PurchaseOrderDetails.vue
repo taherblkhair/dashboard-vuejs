@@ -160,13 +160,13 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { request } from '../../api'
 import { updatePurchaseOrderStatus } from '../../api/purchaseOrders'
-import { formatAttributes } from '../../utils/helpers'
 import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
 import { useToast } from '../../composables/useToast'
 import { useConfirm } from '../../composables/useConfirm'
+import { formatAttributes, formatCurrency, formatDate ,formatDateTime } from '../../utils/helpers'
 
 const route = useRoute()
 const router = useRouter()
@@ -223,20 +223,11 @@ const getPaymentStatusText = (status: string) => {
   return texts[status] || status
 }
 
-const formatDate = (iso?: string) => {
-  if (!iso) return 'غير محدد'
-  try { return new Date(iso).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }) } catch { return iso }
-}
 
-const formatDateTime = (iso?: string) => {
-  if (!iso) return 'غير محدد'
-  try { return new Date(iso).toLocaleString('ar-SA', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) } catch { return iso }
-}
 
-const formatCurrency = (val?: number) => {
-  if (val == null) return '0.00 د.ل'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(val) + ' د.ل'
-}
+
+
+
 
 const load = async () => {
   if (!id) return

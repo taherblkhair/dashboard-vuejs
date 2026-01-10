@@ -218,7 +218,6 @@ const menuItems = ref<any[]>([
         name: "طلبات المبيعات",
         route: "/orders",
         icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
-        badge: "12",
       },
       {
         name: "العملاء",
@@ -234,7 +233,6 @@ const menuItems = ref<any[]>([
         name: "طلبات الشراء",
         route: "/purchase-orders",
         icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
-        badge: "5",
       },
       {
         name: "الموردون",
