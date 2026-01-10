@@ -120,10 +120,6 @@
                 <span class="text-gray-500">الخصم</span>
                 <input v-model.number="form.discount_amount" type="number" min="0" step="0.01" class="w-20 px-2 py-1 border border-gray-200 rounded text-left text-sm" />
               </div>
-              <div class="flex justify-between text-sm items-center">
-                <span class="text-gray-500">الشحن</span>
-                <input v-model.number="form.shipping_fee" type="number" min="0" step="0.01" class="w-20 px-2 py-1 border border-gray-200 rounded text-left text-sm" />
-              </div>
               <div class="border-t pt-3 flex justify-between">
                 <span class="font-semibold text-gray-900">الإجمالي</span>
                 <span class="font-bold text-lg text-gray-900">{{ formatCurrency(grandTotal) }}</span>
