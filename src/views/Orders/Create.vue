@@ -133,7 +133,7 @@
         <router-link to="/orders">
           <MButton variant="secondary">إلغاء</MButton>
         </router-link>
-        <MButton variant="primary" @click="submit" :loading="submitting">
+        <MButton variant="primary" @click="submit" :loading="submitting" :disabled="submitting">
           {{ submitting ? 'جاري الحفظ...' : 'إنشاء الفاتورة' }}
         </MButton>
       </div>
@@ -231,13 +231,25 @@ const subtotal = computed(() => form.value.lines.reduce((s: number, l: any) => s
 const grandTotal = computed(() => subtotal.value - Number(form.value.discount_amount || 0) + Number(form.value.shipping_fee || 0))
 
 const submit = async () => {
-  if (!form.value.customer_id) return addToast('اختر عميل', 'error')
-  if (!form.value.lines.length) return addToast('أضف بند واحد على الأقل', 'error')
-  for (const l of form.value.lines) {
-    if (!l.product_variant_id) return addToast('اختر صنف لكل بند', 'error')
+  if (submitting.value) return
+  submitting.value = true
+
+  if (!form.value.customer_id) {
+    submitting.value = false
+    return addToast('اختر عميل', 'error')
   }
+  if (!form.value.lines.length) {
+    submitting.value = false
+    return addToast('أضف بند واحد على الأقل', 'error')
+  }
+  for (const l of form.value.lines) {
+    if (!l.product_variant_id) {
+      submitting.value = false
+      return addToast('اختر صنف لكل بند', 'error')
+    }
+  }
+
   try {
-    submitting.value = true
     const payload = {
       customer_id: form.value.customer_id,
       source: form.value.source,
@@ -261,7 +273,6 @@ const submit = async () => {
     setTimeout(() => router.push(res?.data?.id ? { name: 'OrderDetails', params: { id: res.data.id } } : { name: 'Orders' }), 1000)
   } catch (e) {
     addToast('فشل إنشاء الفاتورة', 'error')
-  } finally {
     submitting.value = false
   }
 }
