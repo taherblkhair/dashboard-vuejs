@@ -57,7 +57,7 @@
           </div>
 
           <div v-if="form.lines.length === 0" class="text-center py-8 text-gray-400">
-            لا توجد منتجات. استخدم البحث أو الزر أعلاه لإضافة منتجات.
+            لا توجد أصناف. استخدم البحث أو الزر أعلاه لإضافة أصناف.
           </div>
 
           <div v-else class="space-y-3">
@@ -71,7 +71,7 @@
               </div>
               <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div class="col-span-2">
-                  <label class="block text-xs text-gray-500 mb-1">المنتج</label>
+                  <label class="block text-xs text-gray-500 mb-1">الصنف</label>
                   <VariantAutocomplete 
                     v-model="line.product_variant_id" 
                     :selected-label="line.product_name || ''"
@@ -189,7 +189,7 @@ const loadProducts = async () => {
   try {
     const res = await fetchProducts(1)
     products.value = res?.data || []
-  } catch (e) { addToast('فشل تحميل المنتجات', 'error') }
+  } catch (e) { addToast('فشل تحميل الآصناف', 'error') }
 }
 
 const onCustomerChange = async () => {
@@ -226,7 +226,7 @@ const onVariantSelected = (idx: number, v: any) => {
   if (!v) return
   form.value.lines[idx].product_variant_id = v.id
   form.value.lines[idx].unit_price = Number(v.sale_price || 0)
-  form.value.lines[idx].product_name = v.product?.name || v.name || 'المنتج'
+  form.value.lines[idx].product_name = v.product?.name || v.name || 'الصنف'
   form.value.lines[idx].product_sku = v.sku_variant || ''
 }
 

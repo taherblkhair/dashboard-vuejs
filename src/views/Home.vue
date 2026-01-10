@@ -235,7 +235,7 @@
                  </div>
                  <div>
                     <h4 class="text-sm font-black text-slate-900">تنبيهات المخزون</h4>
-                    <p class="text-xs text-slate-400 mt-1">يوجد <span class="text-rose-600 font-bold">{{ dashboard.low_stock?.length || 0 }}</span> منتجات بحاجة لإعادة التزويد</p>
+                    <p class="text-xs text-slate-400 mt-1">يوجد <span class="text-rose-600 font-bold">{{ dashboard.low_stock?.length || 0 }}</span> أصناف بحاجة لإعادة التزويد</p>
                  </div>
               </div>
               <div class="w-10 h-10 rounded-full flex items-center justify-center bg-slate-50 group-hover:translate-x-[-10px] transition-transform">

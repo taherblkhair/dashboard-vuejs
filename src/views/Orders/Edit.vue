@@ -63,7 +63,7 @@
               </div>
 
               <div v-if="form.lines.length === 0" class="text-center py-8 text-gray-400">
-                لا توجد منتجات. استخدم البحث أو الزر أعلاه لإضافة منتجات.
+                لا توجد أصناف. استخدم البحث أو الزر أعلاه لإضافة أصناف.
               </div>
 
               <div v-else class="space-y-3">

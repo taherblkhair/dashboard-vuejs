@@ -4,8 +4,8 @@
       <!-- Header Section -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="space-y-1">
-          <h1 class="text-3xl font-black text-slate-900 tracking-tight">إدارة المنتجات</h1>
-          <p class="text-slate-500 font-medium">عرض وإدارة جميع المنتجات والمخزون في النظام</p>
+          <h1 class="text-3xl font-black text-slate-900 tracking-tight">إدارة الأصناف</h1>
+          <p class="text-slate-500 font-medium">عرض وإدارة جميع الأصناف والمخزون في النظام</p>
         </div>
 
         <div class="flex items-center gap-4">
@@ -27,7 +27,7 @@
       <!-- Quick Stats -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <MStatsCard
-          label="إجمالي المنتجات"
+          label="إجمالي الأصناف"
           :value="totalProducts"
           variant="indigo"
         >
@@ -39,7 +39,7 @@
         </MStatsCard>
 
         <MStatsCard
-          label="منتجات نشطة"
+          label="أصناف نشطة"
           :value="activeProducts"
           variant="emerald"
         >
@@ -188,7 +188,7 @@
               </svg>
             </div>
             <div class="space-y-1">
-              <h3 class="text-xl font-black text-slate-900">لا توجد منتجات مضافة</h3>
+              <h3 class="text-xl font-black text-slate-900">لا توجد أصناف مضافة</h3>
               <p class="text-slate-500">ابدأ بإضافة أول منتج لنظام المخزون الخاص بك</p>
             </div>
             <MButton variant="primary" size="lg" @click="() => router.push({ name: 'ProductCreate' })" class="!rounded-2xl">

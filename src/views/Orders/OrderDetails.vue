@@ -84,7 +84,7 @@
         <div class="lg:col-span-2 space-y-6">
           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
-              <h3 class="text-base font-semibold text-gray-900">المنتجات المطلوبة</h3>
+              <h3 class="text-base font-semibold text-gray-900">الأصناف المطلوبة</h3>
               <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{{ order?.lines?.length || 0 }} عناصر</span>
             </div>
             <div class="overflow-x-auto">
@@ -410,7 +410,7 @@
           
           <div class="p-6">
              <div class="bg-red-50 border border-red-100 rounded-lg p-4 mb-6">
-                <p class="text-red-700 text-sm">عذراً، لا يمكن إتمام العملية نظراً لعدم توفر كميات كافية للمنتجات التالية:</p>
+                <p class="text-red-700 text-sm">عذراً، لا يمكن إتمام العملية نظراً لعدم توفر كميات كافية للأصناف التالية:</p>
              </div>
 
              <div class="max-h-80 overflow-y-auto border border-gray-100 rounded-lg">

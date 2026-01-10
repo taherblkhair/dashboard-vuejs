@@ -151,7 +151,7 @@ const userMenuOpen = ref(false)
 const currentPageTitle = computed(() => {
   const titles: { [key: string]: string } = {
     '/': 'لوحة التحكم',
-    '/products': 'إدارة المنتجات',
+    '/products': 'إدارة الآصناف',
     '/orders': 'طلبات المبيعات',
     '/customers': 'العملاء',
     '/reports': 'التقارير التحليلية',

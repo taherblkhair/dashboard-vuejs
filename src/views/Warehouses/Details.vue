@@ -50,7 +50,7 @@
           <p class="text-xl font-bold text-gray-900">{{ formatCurrency(stockReport.total_stock_value) }}</p>
        </MCard>
        <MCard class="!p-4">
-          <p class="text-sm text-gray-500 font-medium mb-1">عدد المنتجات</p>
+          <p class="text-sm text-gray-500 font-medium mb-1">عدد الأصناف</p>
           <p class="text-xl font-bold text-gray-900">{{ stockReport.unique_products_count || 0 }}</p>
        </MCard>
        <MCard class="!p-4">

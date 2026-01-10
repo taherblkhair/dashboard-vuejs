@@ -41,14 +41,14 @@
              <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">المنتج المراد نقله</label>
                 <div v-if="!form.from_warehouse_id" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-500 text-center">
-                   يرجى اختيار المخزن المرسل أولاً لعرض المنتجات المتاحة
+                   يرجى اختيار المخزن المرسل أولاً لعرض الأصناف المتاحة
                 </div>
                 <div v-else-if="loadingVariants" class="flex items-center gap-2 text-sm text-gray-500 p-2">
                    <div class="animate-spin h-4 w-4 border-2 border-primary-500 rounded-full border-t-transparent"></div>
-                   جاري تحميل المنتجات...
+                   جاري تحميل الأصناف...
                 </div>
                 <div v-else-if="variants.length === 0" class="p-3 bg-yellow-50 text-yellow-700 rounded-lg text-sm border border-yellow-200">
-                   لا توجد منتجات متاحة في هذا المخزن
+                   لا توجد أصناف متاحة في هذا المخزن
                 </div>
                 <select 
                    v-else

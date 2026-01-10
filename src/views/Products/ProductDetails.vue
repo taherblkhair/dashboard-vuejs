@@ -132,62 +132,66 @@
           </MCard>
 
           <!-- Variants Table -->
-          <MCard class="!p-0 !rounded-[2.5rem] border-none shadow-xl shadow-slate-200/50 bg-white overflow-hidden">
-            <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                  </svg>
-                </div>
-                <h3 class="text-xl font-black text-slate-900 tracking-tight">قائمة المتغيرات</h3>
-              </div>
-              <div class="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold tracking-widest uppercase">
-                {{ product?.variants?.length || 0 }} إجمالي
-              </div>
-            </div>
+        <MCard class="!p-0 !rounded-[2.5rem] border-none shadow-xl shadow-slate-200/50 bg-white overflow-hidden">
+  <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-black text-slate-900 tracking-tight">قائمة المتغيرات</h3>
+    </div>
+    <div class="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold tracking-widest uppercase">
+      {{ product?.variants?.length || 0 }} إجمالي
+    </div>
+  </div>
 
-            <MTable v-if="product?.variants?.length">
-              <template #header>
-                <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">المتغير</th>
-                <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">الخصائص</th>
-                <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">سعر البيع</th>
-                <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">الحالة</th>
-              </template>
-              
-              <tr v-for="item in product.variants" :key="item.id" class="group hover:bg-slate-50/50 transition-colors">
-                <td class="px-8 py-5">
-                  <div class="flex items-center gap-3">
-                    <div v-if="item.images && item.images.length > 0" class="w-10 h-10 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 shrink-0">
-                      <img :src="getImageUrl(item.images?.[0]?.url)" class="w-full h-full object-cover" />
-                    </div>
-                    <code class="text-[10px] font-mono font-black text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/50">
-                      {{ item.sku_variant }}
-                    </code>
-                  </div>
-                </td>
-                <td class="px-8 py-5">
-                  <div class="flex flex-wrap gap-1.5 py-1">
-                    <span v-for="(val, key) in item.attributes" :key="key" class="px-2 py-1 bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 rounded-lg">
-                      <span class="text-slate-400 font-medium">{{ key }}: </span>{{ val }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-8 py-5">
-                  <p class="font-black text-emerald-600 text-lg">{{ formatCurrency(item.sale_price) }}</p>
-                </td>
-                <td class="px-8 py-5">
-                  <MBadge :variant="item.is_active ? 'success' : 'danger'" class="!px-3 !py-1 !rounded-lg">
-                    {{ item.is_active ? 'نشط' : 'غير نشط' }}
-                  </MBadge>
-                </td>
-              </tr>
-            </MTable>
-
-            <div v-else class="py-20 text-center">
-              <p class="text-slate-400 font-medium italic">لا توجد متغيرات لهذا المنتج.</p>
+  <MTable v-if="product?.variants?.length" class="w-full">
+    <template #header>
+      <tr>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[25%]">المتغير</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[35%]">الخصائص</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[20%]">سعر البيع</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[20%]">الحالة</th>
+      </tr>
+    </template>
+    
+    <tbody>
+      <tr v-for="item in product.variants" :key="item.id" class="group hover:bg-slate-50/50 transition-colors">
+        <td class="px-8 py-5 w-[25%]">
+          <div class="flex items-center gap-3">
+            <div v-if="item.images && item.images.length > 0" class="w-10 h-10 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 shrink-0">
+              <img :src="getImageUrl(item.images?.[0]?.url)" class="w-full h-full object-cover" />
             </div>
-          </MCard>
+            <code class="text-[10px] font-mono font-black text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/50">
+              {{ item.sku_variant }}
+            </code>
+          </div>
+        </td>
+        <td class="px-8 py-5 w-[35%]">
+          <div class="flex flex-wrap gap-1.5 py-1">
+            <span v-for="(val, key) in item.attributes" :key="key" class="px-2 py-1 bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-500 rounded-lg">
+              <span class="text-slate-400 font-medium">{{ key }}: </span>{{ val }}
+            </span>
+          </div>
+        </td>
+        <td class="px-8 py-5 w-[20%]">
+          <p class="font-black text-emerald-600 text-lg">{{ formatCurrency(item.sale_price) }}</p>
+        </td>
+        <td class="px-8 py-5 w-[20%]">
+          <MBadge :variant="item.is_active ? 'success' : 'danger'" class="!px-3 !py-1 !rounded-lg">
+            {{ item.is_active ? 'نشط' : 'غير نشط' }}
+          </MBadge>
+        </td>
+      </tr>
+    </tbody>
+  </MTable>
+
+  <div v-else class="py-20 text-center">
+    <p class="text-slate-400 font-medium italic">لا توجد متغيرات لهذا المنتج.</p>
+  </div>
+</MCard>
         </div>
 
         <!-- Sidebar Column (Stock) -->

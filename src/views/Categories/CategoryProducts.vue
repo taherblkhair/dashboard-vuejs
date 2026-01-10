@@ -12,8 +12,8 @@
               العودة للفئات
             </button>
           </div>
-          <h1 class="text-3xl font-black text-slate-900 tracking-tight">منتجات الفئة</h1>
-          <p class="text-slate-500 font-medium">قائمة كاملة بالمنتجات المندرجة تحت هذه الفئة</p>
+          <h1 class="text-3xl font-black text-slate-900 tracking-tight">آصناف الفئة</h1>
+          <p class="text-slate-500 font-medium">قائمة كاملة بالآصناف المندرجة تحت هذه الفئة</p>
         </div>
 
         <MButton
@@ -35,7 +35,7 @@
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-24 gap-4">
         <div class="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p class="text-sm font-black text-slate-400 uppercase tracking-widest">جاري تحميل المنتجات...</p>
+        <p class="text-sm font-black text-slate-400 uppercase tracking-widest">جاري تحميل الآصناف...</p>
       </div>
 
       <!-- Empty State -->
@@ -47,7 +47,7 @@
         </div>
         <div class="text-center space-y-2">
           <h3 class="text-xl font-black text-slate-900">المخزن فارغ هنا</h3>
-          <p class="text-slate-400 font-medium">لا توجد منتجات مسجلة لهذه الفئة حتى الآن</p>
+          <p class="text-slate-400 font-medium">لا توجد أصناف مسجلة لهذه الفئة حتى الآن</p>
         </div>
         <MButton variant="primary" size="lg" @click="goBack" class="!rounded-2xl">
           العودة لاختيار فئة أخرى
@@ -73,7 +73,7 @@
             </div>
 
             <p class="text-slate-500 text-sm font-medium leading-relaxed line-clamp-2">
-              {{ p.description || 'لا يوجد وصف متاح لهذا المنتج حالياً.' }}
+              {{ p.description || 'لا يوجد وصف متاح لهذا الصنف حالياً.' }}
             </p>
 
             <div class="space-y-3">

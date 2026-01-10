@@ -158,7 +158,7 @@
                    id="active-toggle"
                    class="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-600 transition-all cursor-pointer" />
             <label for="active-toggle" class="mr-3 text-sm font-black text-slate-700 cursor-pointer">
-              {{ form.is_active ? 'المنتج نشط' : 'المنتج غير نشط' }}
+              {{ form.is_active ? 'نشط' : 'غير نشط' }}
             </label>
           </div>
         </div>

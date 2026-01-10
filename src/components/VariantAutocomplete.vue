@@ -6,7 +6,7 @@
       @keydown.down.prevent="onKeyDown(1)"
       @keydown.up.prevent="onKeyDown(-1)"
       @keydown.enter.prevent="onEnter"
-      :placeholder="placeholder || 'اكتب SKU أو اسم المنتج للبحث'"
+      :placeholder="placeholder || 'اكتب SKU أو اسم الصنف للبحث'"
       class="w-full border rounded px-2 py-2" />
 
     <ul v-if="show && results.length" class="absolute z-50 mt-1 w-full bg-white border rounded shadow max-h-48 overflow-auto">

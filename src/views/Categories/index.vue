@@ -5,7 +5,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="space-y-1">
           <h1 class="text-3xl font-black text-slate-900 tracking-tight">إدارة الفئات</h1>
-          <p class="text-slate-500 font-medium">نظم منتجاتك من خلال تصنيفات هرمية مرنة</p>
+          <p class="text-slate-500 font-medium">نظم أصنافك من خلال تصنيفات هرمية مرنة</p>
         </div>
 
         <div class="flex items-center gap-3">
@@ -132,7 +132,7 @@
         </div>
         <div class="text-center space-y-2">
           <h3 class="text-xl font-black text-slate-900">لا توجد فئات مطابقة</h3>
-          <p class="text-slate-400 font-medium">ابدأ بإضافة فئات جديدة لبناء هيكل منتجاتك</p>
+          <p class="text-slate-400 font-medium">ابدأ بإضافة فئات جديدة لبناء هيكل أصنافك</p>
         </div>
         <MButton variant="primary" size="lg" @click="() => openModal()" class="!rounded-2xl">
           إضافة أول فئة
@@ -157,7 +157,7 @@
             
             <ActionMenu :items="[
               { label: 'تعديل البيانات', action: () => openModal(cat), icon: 'Edit' },
-              { label: 'عرض المنتجات', action: () => goToCategoryProducts(cat.id), icon: 'Eye' },
+              { label: 'عرض الآصناف', action: () => goToCategoryProducts(cat.id), icon: 'Eye' },
               { label: 'حذف الفئة', action: () => remove(cat), variant: 'danger', icon: 'Trash' }
             ]" />
           </div>

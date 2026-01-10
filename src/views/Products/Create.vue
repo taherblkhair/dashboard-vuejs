@@ -4,8 +4,8 @@
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">إدارة المنتجات</h1>
-        <p class="text-gray-600">أضف منتجات جديدة وأدر المتغيرات والمخزون</p>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">إدارة الأصناف</h1>
+        <p class="text-gray-600">أضف أصناف جديدة وأدر المتغيرات والمخزون</p>
       </div>
 
       <div class="flex flex-col lg:flex-row gap-8">
@@ -223,7 +223,7 @@
           <div class="sticky top-8">
             <div class="bg-white rounded-2xl shadow-xl p-6">
               <div class="flex items-center justify-between mb-6">
-                <h3 class="text-xl font-bold text-gray-800">المنتجات المضافة حديثاً</h3>
+                <h3 class="text-xl font-bold text-gray-800">الأصناف المضافة حديثاً</h3>
                 <button @click="refreshProducts"
                         class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,8 +241,8 @@
                     </svg>
                   </div>
                 </div>
-                <p class="text-gray-500">لا توجد منتجات مضافة بعد</p>
-                <p class="text-sm text-gray-400 mt-1">ستظهر المنتجات هنا بعد إضافتها</p>
+                <p class="text-gray-500">لا توجد أصناف مضافة بعد</p>
+                <p class="text-sm text-gray-400 mt-1">ستظهر الأصناف هنا بعد إضافتها</p>
               </div>
 
               <div v-else class="space-y-4">
@@ -293,11 +293,11 @@
             <!-- Stats -->
             <div class="mt-6 grid grid-cols-2 gap-4">
               <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4">
-                <div class="text-blue-800 text-sm font-medium">إجمالي المنتجات</div>
+                <div class="text-blue-800 text-sm font-medium">إجمالي الأصناف</div>
                 <div class="text-2xl font-bold text-blue-900 mt-1">{{ createdProducts.length }}</div>
               </div>
               <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-4">
-                <div class="text-green-800 text-sm font-medium">المنتجات النشطة</div>
+                <div class="text-green-800 text-sm font-medium">الأصناف النشطة</div>
                 <div class="text-2xl font-bold text-green-900 mt-1">
                   {{ createdProducts.filter(p => p.is_active).length }}
                 </div>

@@ -65,7 +65,7 @@ type QuickLink = {
 const quickLinks = reactive<QuickLink[]>([
 	{ key: 'addresses', label: 'العناوين', name: 'Addresses', sub: 'إدارة العناوين', icon: 'M3 10h4l3 8 4-16 3 8h4', exists: false },
 	{ key: 'cities', label: 'المدن', name: 'Cities', sub: 'قائمة المدن', icon: 'M3 7h18M12 3v4M5 21h14a2 2 0 002-2V7H3v12a2 2 0 002 2z', exists: false },
-	{ key: 'products', label: 'المنتجات', name: 'Products', sub: 'قائمة المنتجات', icon: 'M3 3v18h18V3H3zm9 14l7-4V7l-7 4-7-4v6l7 4z', exists: false },
+	{ key: 'products', label: 'الآصناف', name: 'Products', sub: 'قائمة الآصناف', icon: 'M3 3v18h18V3H3zm9 14l7-4V7l-7 4-7-4v6l7 4z', exists: false },
 	{ key: 'orders', label: 'الطلبات', name: 'Orders', sub: 'قائمة الطلبات', icon: 'M3 3h18v2H3V3zm2 4h14v14H5V7z', exists: false },
 	{ key: 'customers', label: 'العملاء', name: 'Customers', sub: 'قائمة العملاء', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M7 20v-2a5 5 0 0110 0v2', exists: false },
 	{ key: 'warehouses', label: 'المستودعات', name: 'Warehouses', sub: 'المستودعات', icon: 'M3 7l9-4 9 4v10l-9 4-9-4V7z', exists: false },
