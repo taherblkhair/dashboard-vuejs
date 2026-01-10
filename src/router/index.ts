@@ -54,6 +54,7 @@ const routes = [
   { path: 'settings', name: 'Settings', component: () => import('../views/Settings.vue') },
   { path: 'addresses', name: 'Addresses', component: () => import('../views/Addresses/index.vue') },
   { path: 'cities', name: 'Cities', component: () => import('../views/Cities/index.vue') },
+  { path: 'users', name: 'Users', component: () => import('../views/Users/index.vue') },
     ]
   },
   {
