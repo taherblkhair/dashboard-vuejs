@@ -28,18 +28,94 @@
       <!-- Right Section: Actions & Profile -->
       <div class="flex items-center gap-4">
         <!-- Search Bar (Desktop) -->
-        <div class="relative hidden xl:block group">
+        <div class="relative hidden xl:block group" ref="searchContainer">
           <input
             type="text"
+            v-model="searchQuery"
+            @input="handleSearchInput"
+            @focus="showResults = true"
             placeholder="بحث عن طلب، عميل أو صنف..."
-            class="w-96 bg-slate-50 border border-transparent rounded-[1.25rem] py-3 pl-12 pr-5 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-100 transition-all duration-300 placeholder:text-slate-400"
+            class="w-96 bg-slate-50 border border-transparent rounded-[1.25rem] py-3 pl-12 pr-10 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-100 transition-all duration-300 placeholder:text-slate-400"
           />
-          <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg v-if="!isLoading" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
-          <div class="absolute right-4 top-1/2 -translate-y-1/2 hidden group-focus-within:flex items-center gap-1">
-             <kbd class="px-1.5 py-0.5 text-[10px] font-bold text-slate-400 bg-slate-100 rounded border border-slate-200">⌘</kbd>
-             <kbd class="px-1.5 py-0.5 text-[10px] font-bold text-slate-400 bg-slate-100 rounded border border-slate-200">K</kbd>
+           <svg v-else class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-indigo-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          
+          <!-- Search Results Dropdown -->
+          <div v-if="showResults && searchQuery" class="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+             <div v-if="isLoading" class="p-8 text-center text-slate-400 text-sm font-medium">
+               جاري البحث...
+             </div>
+             
+             <div v-else-if="!hasResults" class="p-8 text-center text-slate-400 text-sm font-medium">
+               لا توجد نتائج لـ "{{ searchQuery }}"
+             </div>
+
+             <div v-else class="max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <!-- Products -->
+                <div v-if="searchResults.products.length" class="py-2">
+                   <h3 class="px-4 py-2 text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">المنتجات</h3>
+                   <button 
+                     v-for="p in searchResults.products" 
+                     :key="p.id"
+                     @click="navigateTo('ProductDetails', { id: p.id })"
+                     class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-right"
+                   >
+                     <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                     </div>
+                     <div class="min-w-0 flex-1">
+                        <p class="text-sm font-bold text-slate-700 truncate">{{ p.name }}</p>
+                        <p class="text-xs text-slate-400 truncate font-mono">{{ p.sku }}</p>
+                     </div>
+                   </button>
+                </div>
+
+                <!-- Customers -->
+                <div v-if="searchResults.customers.length" class="py-2 border-t border-slate-50">
+                   <h3 class="px-4 py-2 text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">العملاء</h3>
+                   <button 
+                     v-for="c in searchResults.customers" 
+                     :key="c.id"
+                     @click="navigateTo('CustomersView', { id: c.id })"
+                     class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-right"
+                   >
+                     <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                     </div>
+                     <div class="min-w-0 flex-1">
+                        <p class="text-sm font-bold text-slate-700 truncate">{{ c.name }}</p>
+                        <p class="text-xs text-slate-400 truncate">{{ c.phone }}</p>
+                     </div>
+                   </button>
+                </div>
+
+                <!-- Orders -->
+                <div v-if="searchResults.orders.length" class="py-2 border-t border-slate-50">
+                   <h3 class="px-4 py-2 text-xs font-black text-slate-400 uppercase tracking-widest bg-slate-50/50">الطلبات</h3>
+                   <button 
+                     v-for="o in searchResults.orders" 
+                     :key="o.id"
+                     @click="navigateTo('OrderDetails', { id: o.id })"
+                     class="w-full px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors text-right"
+                   >
+                     <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                     </div>
+                     <div class="min-w-0 flex-1">
+                        <p class="text-sm font-bold text-slate-700 truncate">طلب #{{ o.id }}</p>
+                        <p class="text-xs text-slate-400 truncate">{{ o.customer?.name || 'عميل غير مسجل' }}</p>
+                     </div>
+                      <span :class="['text-[10px] font-black px-2 py-0.5 rounded', getStatusColor(o.status)]">
+                        {{ getStatusText(o.status) }}
+                      </span>
+                   </button>
+                </div>
+             </div>
           </div>
         </div>
 
@@ -65,73 +141,7 @@
         <div class="h-8 w-px bg-slate-100 mx-2"></div>
 
         <!-- User Menu -->
-        <div class="relative">
-          <button
-            class="flex items-center gap-3 p-1.5 pl-4 rounded-2xl hover:bg-slate-50 transition-all duration-300 border border-transparent hover:border-slate-100 group"
-            @click="userMenuOpen = !userMenuOpen"
-          >
-            <img
-              class="w-10 h-10 rounded-xl object-cover ring-2 ring-white shadow-sm group-hover:ring-indigo-100 transition-all"
-              :src="userAvatar"
-              alt="User"
-            />
-            <div class="text-right hidden sm:block">
-              <p class="text-sm font-bold text-slate-900 leading-none">{{ displayName }}</p>
-              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">مدير النظام</p>
-            </div>
-            <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          <!-- Dropdown Menu -->
-          <transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="transform opacity-0 scale-95 translate-y-4"
-            enter-to-class="transform opacity-100 scale-100 translate-y-0"
-            leave-active-class="transition duration-200 ease-in"
-            leave-from-class="transform opacity-100 scale-100 translate-y-0"
-            leave-to-class="transform opacity-0 scale-95 translate-y-4"
-          >
-            <div
-              v-if="userMenuOpen"
-              class="absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-indigo-100/50 border border-slate-100 p-3 z-50 overflow-hidden"
-            >
-              <div class="p-4 bg-slate-50 rounded-2xl mb-2">
-                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">الحساب النشط</p>
-                 <p class="text-xs font-bold text-slate-900 truncate">{{ state.user?.email || 'admin@sabine.ly' }}</p>
-              </div>
-              
-              <div class="space-y-1">
-                <a class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all cursor-pointer group">
-                  <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                  </div>
-                  الملف الشخصي
-                </a>
-                <a class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl transition-all cursor-pointer group">
-                  <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    </svg>
-                  </div>
-                  الإعدادات
-                </a>
-                <div class="h-px bg-slate-50 my-2 px-4"></div>
-                <button @click="handleLogout" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer group text-right">
-                  <div class="w-8 h-8 rounded-lg bg-rose-100/50 flex items-center justify-center group-hover:bg-white group-hover:shadow-sm transition-all text-rose-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                  </div>
-                  تسجيل الخروج
-                </button>
-              </div>
-            </div>
-          </transition>
-        </div>
+     
       </div>
     </div>
   </header>
@@ -141,6 +151,9 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuth } from '../../store'
+import { fetchProducts } from '../../api/products'
+import { fetchCustomers } from '../../api/customers'
+import { fetchOrders } from '../../api/orders'
 
 const emit = defineEmits(['toggle-sidebar'] as const)
 
@@ -184,6 +197,92 @@ async function handleLogout() {
     router.push({ name: 'Login' })
   }
 }
+
+// Global Search Logic
+const searchQuery = ref('')
+const searchResults = ref<{ products: any[], customers: any[], orders: any[] }>({ products: [], customers: [], orders: [] })
+const isLoading = ref(false)
+const showResults = ref(false)
+const searchContainer = ref<HTMLElement | null>(null)
+let searchTimeout: any = null
+
+const hasResults = computed(() => {
+  return searchResults.value.products.length > 0 || 
+         searchResults.value.customers.length > 0 || 
+         searchResults.value.orders.length > 0
+})
+
+const handleSearchInput = () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  if (!searchQuery.value.trim()) {
+    searchResults.value = { products: [], customers: [], orders: [] }
+    return
+  }
+  
+  isLoading.value = true
+  showResults.value = true
+  
+  searchTimeout = setTimeout(async () => {
+    try {
+      const q = searchQuery.value
+      const [productsRes, customersRes, ordersRes] = await Promise.all([
+        fetchProducts(1, { search: q }),
+        fetchCustomers(1, q),
+        fetchOrders(1, { search: q }) // orders api supports search param
+      ])
+      
+      searchResults.value = {
+        products: (productsRes as any).data || [],
+        customers: (customersRes as any).data || [],
+        orders: (ordersRes as any).data || []
+      }
+    } catch (e) {
+      console.error('Search failed', e)
+    } finally {
+      isLoading.value = false
+    }
+  }, 500)
+}
+
+const navigateTo = (routeName: string, params: any) => {
+  router.push({ name: routeName, params })
+  showResults.value = false
+  searchQuery.value = ''
+}
+
+const statusMap: Record<string, { text: string; class: string }> = {
+  pending: { text: 'قيد الانتظار', class: 'bg-amber-100 text-amber-700' },
+  processing: { text: 'جاري التجهيز', class: 'bg-indigo-100 text-indigo-700' },
+  shipped: { text: 'تم الشحن', class: 'bg-blue-100 text-blue-700' },
+  delivered: { text: 'تم التوصيل', class: 'bg-emerald-100 text-emerald-700' },
+  cancelled: { text: 'ملغى', class: 'bg-rose-100 text-rose-700' },
+  returned: { text: 'مرتجع', class: 'bg-gray-100 text-gray-700' }
+}
+
+function getStatusText(status: string) {
+  return statusMap[status]?.text || status
+}
+
+function getStatusColor(status: string) {
+  return statusMap[status]?.class || 'bg-slate-100 text-slate-700'
+}
+
+// Close search on click outside
+import { onMounted, onUnmounted } from 'vue'
+
+const handleClickOutside = (e: MouseEvent) => {
+  if (searchContainer.value && !searchContainer.value.contains(e.target as Node)) {
+    showResults.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <style scoped>
