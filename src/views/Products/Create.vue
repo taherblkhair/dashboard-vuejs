@@ -197,11 +197,7 @@
                       السابق
                     </button>
                     <div class="flex gap-3">
-                      <button @click="saveAsDraft"
-                              :disabled="saving"
-                              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                        حفظ كمسودة
-                      </button>
+                     
                       <button @click="saveFromForm"
                               :disabled="saving"
                               class="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">

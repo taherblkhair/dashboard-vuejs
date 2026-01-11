@@ -422,7 +422,7 @@
             </svg>
           </template>
         </MButton>
-        <MButton v-else 
+        <!-- <MButton v-else 
                 type="submit" 
                 variant="primary" 
                 :loading="loading"
@@ -437,7 +437,7 @@
             </svg>
           </template>
           {{ loading ? 'جاري الحفظ...' : 'حفظ الصنف' }}
-        </MButton>
+        </MButton> -->
       </div>
     </div>
 
