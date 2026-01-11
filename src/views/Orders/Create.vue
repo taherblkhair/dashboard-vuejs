@@ -19,7 +19,10 @@
           <MCard title="بيانات العميل">
             <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">العميل <span class="text-red-500">*</span></label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-sm font-medium text-gray-700">العميل <span class="text-red-500">*</span></label>
+                  <button @click="openCustomerModal" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">+ عميل جديد</button>
+                </div>
                 <select v-model="form.customer_id" @change="onCustomerChange" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
                   <option value="">اختر عميلاً</option>
                   <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
@@ -138,13 +141,43 @@
         </MButton>
       </div>
     </div>
+
+    <!-- New Customer Modal -->
+    <div v-if="showCustomerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="closeCustomerModal">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          <h3 class="text-lg font-bold text-gray-900">إضافة عميل جديد</h3>
+          <button @click="closeCustomerModal" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">اسم العميل <span class="text-red-500">*</span></label>
+            <input v-model="newCustomer.name" type="text" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="الاسم كامل" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف <span class="text-red-500">*</span></label>
+            <input v-model="newCustomer.phone" type="tel" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="09XXXXXXXX" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني (اختياري)</label>
+            <input v-model="newCustomer.email" type="email" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 flex justify-end gap-3">
+          <MButton variant="secondary" size="sm" @click="closeCustomerModal">إلغاء</MButton>
+          <MButton variant="primary" size="sm" @click="saveNewCustomer" :loading="savingCustomer" :disabled="savingCustomer">حفظ العميل</MButton>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchCustomers, fetchCustomer } from '../../api/customers'
+import { fetchCustomers, fetchCustomer, createCustomer } from '../../api/customers'
 import { fetchProducts } from '../../api/products'
 import { createOrder } from '../../api/orders'
 import { fetchAddresses } from '../../api/addresses'
@@ -274,6 +307,46 @@ const submit = async () => {
   } catch (e) {
     addToast('فشل إنشاء الفاتورة', 'error')
     submitting.value = false
+  }
+}
+
+// Inline Customer Creation
+const showCustomerModal = ref(false)
+const savingCustomer = ref(false)
+const newCustomer = ref({ name: '', phone: '', email: '', customer_type: 'individual', is_active: true })
+
+const openCustomerModal = () => {
+  newCustomer.value = { name: '', phone: '', email: '', customer_type: 'individual', is_active: true }
+  showCustomerModal.value = true
+}
+
+const closeCustomerModal = () => {
+  showCustomerModal.value = false
+}
+
+const saveNewCustomer = async () => {
+  if (!newCustomer.value.name || !newCustomer.value.phone) {
+    return addToast('يرجى إدخال الاسم ورقم الهاتف', 'error')
+  }
+
+  savingCustomer.value = true
+  try {
+    const res: any = await createCustomer(newCustomer.value)
+    addToast('تم إضافة العميل بنجاح', 'success')
+    
+    // Refresh list and select new customer
+    await loadCustomers()
+    if (res.data?.id) {
+      form.value.customer_id = res.data.id
+      await onCustomerChange() // load addresses if any
+    }
+    
+    closeCustomerModal()
+  } catch (e) {
+    addToast('فشل إضافة العميل', 'error')
+    console.error(e)
+  } finally {
+    savingCustomer.value = false
   }
 }
 </script>
