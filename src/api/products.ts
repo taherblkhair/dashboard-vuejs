@@ -83,6 +83,26 @@ export async function createProduct(payload: Partial<Product> | FormData): Promi
   return request(`/products`, { method: 'POST', body }) as Promise<{ data: Product }>
 }
 
+export async function updateProduct(id: number, payload: Partial<Product> | FormData): Promise<{ data: Product }> {
+  // Add _method=PUT for FormData since Laravel requires it for PUT with files
+  const body = payload instanceof FormData ? payload : JSON.stringify(payload)
+  if (payload instanceof FormData && !payload.has('_method')) {
+    payload.append('_method', 'PUT')
+  }
+  
+  return request(`/products/${id}`, { 
+    method: payload instanceof FormData ? 'POST' : 'PUT', 
+    body 
+  }) as Promise<{ data: Product }>
+}
+
+export async function updateProductVariant(id: number, payload: any): Promise<any> {
+  return request(`/product-variants/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload)
+  })
+}
+
 export async function deleteProduct(id: number): Promise<{ message?: string } | any> {
   // expect API to respond with a success message or empty body
   return request(`/products/${id}`, { method: 'DELETE' })

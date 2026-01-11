@@ -444,7 +444,8 @@ const props = defineProps<{
   loading?: boolean,
   showNext?: boolean,
   showPrev?: boolean,
-  currentStep?: number
+  currentStep?: number,
+  initialData?: any
 }>()
 
 const emit = defineEmits(['save', 'close', 'next', 'prev', 'goToStep'])
@@ -604,6 +605,39 @@ const normalizeVariants = () => {
   }
 }
 
+// Initial Data Population
+const populateForm = () => {
+  if (!props.initialData) return
+
+  const d = props.initialData
+  form.name = d.name || ''
+  form.sku = d.sku || ''
+  form.description = d.description || ''
+  form.category_id = d.category_id || ''
+  form.is_active = !!d.is_active
+
+  if (d.images) {
+    const main = d.images.find((i: any) => i.type === 'main')
+    if (main) mainImagePreview.value = main.url
+    
+    galleryPreviews.value = d.images
+      .filter((i: any) => i.type !== 'main')
+      .map((i: any) => i.url)
+  }
+
+  if (d.variants && d.variants.length > 0) {
+    form.variants = d.variants.map((v: any, idx: number) => ({
+      ...v,
+      id: v.id || `v-${Date.now()}-${idx}`,
+      _open: false,
+      imagePreview: v.images?.[0]?.url || '',
+      attributes: v.attributes || { color: '', size: '', weight: '' }
+    }))
+    variantCounter = form.variants.length + 1
+    normalizeVariants()
+  }
+}
+
 // Validation
 const validateForm = () => {
   let valid = true
@@ -719,6 +753,7 @@ defineExpose({ getFormData, validateAll })
 
 // Initialize
 onMounted(() => {
+  populateForm()
   normalizeVariants()
 })
 </script>
