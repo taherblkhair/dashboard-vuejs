@@ -44,7 +44,7 @@ type Crumb = { label: string; name?: string; path?: string }
 // map route names to friendly Arabic labels
 const labelMap: Record<string, string> = {
   Dashboard: 'لوحة التحكم',
-  Products: 'الآصناف',
+  Products: 'الأصناف',
   ProductCreate: 'إضافة صنف',
   ProductDetails: 'تفاصيل الصنف',
   Categories: 'الفئات',

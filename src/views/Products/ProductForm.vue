@@ -464,6 +464,7 @@
 <script setup lang="ts">
 import { reactive, watch, ref, onMounted, nextTick, computed } from 'vue'
 import { fetchCategory } from '../../api/categories'
+import { getImageUrl } from '../../utils/helpers'
 import MInput from '../../components/ui/MInput.vue'
 import MButton from '../../components/ui/MButton.vue'
 
@@ -651,11 +652,11 @@ const populateForm = () => {
 
   if (d.images) {
     const main = d.images.find((i: any) => i.type === 'main')
-    if (main) mainImagePreview.value = main.url
+    if (main) mainImagePreview.value = getImageUrl(main.url)
     
     galleryPreviews.value = d.images
       .filter((i: any) => i.type !== 'main')
-      .map((i: any) => i.url)
+      .map((i: any) => getImageUrl(i.url))
   }
 
   if (d.variants && d.variants.length > 0) {
@@ -663,8 +664,8 @@ const populateForm = () => {
       ...v,
       id: v.id || `v-${Date.now()}-${idx}`,
       _open: false,
-      imagePreview: v.images?.[0]?.url || '',
-      attributes: v.attributes || { color: '', size: '', weight: '' }
+      imagePreview: getImageUrl(v.images?.[0]?.url) || '',
+الآصناف      attributes: v.attributes || { color: '', size: '', weight: '' }
     }))
     variantCounter = form.variants.length + 1
     normalizeVariants()

@@ -77,4 +77,12 @@ export function formatNumber(val?: string | number): string {
   return new Intl.NumberFormat('en-US').format(num)
 }
 
-export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime, formatNumber }
+export function getImageUrl(url?: string): string {
+  if (!url) return ''
+  if (url.startsWith('http') || url.startsWith('blob:')) return url
+  // If we have a base URL in env, use it but strip /api if present
+  const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/api\/?$/, '')
+  return `${base}${url.startsWith('/') ? '' : '/'}${url}`
+}
+
+export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime, formatNumber, getImageUrl }
