@@ -152,8 +152,9 @@
       <tr>
         <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[25%]">المتغير</th>
         <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[35%]">الخصائص</th>
-        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[20%]">سعر البيع</th>
-        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[20%]">الحالة</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[15%]">سعر البيع</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[10%]">الحالة</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[15%]">الإجراءات</th>
       </tr>
     </template>
     
@@ -176,13 +177,25 @@
             </span>
           </div>
         </td>
-        <td class="px-8 py-5 w-[20%]">
+        <td class="px-8 py-5 w-[15%]">
           <p class="font-black text-emerald-600 text-lg">{{ formatCurrency(item.sale_price) }}</p>
         </td>
-        <td class="px-8 py-5 w-[20%]">
-          <MBadge :variant="item.is_active ? 'success' : 'danger'" class="!px-3 !py-1 !rounded-lg">
-            {{ item.is_active ? 'نشط' : 'غير نشط' }}
-          </MBadge>
+        <td class="px-8 py-5 w-[10%] text-center">
+          <div class="flex justify-center">
+            <MBadge :variant="item.is_active ? 'success' : 'danger'" class="!px-3 !py-1 !rounded-lg shrink-0">
+              {{ item.is_active ? 'نشط' : 'غير نشط' }}
+            </MBadge>
+          </div>
+        </td>
+        <td class="px-8 py-5 w-[15%]">
+          <MButton 
+            variant="secondary" 
+            size="sm" 
+            class="!rounded-xl !text-indigo-600 !bg-indigo-50 hover:!bg-indigo-100 border-none font-bold whitespace-nowrap"
+            @click="openVariantModal(item)"
+          >
+            تعديل
+          </MButton>
         </td>
       </tr>
     </tbody>
@@ -261,28 +274,166 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Variant Modal -->
+    <div v-if="editingVariant" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeVariantModal"></div>
+      <MCard class="relative w-full max-w-2xl !p-0 !rounded-[2.5rem] border-none shadow-2xl bg-white overflow-hidden animate-in zoom-in duration-300">
+        <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+          <div class="space-y-1">
+            <h3 class="text-2xl font-black text-slate-900 tracking-tight">تعديل المتغير</h3>
+            <p class="text-slate-400 text-xs font-medium">تحديث بيانات المتغير: {{ editingVariant.sku_variant }}</p>
+          </div>
+          <button @click="closeVariantModal" class="p-2 text-slate-400 hover:bg-white rounded-xl transition-all shadow-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form @submit.prevent="saveVariantUpdate" class="p-8 space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1.5">
+              <label class="text-xs font-black text-slate-700 block px-1">سعر الشراء</label>
+              <MInput v-model="variantForm.purchase_price" type="number" step="0.01" class="!rounded-2xl" required />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-black text-slate-700 block px-1">سعر البيع</label>
+              <MInput v-model="variantForm.sale_price" type="number" step="0.01" class="!rounded-2xl" required />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-black text-slate-700 block px-1">تاريخ الانتهاء</label>
+              <MInput v-model="variantForm.expiry_date" type="date" class="!rounded-2xl" />
+            </div>
+            <div class="space-y-1.5 flex flex-col justify-end">
+              <label class="text-xs font-black text-slate-700 block px-1 mb-2">الحالة</label>
+              <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <button type="button" @click="variantForm.is_active = !variantForm.is_active" 
+                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none" 
+                        :class="variantForm.is_active ? 'bg-indigo-600' : 'bg-slate-200'">
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" 
+                        :class="variantForm.is_active ? '-translate-x-5' : 'translate-x-0'"></span>
+                </button>
+                <span class="text-xs font-bold" :class="variantForm.is_active ? 'text-indigo-600' : 'text-slate-400'">{{ variantForm.is_active ? 'نشط' : 'غير نشط' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">الخصائص</h4>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-500 block px-1">اللون</label>
+                <MInput v-model="variantForm.attributes.color" placeholder="أحمر" class="!rounded-xl" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-500 block px-1">المقاس</label>
+                <MInput v-model="variantForm.attributes.size" placeholder="XL" class="!rounded-xl" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-500 block px-1">الوزن</label>
+                <MInput v-model="variantForm.attributes.weight" placeholder="1kg" class="!rounded-xl" />
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 flex gap-3">
+             <MButton variant="secondary" size="lg" type="button" @click="closeVariantModal" class="flex-1 !rounded-2xl">إلغاء</MButton>
+             <MButton variant="primary" size="lg" type="submit" class="flex-[2] !rounded-2xl shadow-lg shadow-indigo-100" :loading="variantUpdating">
+                حفظ التعديلات
+             </MButton>
+          </div>
+        </form>
+      </MCard>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchProduct as apiFetchProduct, fetchProductStock as apiFetchProductStock } from '../../api/products'
+import { fetchProduct as apiFetchProduct, fetchProductStock as apiFetchProductStock, updateProductVariant } from '../../api/products'
 import type { Product, Variant } from '../../api/products'
 import { formatCurrency } from '../../utils/helpers'
 import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import MInput from '../../components/ui/MInput.vue'
+import { useToast } from '../../composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
 const id = Number(route.params.id)
+const { addToast } = useToast()
 
 const product = ref<Product | null>(null)
 const loading = ref(true)
 const stock = ref<any | null>(null)
 const stockLoading = ref(false)
+
+const editingVariant = ref<Variant | null>(null)
+const variantUpdating = ref(false)
+const variantForm = reactive({
+  purchase_price: '',
+  sale_price: '',
+  expiry_date: '',
+  is_active: true,
+  attributes: {
+    color: '',
+    size: '',
+    weight: ''
+  }
+})
+
+const openVariantModal = (v: Variant) => {
+  editingVariant.value = v
+  variantForm.purchase_price = String(v.purchase_price)
+  variantForm.sale_price = String(v.sale_price)
+  variantForm.expiry_date = v.expiry_date || ''
+  variantForm.is_active = !!v.is_active
+  variantForm.attributes = {
+    color: v.attributes.color || '',
+    size: v.attributes.size || '',
+    weight: v.attributes.weight || ''
+  }
+}
+
+const closeVariantModal = () => {
+  editingVariant.value = null
+}
+
+const saveVariantUpdate = async () => {
+  if (!editingVariant.value) return
+  
+  variantUpdating.value = true
+  try {
+    const cleanAttributes: Record<string, any> = {}
+    Object.entries(variantForm.attributes).forEach(([key, val]) => {
+      if (val !== '' && val !== null && val !== undefined) {
+        cleanAttributes[key] = val
+      }
+    })
+
+    const payload = {
+      attributes: cleanAttributes,
+      purchase_price: parseFloat(variantForm.purchase_price) || 0,
+      sale_price: parseFloat(variantForm.sale_price) || 0,
+      expiry_date: variantForm.expiry_date || null,
+      is_active: variantForm.is_active
+    }
+
+    await updateProductVariant(editingVariant.value.id, payload)
+    addToast('تم تحديث المتغير بنجاح', 'success')
+    closeVariantModal()
+    await Promise.all([fetchProductData(), fetchStock()])
+  } catch (e) {
+    console.error('Failed to update variant', e)
+    addToast('فشل تحديث المتغير', 'error')
+  } finally {
+    variantUpdating.value = false
+  }
+}
 
 const getMinPrice = (variants: Variant[]) => {
   if (!variants || variants.length === 0) return 0

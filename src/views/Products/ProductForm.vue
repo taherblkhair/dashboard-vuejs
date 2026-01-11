@@ -2,7 +2,7 @@
 <template>
   <form @submit.prevent="onSubmit" class="space-y-6">
     <!-- Progressive Indicator -->
-    <div class="relative px-2 mb-12">
+    <div v-if="!hideVariants" class="relative px-2 mb-12">
       <div class="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 rounded-full overflow-hidden">
         <div 
           class="h-full bg-indigo-600 transition-all duration-500 ease-out"
@@ -44,7 +44,7 @@
           <label class="text-sm font-black text-slate-700 block px-1">الصورة الرئيسية</label>
           <div 
             class="relative w-full aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden group"
-            @click="$refs.mainImageInput.click()"
+            @click="mainImageInput?.click()"
           >
             <input 
               type="file" 
@@ -93,7 +93,7 @@
             <div 
               v-if="galleryPreviews.length < 10"
               class="aspect-square rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all"
-              @click="$refs.galleryInput.click()"
+              @click="galleryInput?.click()"
             >
               <input 
                 type="file" 
@@ -238,24 +238,36 @@
                 </div>
               </div>
             </div>
-            <MButton 
-              variant="secondary" 
-              size="sm" 
-              type="button"
-              class="!p-2 !rounded-xl !text-rose-500 hover:!bg-rose-50 border-none transition-all opacity-0 group-hover:opacity-100"
-              @click.stop="removeVariant(i)"
-            >
-              <template #icon>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                </svg>
-              </template>
-            </MButton>
+            <div class="flex items-center gap-2">
+              <MButton 
+                v-if="v.id && !String(v.id).startsWith('v-')"
+                variant="primary" 
+                size="sm" 
+                type="button"
+                @click.stop="$emit('save-variant', v)"
+                class="!px-4 !py-1.5 !rounded-xl text-xs font-black shadow-sm"
+              >
+                حفظ التغييرات
+              </MButton>
+              <MButton 
+                variant="secondary" 
+                size="sm" 
+                type="button"
+                class="!p-2 !rounded-xl !text-rose-500 hover:!bg-rose-50 border-none transition-all opacity-0 group-hover:opacity-100"
+                @click.stop="removeVariant(i)"
+              >
+                <template #icon>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </template>
+              </MButton>
+            </div>
           </div>
 
           <!-- Variant Content -->
           <div v-show="v._open" class="px-8 pb-8 pt-2 space-y-6 border-t border-slate-50 animate-in fade-in duration-300">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div v-if="!hideVariants" class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="space-y-4">
                 <h5 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">البيانات الأساسية والصورة</h5>
                 <div class="flex gap-4">
@@ -376,7 +388,7 @@
     </div>
 
     <!-- Navigation Buttons -->
-    <div v-if="showNavigation" class="flex items-center justify-between pt-10 border-t border-slate-50 mt-10">
+    <div v-if="showNavigation && !hideVariants" class="flex items-center justify-between pt-10 border-t border-slate-50 mt-10">
       <div>
         <MButton v-if="showPrev" 
                 type="button" 
@@ -428,6 +440,24 @@
         </MButton>
       </div>
     </div>
+
+    <!-- Simple Save Button for Single Step / Product Only Edit -->
+    <div v-if="hideVariants && currentStep === 0" class="flex justify-end pt-10 border-t border-slate-100 mt-10">
+      <div class="flex items-center gap-4">
+        <MButton type="button" 
+                variant="secondary" 
+                @click="$emit('close')"
+                class="!rounded-2xl !px-8 border-none !text-slate-400 font-bold">
+          إلغاء
+        </MButton>
+        <MButton type="submit" 
+                variant="primary" 
+                :loading="loading"
+                class="!rounded-2xl !px-12 shadow-lg shadow-indigo-100">
+          {{ loading ? 'جاري الحفظ...' : 'حفظ البيانات' }}
+        </MButton>
+      </div>
+    </div>
   </form>
 </template>
 
@@ -445,10 +475,11 @@ const props = defineProps<{
   showNext?: boolean,
   showPrev?: boolean,
   currentStep?: number,
-  initialData?: any
+  initialData?: any,
+  hideVariants?: boolean
 }>()
 
-const emit = defineEmits(['save', 'close', 'next', 'prev', 'goToStep'])
+const emit = defineEmits(['save', 'close', 'next', 'prev', 'goToStep', 'save-variant'])
 
 const categories = computed(() => props.categories || [])
 const showNavigation = computed(() => props.showNext || props.showPrev)
@@ -469,6 +500,8 @@ const form = reactive({
 
 const mainImagePreview = ref('')
 const galleryPreviews = ref<string[]>([])
+const mainImageInput = ref<HTMLInputElement | null>(null)
+const galleryInput = ref<HTMLInputElement | null>(null)
 
 const handleMainImageChange = (e: Event) => {
   const file = (e.target as HTMLInputElement).files?.[0]
