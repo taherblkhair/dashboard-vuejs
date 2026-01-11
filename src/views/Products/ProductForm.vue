@@ -665,7 +665,7 @@ const populateForm = () => {
       id: v.id || `v-${Date.now()}-${idx}`,
       _open: false,
       imagePreview: getImageUrl(v.images?.[0]?.url) || '',
-الآصناف      attributes: v.attributes || { color: '', size: '', weight: '' }
+      attributes: v.attributes || { color: '', size: '', weight: '' }
     }))
     variantCounter = form.variants.length + 1
     normalizeVariants()
