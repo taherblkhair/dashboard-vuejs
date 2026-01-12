@@ -23,10 +23,12 @@
                   <label class="block text-sm font-medium text-gray-700">العميل <span class="text-red-500">*</span></label>
                   <button @click="openCustomerModal" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">+ عميل جديد</button>
                 </div>
-                <select v-model="form.customer_id" @change="onCustomerChange" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                  <option value="">اختر عميلاً</option>
-                  <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
-                </select>
+                <!-- Replaced select with Autocomplete -->
+                <CustomerAutocomplete 
+                  v-model="form.customer_id" 
+                  @select="onCustomerSelect"
+                  :initial-label="customers.find(c => c.id === form.customer_id)?.name" 
+                />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">المصدر</label>
@@ -177,11 +179,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchCustomers, fetchCustomer, createCustomer } from '../../api/customers'
+import { fetchCustomer, createCustomer } from '../../api/customers'
 import { fetchProducts } from '../../api/products'
 import { createOrder } from '../../api/orders'
-import { fetchAddresses } from '../../api/addresses'
 import VariantAutocomplete from '../../components/VariantAutocomplete.vue'
+import CustomerAutocomplete from '../../components/CustomerAutocomplete.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
 import { formatCurrency } from '../../utils/helpers'
@@ -208,10 +210,9 @@ const form = ref<any>({
 })
 
 const loadCustomers = async () => {
-  try {
-    const res = await fetchCustomers(1)
-    customers.value = res?.data || []
-  } catch (e) { addToast('فشل تحميل العملاء', 'error') }
+  // Autocomplete handles searching, we don't need to load all customers initially
+  // But we keep the customers ref if we need it for other things, or we can remove it.
+  // For now, let's just leave it empty or fetch a default set if really needed.
 }
 
 const loadProducts = async () => {
@@ -221,20 +222,30 @@ const loadProducts = async () => {
   } catch (e) { addToast('فشل تحميل الآصناف', 'error') }
 }
 
-const onCustomerChange = async () => {
-  const id = form.value.customer_id
+const onCustomerSelect = async (customer: any) => {
+  if (!customer) {
+    form.value.customer_id = null
+    customerAddresses.value = []
+    form.value.delivery_address_id = null
+    return
+  }
+  
+  form.value.customer_id = customer.id
   customerAddresses.value = []
   form.value.delivery_address_id = null
-  if (!id) return
+  
   try {
-    const res = await fetchCustomer(Number(id))
-    const cust = res?.data || null
-    if (cust?.addresses) customerAddresses.value = cust.addresses
-    else {
-      const ares = await fetchAddresses()
-      customerAddresses.value = (ares || []).filter((a: any) => a.owner_type?.includes('Customer') && Number(a.owner_id) === Number(id))
+    // use the customer object directly if addresses are present, otherwise fetch details
+    if (customer.addresses && customer.addresses.length > 0) {
+        customerAddresses.value = customer.addresses
+        if (customer.default_address_id) form.value.delivery_address_id = customer.default_address_id
+    } else {
+        // fetch full details to get addresses
+        const res = await fetchCustomer(customer.id)
+        const fullCust = res?.data
+        if (fullCust?.addresses) customerAddresses.value = fullCust.addresses
+        if (fullCust?.default_address_id) form.value.delivery_address_id = fullCust.default_address_id
     }
-    if (cust?.default_address_id) form.value.delivery_address_id = cust.default_address_id
   } catch (e) { console.error(e) }
 }
 
@@ -334,11 +345,15 @@ const saveNewCustomer = async () => {
     const res: any = await createCustomer(newCustomer.value)
     addToast('تم إضافة العميل بنجاح', 'success')
     
-    // Refresh list and select new customer
-    await loadCustomers()
+    // List refresh is not needed for autocomplete, but we might want to set the initial label
+    // or just trigger the select manually. 
+    // Since we are setting form.customer_id, we need to ensure the Autocomplete updates its display.
+    // The Autocomplete doesn't assume we passed the object unless we emit select. 
+    // Ideally, we just call onCustomerSelect with the new customer object.
+    
     if (res.data?.id) {
-      form.value.customer_id = res.data.id
-      await onCustomerChange() // load addresses if any
+       // We can pass the new customer object directly
+       await onCustomerSelect(res.data)
     }
     
     closeCustomerModal()
