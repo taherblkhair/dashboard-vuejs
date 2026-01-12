@@ -95,15 +95,12 @@
                 </svg>
               </div>
 
-              <div class="mt-8 grid grid-cols-2 gap-4">
+              <div class="mt-8 grid  gap-4">
                  <div class="bg-white/5 border border-white/10 p-5 rounded-[2rem] backdrop-blur-md">
                     <p class="text-indigo-300 text-[10px] font-bold uppercase mb-2">مبيعات اليوم</p>
                     <p class="text-2xl font-bold">{{ formatCurrency(dashboard.revenue?.today) }}</p>
                  </div>
-                 <div class="bg-white/5 border border-white/10 p-5 rounded-[2rem] backdrop-blur-md">
-                    <p class="text-indigo-300 text-[10px] font-bold uppercase mb-2">متوسط السلة</p>
-                    <p class="text-2xl font-bold">{{ formatCurrency(dashboard.revenue?.average_order_value) }}</p>
-                 </div>
+                 
               </div>
            </div>
         </div>
@@ -135,7 +132,7 @@
              </div>
            </div>
 
-           <div class="mt-12 bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+           <!-- <div class="mt-12 bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
               <div class="flex items-center justify-between">
                  <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase">قوة الأداء</p>
@@ -145,7 +142,7 @@
                     <div v-for="i in 3" :key="i" class="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
                  </div>
               </div>
-           </div>
+           </div> -->
         </MCard>
       </div>
 

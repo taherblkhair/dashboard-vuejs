@@ -18,7 +18,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">نوع العميل</label>
             <select v-model="form.customer_type" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="individual">فردي</option>
-              <option value="business">شركة</option>
+              <option value="wholesale">جملة</option>
             </select>
           </div>
 

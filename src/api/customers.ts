@@ -1,12 +1,11 @@
 import { request } from './index'
 
 export async function fetchCustomers(page = 1, q: string | null = null) {
+  let url = `/customers?page=${page}`
   if (q && q.toString().trim() !== '') {
-    // Use the dedicated search endpoint when a query is provided
-    const url = `/customers/search?page=${page}&search=${encodeURIComponent(q.toString())}`
-    return request(url)
+    url += `&search=${encodeURIComponent(q.toString())}`
   }
-  return request(`/customers?page=${page}`)
+  return request(url)
 }
 
 export async function fetchCustomer(id: number) {
@@ -15,6 +14,10 @@ export async function fetchCustomer(id: number) {
 
 export async function createCustomer(payload: any) {
   return request(`/customers`, { method: 'POST', body: JSON.stringify(payload) })
+}
+
+export async function updateCustomer(id: number, payload: any) {
+  return request(`/customers/${id}`, { method: 'PUT', body: JSON.stringify(payload) })
 }
 
 export async function createCustomerAddress(customerId: number, payload: any) {
