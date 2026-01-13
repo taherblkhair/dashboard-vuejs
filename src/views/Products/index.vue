@@ -365,9 +365,16 @@ const deleteProduct = async (product: Product) => {
     await apiDeleteProduct(product.id)
     products.value = products.value.filter(p => p.id !== product.id)
     addToast('تم حذف الصنف بنجاح', 'success')
-  } catch (e) {
+  } catch (e: any) {
     console.error('Error deleting product:', e)
-    addToast('فشل حذف الصنف', 'error')
+    let errorMessage = 'فشل حذف الصنف'
+    try {
+      const parsed = JSON.parse(e.message)
+      if (parsed.message) errorMessage = parsed.message
+    } catch {
+       // fallback
+    }
+    addToast(errorMessage, 'error')
   }
 }
 

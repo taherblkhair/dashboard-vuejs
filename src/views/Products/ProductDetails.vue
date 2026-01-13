@@ -456,9 +456,17 @@ const deleteVariant = async (v: Variant) => {
     if (product.value) {
       product.value.variants = product.value.variants.filter(item => item.id !== v.id)
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error('Failed to delete variant', e)
-    addToast('فشل حذف المتغير', 'error')
+    let errorMessage = 'فشل حذف المتغير'
+    try {
+      const parsed = JSON.parse(e.message)
+      if (parsed.message) errorMessage = parsed.message
+    } catch {
+      // If parsing fails, use the original message if available, otherwise keep default
+      /* if (e.message) errorMessage = e.message */ 
+    }
+    addToast(errorMessage, 'error')
   }
 }
 
