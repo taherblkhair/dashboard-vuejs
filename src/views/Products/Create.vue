@@ -310,6 +310,9 @@
 import { ref, onMounted, computed } from 'vue'
 import ProductForm from './ProductForm.vue'
 import { fetchCategories, createProduct as apiCreateProduct } from '../../api/products'
+import { useToast } from '../../composables/useToast'
+
+const { addToast } = useToast()
 
 const categories = ref<any[]>([])
 const saving = ref(false)
@@ -465,10 +468,12 @@ const onSave = async (payload: any) => {
     previewData.value = {}
     
     // Show success message
-    console.log('Product created successfully:', created)
+    // console.log('Product created successfully:', created)
+    addToast('تم إضافة الصنف بنجاح', 'success')
     
   } catch (e) {
     console.error('Failed to create product', e)
+    addToast('فشل إضافة الصنف', 'error')
   } finally {
     saving.value = false
   }

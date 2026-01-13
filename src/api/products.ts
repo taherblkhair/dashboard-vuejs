@@ -103,6 +103,10 @@ export async function updateProductVariant(id: number, payload: any): Promise<an
   })
 }
 
+export async function deleteProductVariant(id: number): Promise<any> {
+    return request(`/product-variants/${id}`, { method: 'DELETE' })
+}
+
 export async function deleteProduct(id: number): Promise<{ message?: string } | any> {
   // expect API to respond with a success message or empty body
   return request(`/products/${id}`, { method: 'DELETE' })

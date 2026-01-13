@@ -154,7 +154,7 @@
         <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[35%]">الخصائص</th>
         <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[15%]">سعر البيع</th>
         <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[10%]">الحالة</th>
-        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[15%]">الإجراءات</th>
+        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-[20%]">الإجراءات</th>
       </tr>
     </template>
     
@@ -188,14 +188,10 @@
           </div>
         </td>
         <td class="px-8 py-5 w-[15%]">
-          <MButton 
-            variant="secondary" 
-            size="sm" 
-            class="!rounded-xl !text-indigo-600 !bg-indigo-50 hover:!bg-indigo-100 border-none font-bold whitespace-nowrap"
-            @click="openVariantModal(item)"
-          >
-            تعديل
-          </MButton>
+            <ActionMenu :items="[
+              { label: 'تعديل', action: () => openVariantModal(item), icon: IconEdit },
+              { label: 'حذف', action: () => deleteVariant(item), icon: IconTrash, variant: 'danger' }
+            ]" />
         </td>
       </tr>
     </tbody>
@@ -352,20 +348,27 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchProduct as apiFetchProduct, fetchProductStock as apiFetchProductStock, updateProductVariant } from '../../api/products'
+import { fetchProduct as apiFetchProduct, fetchProductStock as apiFetchProductStock, updateProductVariant, deleteProductVariant } from '../../api/products'
 import type { Product, Variant } from '../../api/products'
 import { formatCurrency } from '../../utils/helpers'
+import { useConfirm } from '../../composables/useConfirm'
 import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
 import MInput from '../../components/ui/MInput.vue'
+import ActionMenu from '../../components/ui/ActionMenu.vue'
 import { useToast } from '../../composables/useToast'
+import { defineComponent, h } from 'vue'
+
+const IconEdit = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' })]) })
+const IconTrash = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' })]) })
 
 const route = useRoute()
 const router = useRouter()
 const id = Number(route.params.id)
 const { addToast } = useToast()
+const { confirm } = useConfirm()
 
 const product = ref<Product | null>(null)
 const loading = ref(true)
@@ -432,6 +435,30 @@ const saveVariantUpdate = async () => {
     addToast('فشل تحديث المتغير', 'error')
   } finally {
     variantUpdating.value = false
+  }
+}
+
+const deleteVariant = async (v: Variant) => {
+  const confirmed = await confirm({
+    title: 'حذف المتغير',
+    message: `هل أنت متأكد من حذف المتغير "${v.sku_variant}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+    type: 'danger',
+    confirmText: 'حذف',
+    cancelText: 'إلغاء'
+  })
+
+  if (!confirmed) return
+
+  try {
+    await deleteProductVariant(v.id)
+    addToast('تم حذف المتغير بنجاح', 'success')
+    // Remove locally or refresh
+    if (product.value) {
+      product.value.variants = product.value.variants.filter(item => item.id !== v.id)
+    }
+  } catch (e) {
+    console.error('Failed to delete variant', e)
+    addToast('فشل حذف المتغير', 'error')
   }
 }
 

@@ -89,7 +89,7 @@
       </form>
 
       <div class="mt-6">
-        <h3 class="text-lg font-semibold">نماذج مزودي التوصيل (حتى 5)</h3>
+        <h3 class="text-lg font-semibold"> مزودي التوصيل </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
           <div v-for="p in shortList" :key="p.id" class="bg-white rounded shadow p-3">
             <div class="flex items-start justify-between">

@@ -244,6 +244,8 @@ import { useRouter } from 'vue-router'
 import { fetchProducts as apiFetchProducts, fetchCategories, deleteProduct as apiDeleteProduct } from '../../api/products'
 import type { Product, Category, Variant } from '../../api/products'
 import { formatCurrency, formatAttributes } from '../../utils/helpers'
+import { useToast } from '../../composables/useToast'
+import { useConfirm } from '../../composables/useConfirm'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
@@ -257,6 +259,8 @@ const IconEye = defineComponent({ render: () => h('svg', { fill:'none', viewBox:
 const IconTrash = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-4 h-4' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16' })]) })
 
 const router = useRouter()
+const { addToast } = useToast()
+const { confirm } = useConfirm()
 
 // Data State
 const products = ref<Product[]>([])
@@ -347,13 +351,23 @@ const viewProductDetails = (product: Product) => {
 }
 
 const deleteProduct = async (product: Product) => {
-  if (!confirm(`هل أنت متأكد من حذف الصنف "${product.name}"؟`)) return
+  const confirmed = await confirm({
+    title: 'حذف صنف',
+    message: `هل أنت متأكد من حذف الصنف "${product.name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+    type: 'danger',
+    confirmText: 'حذف',
+    cancelText: 'إلغاء'
+  })
+  
+  if (!confirmed) return
 
   try {
     await apiDeleteProduct(product.id)
     products.value = products.value.filter(p => p.id !== product.id)
+    addToast('تم حذف الصنف بنجاح', 'success')
   } catch (e) {
     console.error('Error deleting product:', e)
+    addToast('فشل حذف الصنف', 'error')
   }
 }
 
