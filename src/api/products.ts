@@ -97,9 +97,22 @@ export async function updateProduct(id: number, payload: Partial<Product> | Form
 }
 
 export async function updateProductVariant(id: number, payload: any): Promise<any> {
+  const body = payload instanceof FormData ? payload : JSON.stringify(payload)
+  if (payload instanceof FormData && !payload.has('_method')) {
+    payload.append('_method', 'PUT')
+  }
+
   return request(`/product-variants/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(payload)
+    method: payload instanceof FormData ? 'POST' : 'PUT',
+    body
+  })
+}
+
+export async function createProductVariant(productId: number, payload: any): Promise<any> {
+  const body = payload instanceof FormData ? payload : JSON.stringify(payload)
+  return request(`/products/${productId}/variants`, {
+    method: 'POST',
+    body
   })
 }
 

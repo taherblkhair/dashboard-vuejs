@@ -142,8 +142,23 @@
       </div>
       <h3 class="text-xl font-black text-slate-900 tracking-tight">قائمة المتغيرات</h3>
     </div>
-    <div class="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold tracking-widest uppercase">
-      {{ product?.variants?.length || 0 }} إجمالي
+    <div class="flex items-center gap-3">
+       <div class="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold tracking-widest uppercase">
+        {{ product?.variants?.length || 0 }} إجمالي
+      </div>
+      <MButton 
+        variant="primary" 
+        size="sm" 
+        class="!rounded-xl shadow-lg shadow-indigo-100"
+        @click="openAddVariantModal"
+      >
+        <template #icon>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+        </template>
+        إضافة متغير
+      </MButton>
     </div>
   </div>
 
@@ -272,13 +287,14 @@
     </div>
 
     <!-- Edit Variant Modal -->
-    <div v-if="editingVariant" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Edit/Add Variant Modal -->
+    <div v-if="showVariantModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="closeVariantModal"></div>
       <MCard class="relative w-full max-w-2xl !p-0 !rounded-[2.5rem] border-none shadow-2xl bg-white overflow-hidden animate-in zoom-in duration-300">
         <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
           <div class="space-y-1">
-            <h3 class="text-2xl font-black text-slate-900 tracking-tight">تعديل المتغير</h3>
-            <p class="text-slate-400 text-xs font-medium">تحديث بيانات المتغير: {{ editingVariant.sku_variant }}</p>
+            <h3 class="text-2xl font-black text-slate-900 tracking-tight">{{ isEditing ? 'تعديل المتغير' : 'إضافة متغير جديد' }}</h3>
+            <p class="text-slate-400 text-xs font-medium">{{ isEditing ? `تحديث بيانات المتغير: ${editingVariant?.sku_variant}` : 'إضافة متغير جديد لهذا الصنف' }}</p>
           </div>
           <button @click="closeVariantModal" class="p-2 text-slate-400 hover:bg-white rounded-xl transition-all shadow-sm">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,6 +327,27 @@
                         :class="variantForm.is_active ? '-translate-x-5' : 'translate-x-0'"></span>
                 </button>
                 <span class="text-xs font-bold" :class="variantForm.is_active ? 'text-indigo-600' : 'text-slate-400'">{{ variantForm.is_active ? 'نشط' : 'غير نشط' }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-1.5">
+            <label class="text-xs font-black text-slate-700 block px-1">صورة المتغير</label>
+            <div class="flex items-center gap-4">
+              <div v-if="variantForm.imagePreview || (isEditing && editingVariant?.images?.[0]?.url)" class="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shrink-0 group">
+                <img :src="variantForm.imagePreview || getImageUrl(editingVariant?.images?.[0]?.url)" class="w-full h-full object-cover" />
+                <button type="button" @click="removeImage" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="flex-1">
+                 <input 
+                  type="file" 
+                  accept="image/*"
+                  @change="handleImageUpload"
+                  class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                />
+                <p class="mt-1 text-[10px] text-slate-400">PNG, JPG, GIF up to 5MB</p>
               </div>
             </div>
           </div>
@@ -348,7 +385,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchProduct as apiFetchProduct, fetchProductStock as apiFetchProductStock, updateProductVariant, deleteProductVariant } from '../../api/products'
+  import { fetchProduct as apiFetchProduct, fetchProductStock as apiFetchProductStock, updateProductVariant, deleteProductVariant, createProductVariant } from '../../api/products'
 import type { Product, Variant } from '../../api/products'
 import { formatCurrency } from '../../utils/helpers'
 import { useConfirm } from '../../composables/useConfirm'
@@ -376,6 +413,8 @@ const stock = ref<any | null>(null)
 const stockLoading = ref(false)
 
 const editingVariant = ref<Variant | null>(null)
+const showVariantModal = ref(false)
+const isEditing = ref(false)
 const variantUpdating = ref(false)
 const variantForm = reactive({
   purchase_price: '',
@@ -386,11 +425,49 @@ const variantForm = reactive({
     color: '',
     size: '',
     weight: ''
-  }
+  },
+  image: null as File | null,
+  imagePreview: ''
 })
+
+const handleImageUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files[0]) {
+    const file = input.files[0]
+    variantForm.image = file
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      variantForm.imagePreview = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const removeImage = () => {
+  variantForm.image = null
+  variantForm.imagePreview = ''
+}
+
+const openAddVariantModal = () => {
+  editingVariant.value = null
+  isEditing.value = false
+  variantForm.purchase_price = ''
+  variantForm.sale_price = ''
+  variantForm.expiry_date = ''
+  variantForm.is_active = true
+  variantForm.attributes = {
+    color: '',
+    size: '',
+    weight: ''
+  }
+  variantForm.image = null
+  variantForm.imagePreview = ''
+  showVariantModal.value = true
+}
 
 const openVariantModal = (v: Variant) => {
   editingVariant.value = v
+  isEditing.value = true
   variantForm.purchase_price = String(v.purchase_price)
   variantForm.sale_price = String(v.sale_price)
   variantForm.expiry_date = v.expiry_date || ''
@@ -400,15 +477,18 @@ const openVariantModal = (v: Variant) => {
     size: v.attributes.size || '',
     weight: v.attributes.weight || ''
   }
+  variantForm.image = null
+  variantForm.imagePreview = '' // Reset preview, will rely on existing image logic in template
+  showVariantModal.value = true
 }
 
 const closeVariantModal = () => {
+  showVariantModal.value = false
   editingVariant.value = null
+  isEditing.value = false
 }
 
 const saveVariantUpdate = async () => {
-  if (!editingVariant.value) return
-  
   variantUpdating.value = true
   try {
     const cleanAttributes: Record<string, any> = {}
@@ -418,21 +498,44 @@ const saveVariantUpdate = async () => {
       }
     })
 
-    const payload = {
-      attributes: cleanAttributes,
-      purchase_price: parseFloat(variantForm.purchase_price) || 0,
-      sale_price: parseFloat(variantForm.sale_price) || 0,
-      expiry_date: variantForm.expiry_date || null,
-      is_active: variantForm.is_active
+    const formData = new FormData()
+    formData.append('purchase_price', String(parseFloat(variantForm.purchase_price) || 0))
+    formData.append('sale_price', String(parseFloat(variantForm.sale_price) || 0))
+    if (variantForm.expiry_date) formData.append('expiry_date', variantForm.expiry_date)
+    formData.append('is_active', variantForm.is_active ? '1' : '0')
+    
+    // Append attributes
+    Object.entries(variantForm.attributes).forEach(([key, val]) => {
+      if (val !== '' && val !== null && val !== undefined) {
+        formData.append(`attributes[${key}]`, String(val))
+      }
+    })
+
+    // Append image
+    if (variantForm.image) {
+      formData.append('image', variantForm.image)
     }
 
-    await updateProductVariant(editingVariant.value.id, payload)
-    addToast('تم تحديث المتغير بنجاح', 'success')
+    if (isEditing.value && editingVariant.value) {
+      await updateProductVariant(editingVariant.value.id, formData)
+      addToast('تم تحديث المتغير بنجاح', 'success')
+    } else {
+      await createProductVariant(id, formData)
+      addToast('تم إضافة المتغير بنجاح', 'success')
+    }
+    
     closeVariantModal()
     await Promise.all([fetchProductData(), fetchStock()])
-  } catch (e) {
-    console.error('Failed to update variant', e)
-    addToast('فشل تحديث المتغير', 'error')
+  } catch (e: any) {
+    console.error('Failed to save variant', e)
+    let errorMessage = isEditing.value ? 'فشل تحديث المتغير' : 'فشل إضافة المتغير'
+     try {
+      const parsed = JSON.parse(e.message)
+      if (parsed.message) errorMessage = parsed.message
+    } catch {
+       // fallback
+    }
+    addToast(errorMessage, 'error')
   } finally {
     variantUpdating.value = false
   }
