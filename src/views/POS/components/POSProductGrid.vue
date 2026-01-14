@@ -18,8 +18,9 @@
     </div>
 
     <!-- Products Grid -->
-    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4 pb-20">
-      <div 
+    <div v-else class="flex flex-col h-full"> 
+      <div class="flex-1 overflow-y-auto pb-20 grid grid-cols-2 lg:grid-cols-4 gap-4 content-start">
+        <div 
         v-for="product in products" 
         :key="product.id"
         @click="handleProductClick(product)"
@@ -55,6 +56,7 @@
       @add-to-cart="handleAddToCart"
     />
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -68,12 +70,18 @@ import POSVariantSelectionModal from './POSVariantSelectionModal.vue'
 const posStore = usePosStore()
 const products = ref<Product[]>([])
 const loading = ref(false)
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0
+})
 
 const showModal = ref(false)
 const selectedProduct = ref<Product | null>(null)
 let searchTimeout: any = null
 
-const loadProducts = async () => {
+const loadProducts = async (page = 1) => {
   loading.value = true
   try {
     const filters: any = {
@@ -88,9 +96,17 @@ const loadProducts = async () => {
       filters.category_id = String(posStore.selectedCategory)
     }
 
-    const res = await fetchProducts(1, filters)
-    // Handle pagination if needed, for now just taking first page or all
+    const res = await fetchProducts(page, filters)
     products.value = res.data
+    // Update pagination
+    if (res.meta) {
+      pagination.value = {
+        current_page: res.meta.current_page || page,
+        last_page: res.meta.last_page || 1,
+        per_page: res.meta.per_page || 15,
+        total: res.meta.total || 0
+      }
+    }
   } catch (e) {
     console.error('Failed to load products', e)
   } finally {
@@ -102,12 +118,17 @@ const loadProducts = async () => {
 watch(() => [posStore.searchQuery, posStore.selectedCategory], () => {
   if (searchTimeout) clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
-    loadProducts()
+    loadProducts(1) // Reset to page 1 on filter change
   }, 300)
 })
 
+const changePage = (page: number) => {
+  if (page < 1 || page > pagination.value.last_page) return
+  loadProducts(page)
+}
+
 onMounted(() => {
-  loadProducts()
+  loadProducts(1)
 })
 
 const getProductImage = (product: Product) => {

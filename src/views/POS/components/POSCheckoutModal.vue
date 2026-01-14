@@ -39,25 +39,62 @@
           </div>
         </div>
 
-        <!-- 2. Payment Method -->
-        <div class="space-y-3">
-           <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">طريقة الدفع</h4>
-           <div class="grid grid-cols-2 gap-4">
-             <button 
-                @click="paymentMethod = 'cash'"
-                class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 text-center"
-                :class="paymentMethod === 'cash' ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700' : 'border-slate-100 bg-white hover:border-indigo-100 text-slate-500'"
-             >
-               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-               <span class="font-bold text-sm">نقداً (Cash)</span>
+        <!-- 2. Delivery Address Display -->
+        <div class="space-y-3" v-if="selectedAddress">
+           <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">عنوان التوصيل</h4>
+           <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-slate-600 text-sm font-bold flex items-center gap-3">
+             <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+             </div>
+             <span>{{ selectedAddress.city }} - {{ selectedAddress.area }} {{ selectedAddress.street ? `- ${selectedAddress.street}` : '' }}</span>
+           </div>
+        </div>
+        <div class="space-y-3" v-else-if="selectedCustomer">
+           <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">عنوان التوصيل</h4>
+           
+           <!-- Warning if no address -->
+           <div v-if="!showAddressForm" class="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-600 text-sm font-bold flex flex-col gap-3">
+             <div class="flex items-center gap-3">
+               <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+               <span>هذا العميل ليس لديه عنوان مسجل.</span>
+             </div>
+             <button @click="showAddressForm = true" class="w-full py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl transition-colors text-xs font-black">
+               + إضافة عنوان جديد
              </button>
+           </div>
+
+           <!-- Add Address Form -->
+           <div v-else class="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 animate-in fade-in slide-in-from-top-2">
+             <div class="flex items-center justify-between mb-2">
+               <h5 class="font-bold text-slate-700 text-xs">إضافة عنوان جديد</h5>
+               <button @click="showAddressForm = false" class="text-xs text-slate-400 hover:text-rose-500">إلغاء</button>
+             </div>
+             
+             <div class="grid grid-cols-2 gap-3">
+               <div>
+                 <label class="block text-[10px] font-bold text-slate-400 mb-1">المدينة</label>
+                 <input v-model="newAddress.city" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="الرياض" />
+               </div>
+               <div>
+                 <label class="block text-[10px] font-bold text-slate-400 mb-1">المنطقة</label>
+                 <input v-model="newAddress.area" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="العليا" />
+               </div>
+               <div class="col-span-2">
+                 <label class="block text-[10px] font-bold text-slate-400 mb-1">الشارع</label>
+                 <input v-model="newAddress.street" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="شارع الملك فهد" />
+               </div>
+               <div>
+                  <label class="block text-[10px] font-bold text-slate-400 mb-1">المبنى (اختياري)</label>
+                  <input v-model="newAddress.building" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />
+               </div>
+             </div>
+
              <button 
-                @click="paymentMethod = 'card'"
-                class="p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 text-center"
-                :class="paymentMethod === 'card' ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700' : 'border-slate-100 bg-white hover:border-indigo-100 text-slate-500'"
+               @click="saveNewAddress" 
+               :disabled="savingAddress || !newAddress.city"
+               class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold disabled:opacity-50"
              >
-               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
-               <span class="font-bold text-sm">بطاقة (Card)</span>
+               {{ savingAddress ? 'جاري الحفظ...' : 'حفظ العنوان' }}
              </button>
            </div>
         </div>
@@ -101,7 +138,7 @@
         <button 
           @click="handleCheckout"
           class="flex-1 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-lg shadow-xl shadow-emerald-200 flex items-center justify-center gap-3 transition-transform active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
-          :disabled="processing || !customerId"
+          :disabled="processing || !customerId || !selectedAddress "
         >
           <span v-if="processing">جاري التنفيذ...</span>
           <span v-else>تأكيد ودفع</span>
@@ -117,7 +154,7 @@ import { ref, computed } from 'vue'
 import CustomerAutocomplete from '../../../components/CustomerAutocomplete.vue'
 import { formatCurrency } from '../../../utils/helpers'
 import { createOrder } from '../../../api/orders'
-import { fetchCustomer } from '../../../api/customers'
+import { fetchCustomer, createCustomerAddress } from '../../../api/customers'
 import { usePosStore } from '../../../stores/pos'
 import { useToast } from '../../../composables/useToast'
 import { useRouter } from 'vue-router'
@@ -138,9 +175,14 @@ const customerId = ref<number | null>(null)
 const selectedCustomer = ref<any>(null)
 const deliveryAddressId = ref<number | null>(null)
 const billingAddressId = ref<number | null>(null)
-const paymentMethod = ref('cash')
+const selectedAddress = ref<any>(null)
 const discount = ref(0)
 const processing = ref(false)
+
+// Address Creation
+const showAddressForm = ref(false)
+const savingAddress = ref(false)
+const newAddress = ref({ city: '', area: '', street: '', building: '', notes: '' })
 
 const finalTotal = computed(() => {
   return Math.max(0, props.cartTotal - discount.value)
@@ -151,6 +193,8 @@ const onCustomerSelect = async (customer: any) => {
   customerId.value = customer?.id || null
   deliveryAddressId.value = null
   billingAddressId.value = null
+  selectedAddress.value = null
+  showAddressForm.value = false
 
   if (customer?.id) {
     try {
@@ -161,10 +205,60 @@ const onCustomerSelect = async (customer: any) => {
         const defaultAddr = fullCustomer.addresses.find((a: any) => a.id === fullCustomer.default_address_id) || fullCustomer.addresses[0]
         deliveryAddressId.value = defaultAddr.id
         billingAddressId.value = defaultAddr.id
+        selectedAddress.value = defaultAddr
       }
     } catch (e) {
       console.error('Failed to fetch customer details', e)
     }
+  }
+}
+
+const saveNewAddress = async () => {
+  if (!customerId.value || !newAddress.value.city) return
+
+  savingAddress.value = true
+  console.log('Saving address for customer:', customerId.value, newAddress.value)
+  
+  try {
+    // Attempt to use the specific customer address endpoint first
+    // This avoids potentially strict polymorphic validation on the generic /addresses endpoint if it checks exists:users
+    const payload = { ...newAddress.value }
+    console.log('Using createCustomerAddress:', payload)
+    
+    // api/customers.ts: createCustomerAddress(customerId, payload)
+    const res: any = await createCustomerAddress(customerId.value, payload)
+    console.log('Address API Response:', res)
+    
+    const createdAddr = res.data || res
+
+    if (createdAddr && createdAddr.id) {
+       addToast('تم إضافة العنوان بنجاح', 'success')
+       // Auto select
+       selectedAddress.value = createdAddr
+       deliveryAddressId.value = createdAddr.id
+       billingAddressId.value = createdAddr.id
+       showAddressForm.value = false
+       // Reset
+       newAddress.value = { city: '', area: '', street: '', building: '', notes: '' }
+    } else {
+      console.warn('Response did not contain ID:', createdAddr)
+      addToast('لم يتم استلام معرف العنوان من الخادم', 'error')
+    }
+  } catch (e: any) {
+    console.error('Failed to create address', e)
+    let msg = 'فشل إضافة العنوان'
+    if (e.message) msg = e.message
+    try {
+        const parsed = JSON.parse(e.message)
+        if (parsed.message) msg = parsed.message
+        if (parsed.errors) {
+             const firstKey = Object.keys(parsed.errors)[0]
+             if (firstKey) msg += `: ${parsed.errors[firstKey][0]}`
+        }
+    } catch {}
+    addToast(msg, 'error')
+  } finally {
+    savingAddress.value = false
   }
 }
 
@@ -189,7 +283,7 @@ const handleCheckout = async () => {
       delivery_time_slot: null,
       delivery_address_id: deliveryAddressId.value,
       billing_address_id: billingAddressId.value,
-      notes: `POS Order - Payment: ${paymentMethod.value.toUpperCase()}`,
+      notes: `POS Order`,
       lines: posStore.cart.map(item => ({
         product_variant_id: item.variant.id,
         quantity: item.quantity,
