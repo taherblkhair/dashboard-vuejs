@@ -9,6 +9,12 @@ const routes = [
     meta: { guest: true }
   },
   {
+    path: '/pos',
+    name: 'POS',
+    component: () => import('../views/POS/index.vue'),
+    meta: { layout: 'empty' } // Assuming MainLayout handles this or we need to ensure it's not wrapped
+  },
+  {
     path: '/',
     component: MainLayout,
     // all child routes under MainLayout are protected by the global guard

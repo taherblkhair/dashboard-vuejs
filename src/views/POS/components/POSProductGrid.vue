@@ -1,0 +1,154 @@
+<template>
+  <div class="h-full">
+    <!-- Loading State -->
+    <div v-if="loading" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div v-for="i in 8" :key="i" class="aspect-square bg-white rounded-2xl shadow-sm animate-pulse flex flex-col p-4 gap-3">
+        <div class="h-32 bg-slate-100 rounded-xl w-full"></div>
+        <div class="h-4 bg-slate-100 rounded w-3/4"></div>
+        <div class="h-4 bg-slate-100 rounded w-1/2"></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="products.length === 0" class="h-full flex flex-col items-center justify-center text-slate-400">
+      <svg class="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+      </svg>
+      <p class="font-bold text-lg">لا توجد أصناف مطابقة</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4 pb-20">
+      <div 
+        v-for="product in products" 
+        :key="product.id"
+        @click="handleProductClick(product)"
+        class="bg-white rounded-2xl p-3 shadow-sm hover:shadow-md transition-all cursor-pointer border border-slate-100 group flex flex-col gap-3 relative overflow-hidden"
+      >
+        <!-- Image -->
+        <div class="aspect-square rounded-xl bg-slate-50 overflow-hidden relative">
+           <img 
+            :src="getProductImage(product)" 
+            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center p-3">
+             <span class="text-white text-xs font-bold">إضافة +</span>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="space-y-1">
+          <h3 class="font-bold text-slate-800 text-sm line-clamp-2 leading-relaxed">{{ product.name }}</h3>
+          <div class="flex items-center justify-between">
+            <span class="font-black text-indigo-600">{{ formatPriceRange(product) }}</span>
+            <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">{{ product.variants?.length || 0 }} خيارات</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <POSVariantSelectionModal 
+      :isOpen="showModal"
+      :product="selectedProduct"
+      @close="closeModal"
+      @add-to-cart="handleAddToCart"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
+import { fetchProducts } from '../../../api/products'
+import type { Product, Variant } from '../../../api/products'
+import { usePosStore } from '../../../stores/pos'
+import { getImageUrl, formatCurrency } from '../../../utils/helpers'
+import POSVariantSelectionModal from './POSVariantSelectionModal.vue'
+
+const posStore = usePosStore()
+const products = ref<Product[]>([])
+const loading = ref(false)
+
+const showModal = ref(false)
+const selectedProduct = ref<Product | null>(null)
+let searchTimeout: any = null
+
+const loadProducts = async () => {
+  loading.value = true
+  try {
+    const filters: any = {
+      is_active: '1'
+    }
+    
+    if (posStore.searchQuery) {
+      filters.search = posStore.searchQuery
+    }
+    
+    if (posStore.selectedCategory) {
+      filters.category_id = String(posStore.selectedCategory)
+    }
+
+    const res = await fetchProducts(1, filters)
+    // Handle pagination if needed, for now just taking first page or all
+    products.value = res.data
+  } catch (e) {
+    console.error('Failed to load products', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Custom debounce watch
+watch(() => [posStore.searchQuery, posStore.selectedCategory], () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    loadProducts()
+  }, 300)
+})
+
+onMounted(() => {
+  loadProducts()
+})
+
+const getProductImage = (product: Product) => {
+  if (product.images && product.images.length > 0) {
+    const main = product.images.find(i => i.type === 'main')
+    return getImageUrl(main?.url || product.images[0].url)
+  }
+  // Fallback if variants have images
+  if (product.variants?.length) {
+    const v = product.variants.find(v => v.images && v.images.length > 0)
+    // Optional chaining to be safe
+    const url = v?.images?.[0]?.url
+    if (url) return getImageUrl(url)
+  }
+  
+  return '/placeholder-product.png' // Or empty/default
+}
+
+const formatPriceRange = (product: Product) => {
+  if (!product.variants || product.variants.length === 0) return formatCurrency(0)
+  
+  const prices = product.variants.map(v => parseFloat(v.sale_price))
+  const min = Math.min(...prices)
+  const max = Math.max(...prices)
+
+  if (min === max) return formatCurrency(min)
+  return `${formatCurrency(min)}` // Just show starting from or range
+}
+
+const handleProductClick = (product: Product) => {
+  selectedProduct.value = product
+  showModal.value = true
+}
+
+const closeModal = () => {
+  showModal.value = false
+  selectedProduct.value = null
+}
+
+const handleAddToCart = (payload: { product: Product, variant: Variant, quantity: number }) => {
+  posStore.addToCart(payload.product, payload.variant, payload.quantity)
+  // Optional: Show partial toast or sound effect here
+}
+</script>

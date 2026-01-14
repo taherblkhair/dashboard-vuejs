@@ -259,18 +259,7 @@
                 </div>
               </div>
 
-              <!-- Stock per Warehouse (if available) -->
-              <div class="space-y-4 pt-4 border-t border-slate-50">
-                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">توزيع المخزون</h4>
-                <div v-if="stock.data.warehouses?.length" class="space-y-3">
-                   <!-- Simplified list for sidebar -->
-                   <div v-for="w in stock.data.warehouses" :key="w.id" class="flex items-center justify-between p-3 bg-slate-50/50 rounded-xl border border-slate-100">
-                     <span class="text-sm font-bold text-slate-700">{{ w.warehouse_name }}</span>
-                     <span class="font-black text-slate-900">{{ w.total_stock }}</span>
-                   </div>
-                </div>
-                <p v-else class="text-xs text-slate-400 font-medium italic">سيظهر التوزيع حسب المخازن هنا عند توفره.</p>
-              </div>
+
             </div>
 
             <div v-else class="py-12 text-center space-y-3">
