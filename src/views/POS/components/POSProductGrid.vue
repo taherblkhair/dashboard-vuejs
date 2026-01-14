@@ -49,6 +49,42 @@
       </div>
     </div>
 
+    <!-- Pagination -->
+    <div v-if="pagination.last_page > 1" class="flex justify-center items-center gap-2 mt-6 select-none">
+      <button
+        class="px-3 py-1 rounded-lg border text-sm font-bold"
+        :disabled="pagination.current_page === 1"
+        @click="changePage(pagination.current_page - 1)"
+      >
+        السابق
+      </button>
+      <button
+        v-for="page in Math.min(pagination.last_page, 7)"
+        :key="page + 'page-btn'"
+        class="px-3 py-1 rounded-lg border text-sm font-bold"
+        :class="pagination.current_page === page ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-200'"
+        @click="changePage(page)"
+      >
+        {{ page }}
+      </button>
+      <span v-if="pagination.last_page > 7 && pagination.current_page < pagination.last_page - 3">...</span>
+      <button
+        v-if="pagination.last_page > 7"
+        class="px-3 py-1 rounded-lg border text-sm font-bold"
+        :class="pagination.current_page === pagination.last_page ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-700 border-slate-200'"
+        @click="changePage(pagination.last_page)"
+      >
+        {{ pagination.last_page }}
+      </button>
+      <button
+        class="px-3 py-1 rounded-lg border text-sm font-bold"
+        :disabled="pagination.current_page === pagination.last_page"
+        @click="changePage(pagination.current_page + 1)"
+      >
+        التالي
+      </button>
+    </div>
+
     <POSVariantSelectionModal 
       :isOpen="showModal"
       :product="selectedProduct"
