@@ -448,14 +448,6 @@ const sanitizePayload = (formData: any) => {
   return data
 }
 
-const saveAsDraft = async () => {
-  if (productFormRef.value) {
-    const formData = productFormRef.value.getFormData()
-    const payload = sanitizePayload(formData)
-    payload.append('is_draft', '1')
-    await onSave(payload)
-  }
-}
 
 const onSave = async (payload: any) => {
   saving.value = true

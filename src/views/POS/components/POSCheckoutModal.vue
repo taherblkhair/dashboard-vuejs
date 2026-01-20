@@ -25,7 +25,8 @@
           <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">العميل</h4>
           <div class="bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
             <CustomerAutocomplete 
-              v-model="customerId"
+              :model-value="customerId as any"
+              @update:model-value="customerId = $event as number | null"
               @select="onCustomerSelect"
               placeholder="ابحث عن عميل (الاسم أو الهاتف)..."
               class="w-full !border-none !ring-0 !bg-transparent"
@@ -157,7 +158,7 @@ import { createOrder } from '../../../api/orders'
 import { fetchCustomer, createCustomerAddress } from '../../../api/customers'
 import { usePosStore } from '../../../stores/pos'
 import { useToast } from '../../../composables/useToast'
-import { useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   isOpen: boolean
@@ -169,7 +170,7 @@ const emit = defineEmits(['close', 'completed'])
 
 const posStore = usePosStore()
 const { addToast } = useToast()
-const router = useRouter()
+// const router = useRouter()
 
 const customerId = ref<number | null>(null)
 const selectedCustomer = ref<any>(null)
@@ -292,7 +293,8 @@ const handleCheckout = async () => {
       }))
     }
 
-    const res = await createOrder(payload)
+    // const res = await createOrder(payload)
+    await createOrder(payload)
     addToast('تم إنشاء الطلب بنجاح', 'success')
     emit('completed')
     

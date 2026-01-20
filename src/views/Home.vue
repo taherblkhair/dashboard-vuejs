@@ -322,12 +322,14 @@ const ordersByStatus = computed(() => {
   })
 })
 
+/*
 const getCompletionRate = () => {
   const orders = dashboard.value.orders_by_status || {}
   const total = Object.values(orders).reduce((sum: number, item: any) => sum + (Number(item) || 0), 0)
   const completed = Number(orders.delivered || 0)
   return total > 0 ? Math.round((completed / total) * 100) : 0
 }
+*/
 
 const initials = (name?: string) => name ? name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase() : '??'
 

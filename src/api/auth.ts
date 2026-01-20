@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api'
+const API_BASE = import.meta.env.VITE_API_BASE ||'https://karamstore.ly/api'// 'http://localhost:8000/api'
 // production: 'https://karamstore.ly/api'
 
 // دالة مساعدة لجلب الهيدرز مع التوكن من الـ LocalStorage تلقائياً
@@ -58,7 +58,7 @@ export async function getDashboardData() {
 }
 
 export async function logout() {
-    const token = localStorage.getItem('token')
+    // const token = localStorage.getItem('token')
     try {
         await fetch(`${API_BASE}/auth/logout`, {
             method: 'POST',

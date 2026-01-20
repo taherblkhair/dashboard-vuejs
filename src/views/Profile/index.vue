@@ -166,7 +166,7 @@ import { ref, onMounted } from 'vue'
 import { fetchUserProfile } from '../../api/users'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
-import MButton from '../../components/ui/MButton.vue'
+// import MButton from '../../components/ui/MButton.vue'
 
 const user = ref<any>(null)
 const loading = ref(true)

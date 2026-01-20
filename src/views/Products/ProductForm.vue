@@ -274,7 +274,7 @@
                   <!-- Variant Image -->
                   <div 
                     class="relative w-24 h-24 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-all overflow-hidden group shrink-0"
-                    @click="$refs[`variantImageInput-${i}`][0].click()"
+                    @click="($refs[`variantImageInput-${i}`] as any)[0].click()"
                   >
                     <input 
                       type="file" 

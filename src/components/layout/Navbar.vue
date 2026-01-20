@@ -140,7 +140,7 @@
 
         <div class="h-8 w-px bg-slate-100 mx-2"></div>
 
-        <!-- User Menu -->
+        <!-- User Menu (Missing in template, so removing unused script refs) -->
      
       </div>
     </div>
@@ -150,7 +150,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuth } from '../../store'
+// import { useAuth } from '../../store'
 import { fetchProducts } from '../../api/products'
 import { fetchCustomers } from '../../api/customers'
 import { fetchOrders } from '../../api/orders'
@@ -159,7 +159,8 @@ const emit = defineEmits(['toggle-sidebar'] as const)
 
 const route = useRoute()
 const router = useRouter()
-const userMenuOpen = ref(false)
+// const userMenuOpen = ref(false)
+// const { state, logout } = useAuth()
 
 const currentPageTitle = computed(() => {
   const titles: { [key: string]: string } = {
@@ -179,8 +180,9 @@ const currentPageTitle = computed(() => {
   return titles[route.path] || 'نظام بالخير المتكامل'
 })
 
-const { state, logout } = useAuth()
+// const { state, logout } = useAuth()
 
+/*
 const displayName = computed(() => {
   return state.user?.name || state.user?.username || state.user?.email || 'أحمد محمد'
 })
@@ -197,6 +199,7 @@ async function handleLogout() {
     router.push({ name: 'Login' })
   }
 }
+*/
 
 // Global Search Logic
 const searchQuery = ref('')

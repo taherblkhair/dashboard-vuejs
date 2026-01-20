@@ -35,10 +35,10 @@ async function login(email: string, password: string) {
 }
 
 async function logout() {
-	const token = state.token
+	// const token = state.token
 	// call API but don't fail if network error
 	try {
-		await authApi.logout(token || undefined)
+		await authApi.logout()
 	} catch (e) {
 		// ignore
 	}

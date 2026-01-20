@@ -124,7 +124,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { fetchStockReport } from '../../api/reports'
-import { formatCurrency, formatNumber } from '../../utils/helpers'
+import { formatCurrency } from '../../utils/helpers'
 import { useToast } from '../../composables/useToast'
 
 const report = ref<any>({})

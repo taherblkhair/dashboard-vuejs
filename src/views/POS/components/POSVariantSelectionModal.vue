@@ -108,17 +108,17 @@ const selectedVariant = ref<Variant | null>(null)
 const variants = computed(() => props.product?.variants || [])
 
 const productImage = computed(() => {
-  if (selectedVariant.value?.images?.length) {
+  if (selectedVariant.value?.images?.length && selectedVariant.value.images[0]) {
     // @ts-ignore
     return getImageUrl(selectedVariant.value.images[0].url)
   }
-  if (props.product?.images?.length) {
+  if (props.product?.images?.length && props.product.images[0]) {
     const main = props.product.images.find(i => i.type === 'main')
     return getImageUrl(main?.url || props.product.images[0].url)
   }
   // Fallback to first variant image if available
   const v = props.product?.variants?.find(v => v.images?.length)
-  if (v?.images) return getImageUrl(v.images[0].url)
+  if (v?.images?.[0]) return getImageUrl(v.images[0].url)
   
   return '/placeholder-product.png'
 })
@@ -155,7 +155,7 @@ watch(() => props.isOpen, (newVal) => {
     // Reset state when opening
     quantity.value = 1
     // Auto select first variant if only one exists
-    if (variants.value.length === 1) {
+    if (variants.value.length === 1 && variants.value[0]) {
       selectedVariant.value = variants.value[0]
     } else {
        selectedVariant.value = null

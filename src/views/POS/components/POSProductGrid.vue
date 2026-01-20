@@ -168,7 +168,7 @@ onMounted(() => {
 })
 
 const getProductImage = (product: Product) => {
-  if (product.images && product.images.length > 0) {
+  if (product.images && product.images.length > 0 && product.images[0]) {
     const main = product.images.find(i => i.type === 'main')
     return getImageUrl(main?.url || product.images[0].url)
   }
