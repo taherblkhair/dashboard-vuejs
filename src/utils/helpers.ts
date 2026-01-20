@@ -80,9 +80,39 @@ export function formatNumber(val?: string | number): string {
 export function getImageUrl(url?: string): string {
   if (!url) return ''
   if (url.startsWith('http') || url.startsWith('blob:')) return url
+  
+  // Specific override for production hosting
+  if (import.meta.env.PROD) {
+    const prodBase = 'https://karamstore.ly/sales-system/public'
+    return `${prodBase}${url.startsWith('/') ? '' : '/'}${url}`
+  }
+
   // If we have a base URL in env, use it but strip /api if present
   const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/api\/?$/, '')
   return `${base}${url.startsWith('/') ? '' : '/'}${url}`
 }
 
-export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime, formatNumber, getImageUrl }
+export function resolveProductImage(product: any, variant?: any): string {
+  // 1. Try specific variant image
+  if (variant?.images?.length && variant.images[0]) {
+    return getImageUrl(variant.images[0].url)
+  }
+
+  // 2. Try product main image
+  if (product?.images?.length) {
+    const main = product.images.find((i: any) => i.type === 'main')
+    if (main?.url) return getImageUrl(main.url)
+    if (product.images[0]?.url) return getImageUrl(product.images[0].url)
+  }
+
+  // 3. Fallback: try to find any variant image if product has no images
+  if (product?.variants?.length) {
+    const v = product.variants.find((v: any) => v.images && v.images.length > 0)
+    if (v?.images?.[0]?.url) return getImageUrl(v.images[0].url)
+  }
+
+  // 4. Placeholder
+  return '/placeholder-product.png'
+}
+
+export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime, formatNumber, getImageUrl, resolveProductImage }

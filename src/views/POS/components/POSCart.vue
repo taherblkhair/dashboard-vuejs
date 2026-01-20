@@ -51,22 +51,12 @@
 
 <script setup lang="ts">
 import { usePosStore } from '../../../stores/pos'
-import { formatCurrency, getImageUrl } from '../../../utils/helpers'
+import { formatCurrency, resolveProductImage } from '../../../utils/helpers'
 import type { CartItem } from '../../../stores/pos'
 
 const posStore = usePosStore()
 
 const getItemImage = (item: CartItem) => {
-  if (item.variant.images?.length && item.variant.images[0]) return getImageUrl(item.variant.images[0].url)
-  if (item.product.images?.length && item.product.images[0]) {
-      const main = item.product.images.find(i => i.type === 'main')
-      return getImageUrl(main?.url || item.product.images[0].url)
-  }
-  
-  // Fallback
-  const v = item.product.variants.find(v => v.images && v.images.length > 0)
-  if (v?.images?.[0]) return getImageUrl(v.images[0].url)
-
-  return '/placeholder-product.png'
+  return resolveProductImage(item.product, item.variant)
 }
 </script>

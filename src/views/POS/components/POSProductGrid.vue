@@ -100,7 +100,7 @@ import { ref, onMounted, watch } from 'vue'
 import { fetchProducts } from '../../../api/products'
 import type { Product, Variant } from '../../../api/products'
 import { usePosStore } from '../../../stores/pos'
-import { getImageUrl, formatCurrency } from '../../../utils/helpers'
+import { formatCurrency, resolveProductImage } from '../../../utils/helpers'
 import POSVariantSelectionModal from './POSVariantSelectionModal.vue'
 
 const posStore = usePosStore()
@@ -168,19 +168,7 @@ onMounted(() => {
 })
 
 const getProductImage = (product: Product) => {
-  if (product.images && product.images.length > 0 && product.images[0]) {
-    const main = product.images.find(i => i.type === 'main')
-    return getImageUrl(main?.url || product.images[0].url)
-  }
-  // Fallback if variants have images
-  if (product.variants?.length) {
-    const v = product.variants.find(v => v.images && v.images.length > 0)
-    // Optional chaining to be safe
-    const url = v?.images?.[0]?.url
-    if (url) return getImageUrl(url)
-  }
-  
-  return '/placeholder-product.png' // Or empty/default
+  return resolveProductImage(product)
 }
 
 const formatPriceRange = (product: Product) => {

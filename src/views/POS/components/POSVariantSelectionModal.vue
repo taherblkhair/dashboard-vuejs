@@ -89,7 +89,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { Product, Variant } from '../../../api/products'
-import { formatCurrency, formatAttributes, getImageUrl } from '../../../utils/helpers'
+import { formatCurrency, formatAttributes, resolveProductImage } from '../../../utils/helpers'
 
 const props = defineProps<{
   isOpen: boolean
@@ -108,19 +108,7 @@ const selectedVariant = ref<Variant | null>(null)
 const variants = computed(() => props.product?.variants || [])
 
 const productImage = computed(() => {
-  if (selectedVariant.value?.images?.length && selectedVariant.value.images[0]) {
-    // @ts-ignore
-    return getImageUrl(selectedVariant.value.images[0].url)
-  }
-  if (props.product?.images?.length && props.product.images[0]) {
-    const main = props.product.images.find(i => i.type === 'main')
-    return getImageUrl(main?.url || props.product.images[0].url)
-  }
-  // Fallback to first variant image if available
-  const v = props.product?.variants?.find(v => v.images?.length)
-  if (v?.images?.[0]) return getImageUrl(v.images[0].url)
-  
-  return '/placeholder-product.png'
+  return resolveProductImage(props.product, selectedVariant.value)
 })
 
 const totalPrice = computed(() => {
