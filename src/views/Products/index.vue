@@ -243,7 +243,7 @@ import { ref, computed, onMounted, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchProducts as apiFetchProducts, fetchCategories, deleteProduct as apiDeleteProduct } from '../../api/products'
 import type { Product, Category, Variant } from '../../api/products'
-import { formatCurrency, formatAttributes } from '../../utils/helpers'
+import { formatCurrency, formatAttributes, resolveProductImage } from '../../utils/helpers'
 import { useToast } from '../../composables/useToast'
 import { useConfirm } from '../../composables/useConfirm'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
@@ -335,15 +335,9 @@ const getMinPrice = (variants: Variant[]) => {
 }
 
 const getProductImageUrl = (product: Product): string | undefined => {
-  const mainImage = product.images?.find(img => img.type === 'main')
-  if (mainImage) {
-    const url = mainImage.url
-    if (url.startsWith('http')) return url
-    // Use the same base as Categories (root domain, usually 8000)
-    const baseUrl = 'http://127.0.0.1:8000'
-    return `${baseUrl}${url}`
-  }
-  return undefined
+  const url = resolveProductImage(product)
+  if (url === '/placeholder-product.png') return undefined
+  return url
 }
 
 const viewProductDetails = (product: Product) => {

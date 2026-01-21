@@ -314,6 +314,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories'
 import type { Category } from '../../api/categories'
+import { getImageUrl } from '../../utils/helpers'
 import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MInput from '../../components/ui/MInput.vue'
@@ -338,11 +339,6 @@ const imageFile = ref<File | null>(null)
 const imagePreview = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 
-const getImageUrl = (url: string) => {
-  if (!url) return ''
-  if (url.startsWith('http')) return url
-  return `http://127.0.0.1:8000${url}`
-}
 
 const handleFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement

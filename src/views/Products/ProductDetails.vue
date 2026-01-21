@@ -376,7 +376,7 @@ import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
   import { fetchProduct as apiFetchProduct, fetchProductStock as apiFetchProductStock, updateProductVariant, deleteProductVariant, createProductVariant } from '../../api/products'
 import type { Product, Variant } from '../../api/products'
-import { formatCurrency } from '../../utils/helpers'
+import { formatCurrency, getImageUrl } from '../../utils/helpers'
 import { useConfirm } from '../../composables/useConfirm'
 import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
@@ -600,11 +600,6 @@ const fetchStock = async () => {
 
 const goBack = () => router.back()
 
-const getImageUrl = (url?: string) => {
-  if (!url) return ''
-  if (url.startsWith('http')) return url
-  return `http://127.0.0.1:8000${url}`
-}
 
 const getMainImage = (product: Product | null) => {
   if (product?.images?.length) {
