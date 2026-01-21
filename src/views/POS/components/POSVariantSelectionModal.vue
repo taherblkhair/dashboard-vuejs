@@ -22,6 +22,13 @@
       <!-- Body / Scrollable -->
       <div class="flex-1 overflow-y-auto p-6 space-y-6">
         
+        <!-- Loading State -->
+        <div v-if="loading" class="flex flex-col items-center justify-center py-12 gap-4">
+          <div class="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+          <p class="text-sm font-bold text-slate-400">جاري تحميل المتغيرات...</p>
+        </div>
+
+        <template v-else>
         <!-- Variants Selection -->
         <div v-if="variants.length > 0" class="space-y-3">
           <label class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">اختر المتغير</label>
@@ -80,6 +87,7 @@
             </button>
           </div>
         </div>
+        </template>
       </div>
 
       <!-- Footer / Actions -->
@@ -109,6 +117,7 @@ import { formatCurrency, formatAttributes, resolveProductImage, getImageUrl } fr
 const props = defineProps<{
   isOpen: boolean
   product: Product | null
+  loading?: boolean
 }>()
 
 const emit = defineEmits<{

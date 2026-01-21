@@ -88,6 +88,7 @@
     <POSVariantSelectionModal 
       :isOpen="showModal"
       :product="selectedProduct"
+      :loading="loadingProduct"
       @close="closeModal"
       @add-to-cart="handleAddToCart"
     />
@@ -97,7 +98,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { fetchProducts } from '../../../api/products'
+import { fetchProducts, fetchProduct } from '../../../api/products'
 import type { Product, Variant } from '../../../api/products'
 import { usePosStore } from '../../../stores/pos'
 import { formatCurrency, resolveProductImage } from '../../../utils/helpers'
@@ -115,6 +116,7 @@ const pagination = ref({
 
 const showModal = ref(false)
 const selectedProduct = ref<Product | null>(null)
+const loadingProduct = ref(false)
 let searchTimeout: any = null
 
 const loadProducts = async (page = 1) => {
@@ -182,9 +184,21 @@ const formatPriceRange = (product: Product) => {
   return `${formatCurrency(min)}` // Just show starting from or range
 }
 
-const handleProductClick = (product: Product) => {
-  selectedProduct.value = product
+const handleProductClick = async (product: Product) => {
+  // Fetch full product details to get variant images
+  loadingProduct.value = true
   showModal.value = true
+  try {
+    const res = await fetchProduct(product.id)
+    const fullProduct = (res && (res as any).data) ? (res as any).data : res
+    selectedProduct.value = fullProduct as Product
+  } catch (e) {
+    console.error('Failed to fetch product details', e)
+    // Fallback to original product data
+    selectedProduct.value = product
+  } finally {
+    loadingProduct.value = false
+  }
 }
 
 const closeModal = () => {
