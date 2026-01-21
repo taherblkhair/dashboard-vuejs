@@ -33,6 +33,21 @@
               class="relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all text-right group"
               :class="selectedVariant?.id === variant.id ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-100 hover:border-indigo-200 bg-white'"
             >
+              <!-- Variant Image -->
+              <div v-if="variant.images && variant.images.length > 0" class="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shrink-0">
+                <img 
+                  :src="getImageUrl(variant.images[0]?.url)" 
+                  class="w-full h-full object-cover"
+                  :alt="formatAttributes(variant.attributes) || variant.sku_variant"
+                />
+              </div>
+              <!-- Placeholder for variants without images -->
+              <div v-else class="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-400 shrink-0 border border-slate-200">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-0.5">
                    <span class="font-bold text-slate-700 text-sm truncate">{{ formatAttributes(variant.attributes) || variant.sku_variant }}</span>
@@ -89,7 +104,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { Product, Variant } from '../../../api/products'
-import { formatCurrency, formatAttributes, resolveProductImage } from '../../../utils/helpers'
+import { formatCurrency, formatAttributes, resolveProductImage, getImageUrl } from '../../../utils/helpers'
 
 const props = defineProps<{
   isOpen: boolean
