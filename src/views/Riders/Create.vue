@@ -111,12 +111,12 @@ import ToastList from '../../components/ToastList.vue'
 const form = ref<any>({
   provider_id: null,
   name: 'خالد عبدالله',
-  phone: '+966501234568',
+  phone: '+21891902920',
   email: 'khalid@delivery.com',
   vehicle_type: 'motorcycle',
-  vehicle_number: 'ك أ 1234',
+  vehicle_number: '25-5 ليبيا',
   max_capacity: 100,
-  current_location: 'طرابلس - حي النخيل',
+  current_location: 'طرابلس - المركز',
   is_active: true,
   is_available: true,
 })
