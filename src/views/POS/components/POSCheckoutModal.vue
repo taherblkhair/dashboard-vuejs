@@ -74,7 +74,7 @@
              <div class="grid grid-cols-2 gap-3">
                <div>
                  <label class="block text-[10px] font-bold text-slate-400 mb-1">المدينة</label>
-                 <input v-model="newAddress.city" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="الرياض" />
+                 <input v-model="newAddress.city" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="طرابلس" />
                </div>
                <div>
                  <label class="block text-[10px] font-bold text-slate-400 mb-1">المنطقة</label>

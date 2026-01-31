@@ -67,13 +67,13 @@
           <div class="mt-3">
             <label class="text-sm">رسوم المناطق (JSON بسيط)</label>
             <textarea v-model="areaFeesRaw" rows="3" class="w-full border rounded px-2 py-1 mt-1 text-sm" />
-            <div class="text-xs text-gray-500 mt-1">مثال: { "الرياض": 5, "جدة": 10 }</div>
+            <div class="text-xs text-gray-500 mt-1">مثال: { "طرابلس": 10, "بنغازي": 30 }</div>
           </div>
         </div>
 
         <div class="mt-3">
           <label class="text-sm">مناطق الخدمة (افصل بفواصل)</label>
-          <input v-model="serviceAreasRaw" class="w-full border rounded px-2 py-1 mt-1" placeholder="الرياض, جدة, الدمام" />
+          <input v-model="serviceAreasRaw" class="w-full border rounded px-2 py-1 mt-1" placeholder="طرابلس, بنغازي" />
         </div>
 
         <div class="mt-3 flex items-center gap-3">
@@ -119,16 +119,16 @@ const form = ref<any>({
   name: 'شركة درب السبيل',
   type: 'company',
   contact_person: 'أحمد محمد',
-  phone: '+966501234567',
+  phone: '+218910902903',
   email: 'info@fast-delivery.com',
-  address: 'الرياض - حي العليا',
+  address: 'طرابلس - وسط المدينة',
   pricing_rules: {
     base_fee: 15,
-    area_fees: { 'الرياض': 5, 'جدة': 10, 'الدمام': 12 },
+    area_fees: { 'طرابلس': 5, 'بنغازي': 10, 'مصراتة': 12 },
     weight_rate: 2,
     distance_rate: 1.5,
   },
-  service_areas: ['الرياض', 'جدة', 'الدمام'],
+  service_areas: ['طرابلس', 'بنغازي', 'مصراتة'],
   is_active: true,
 })
 

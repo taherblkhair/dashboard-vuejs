@@ -116,7 +116,7 @@ const form = ref<any>({
   vehicle_type: 'motorcycle',
   vehicle_number: 'ك أ 1234',
   max_capacity: 100,
-  current_location: 'الرياض - حي النخيل',
+  current_location: 'طرابلس - حي النخيل',
   is_active: true,
   is_available: true,
 })
