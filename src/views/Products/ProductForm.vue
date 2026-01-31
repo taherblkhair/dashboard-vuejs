@@ -322,6 +322,17 @@
                       <option value="white">أبيض</option>
                       <option value="green">أخضر</option>
                       <option value="yellow">أصفر</option>
+                      <option value="pink">وردي</option>
+                      <option value="beige">بيج</option>
+                      <option value="brown">بني</option>
+                      <option value="gray">رمادي</option>
+                      <option value="purple">بنفسجي</option>
+                      <option value="orange">برتقالي</option>
+                      <option value="cream">كريمي</option>
+                      <option value="red-brown">بني وردي</option>
+                      <option value="blue-gray">رمادي أزرق</option>
+                      <option value="navy-blue">كحلي</option> 
+
                     </select>
                   </div>
                   <div class="grid grid-cols-2 gap-4">

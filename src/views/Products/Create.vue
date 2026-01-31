@@ -369,7 +369,17 @@ const getColorName = (colorCode: string) => {
     'black': 'أسود',
     'white': 'أبيض',
     'green': 'أخضر',
-    'yellow': 'أصفر'
+    'yellow': 'أصفر',
+    'pink': 'وردي',
+    'beige': 'بيج',
+    'brown': 'بني',
+    'gray': 'رمادي',
+    'purple': 'بنفسجي',
+    'orange': 'برتقالي',
+    'cream': 'كريمي',
+    'red-brown': 'بني وردي',
+    'blue-gray': 'رمادي أزرق',
+    'navy-blue': 'كحلي',
   }
   return colors[colorCode] || colorCode
 }
