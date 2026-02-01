@@ -52,7 +52,7 @@
 
         <MStatsCard
           label="المبالغ المستلمة"
-          :value="formatCurrency(dashboardData.total_received_amount || 0)"
+          :value="formatCurrency(dashboardData.total_received_amount || 0, 2)"
           variant="emerald"
         >
           <template #icon>
@@ -149,7 +149,7 @@
             <td class="px-4 py-3">
               <MBadge :variant="getStatusVariant(order.status)">{{ getStatusText(order.status) }}</MBadge>
             </td>
-            <td class="px-4 py-3 font-medium text-gray-900">{{ formatCurrency(order.total_amount) }}</td>
+            <td class="px-4 py-3 font-medium text-gray-900">{{ formatCurrency(order.total_amount, 2) }}</td>
             <td class="px-4 py-3 text-gray-600 text-sm">{{ formatDate(order.order_date) }}</td>
             <td class="px-4 py-3 text-gray-600 text-sm">{{ formatDate(order.expected_delivery_date) }}</td>
             <td class="px-4 py-3">

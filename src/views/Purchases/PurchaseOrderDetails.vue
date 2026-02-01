@@ -91,8 +91,8 @@
                     {{ item.quantity_received || 0 }}
                   </MBadge>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-600 font-mono">{{ formatCurrency(item.unit_price) }}</td>
-                <td class="px-4 py-3 text-sm font-semibold text-gray-900 font-mono">{{ formatCurrency(item.quantity_ordered * item.unit_price) }}</td>
+                <td class="px-4 py-3 text-sm text-gray-600 font-mono">{{ formatCurrency(item.unit_price, 2) }}</td>
+                <td class="px-4 py-3 text-sm font-semibold text-gray-900 font-mono">{{ formatCurrency(item.quantity_ordered * item.unit_price, 2) }}</td>
               </tr>
             </MTable>
             
@@ -104,7 +104,7 @@
                 </div>
                 <div class="flex justify-between text-base font-bold text-gray-900 border-t border-gray-50 pt-2">
                   <span>الإجمالي نهائي:</span>
-                  <span class="font-mono">{{ formatCurrency(order.total_amount) }}</span>
+                  <span class="font-mono">{{ formatCurrency(order.total_amount, 2) }}</span>
                 </div>
               </div>
             </div>
@@ -131,8 +131,8 @@
                   <div class="h-full bg-green-500" :style="{ width: `${(order.paid_amount/order.total_amount)*100}%` }"></div>
                 </div>
                 <div class="flex justify-between mt-1 text-[10px] font-mono text-gray-400">
-                  <span>{{ formatCurrency(order.paid_amount) }}</span>
-                  <span>{{ formatCurrency(order.total_amount) }}</span>
+                  <span>{{ formatCurrency(order.paid_amount, 2) }}</span>
+                  <span>{{ formatCurrency(order.total_amount, 2) }}</span>
                 </div>
               </div>
             </div>

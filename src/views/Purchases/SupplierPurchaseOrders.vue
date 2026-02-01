@@ -37,7 +37,7 @@
                   <td class="p-2 text-right">{{ o.id }}</td>
                   <td class="p-2 text-right">{{ o.code }}</td>
                   <td class="p-2 text-right">{{ o.status }}</td>
-                  <td class="p-2 text-right">{{ o.total_amount }}</td>
+                  <td class="p-2 text-right">{{ formatCurrency(o.total_amount, 2) }}</td>
                   <td class="p-2 text-right">{{ formatDate(o.order_date) }}</td>
                   <td class="p-2 text-right">{{ formatDate(o.expected_delivery_date) }}</td>
                   <td class="p-2 text-right">
@@ -68,6 +68,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchSupplierPurchaseOrders } from '../../api/suppliers'
 import { useToast } from '../../composables/useToast'
+import { formatCurrency, formatDate } from '../../utils/helpers'
 
 const route = useRoute()
 const router = useRouter()
@@ -96,10 +97,7 @@ onMounted(() => load())
 
 const changePage = (p: number) => { load(p) }
 
-const formatDate = (iso?: string) => {
-  if (!iso) return '-'
-  try { return new Date(iso).toLocaleDateString() } catch { return iso }
-}
+// Local formatDate removed, using global helper
 
 const viewOrder = (id?: number) => {
   if (!id) return
@@ -140,7 +138,7 @@ const exportExcel = () => {
     return
   }
   const headers = ['الرمز', 'الحالة', 'إجمالي', 'تاريخ الطلب', 'تاريخ التوصيل المتوقع']
-  const rows = orders.value.map(o => [o.code, o.status, o.total_amount, formatDate(o.order_date), formatDate(o.expected_delivery_date)])
+  const rows = orders.value.map(o => [o.code, o.status, formatCurrency(o.total_amount, 2), formatDate(o.order_date), formatDate(o.expected_delivery_date)])
   let table = '<table border="1"><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>'
   table += rows.map(r => '<tr>' + r.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>').join('')
   table += '</tbody></table>'

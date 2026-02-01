@@ -109,7 +109,7 @@
                     <div class="flex items-end justify-end">
                       <div class="text-right">
                         <p class="text-[10px] text-gray-400 uppercase">الإجمالي</p>
-                        <p class="font-bold text-primary-600">{{ formatCurrency(line.quantity_ordered * line.unit_price) }}</p>
+                        <p class="font-bold text-primary-600">{{ formatCurrency(line.quantity_ordered * line.unit_price, 2) }}</p>
                       </div>
                     </div>
                   </div>
@@ -139,7 +139,7 @@
               </div>
               <div class="border-t border-gray-100 pt-4 flex justify-between items-end">
                 <span class="text-sm font-semibold text-gray-700">المبلغ الإجمالي</span>
-                <span class="text-xl font-bold text-gray-900">{{ formatCurrency(totalAmount) }}</span>
+                <span class="text-xl font-bold text-gray-900">{{ formatCurrency(totalAmount, 2) }}</span>
               </div>
               
               <div class="pt-4 space-y-3">
@@ -171,7 +171,7 @@ import { useRouter } from 'vue-router'
 import { fetchSuppliers } from '../../api/suppliers'
 import { fetchProducts } from '../../api/products'
 import { createPurchaseOrder } from '../../api/purchaseOrders'
-import { formatAttributes } from '../../utils/helpers'
+import { formatAttributes, formatCurrency } from '../../utils/helpers'
 import ProductAutocomplete from '../../components/ProductAutocomplete.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
@@ -192,6 +192,7 @@ const form = reactive<any>({
 })
 
 const errors = reactive<any>({})
+const cachedProducts = reactive<Record<number, any>>({})
 
 const totalQuantity = computed(() => form.lines.reduce((sum: number, line: any) => sum + (Number(line.quantity_ordered) || 0), 0))
 const totalAmount = computed(() => form.lines.reduce((sum: number, line: any) => sum + (Number(line.quantity_ordered || 0) * Number(line.unit_price || 0)), 0))
@@ -220,12 +221,15 @@ const removeLine = (idx: number) => {
 const variantsForLine = (idx: number) => {
   const line = form.lines[idx]
   if (!line || !line.product_id) return []
-  const prod = products.value.find((p: any) => p.id === line.product_id)
+  const prod = cachedProducts[line.product_id] || products.value.find((p: any) => p.id === line.product_id)
   return prod?.variants || []
 }
 
 const onProductSelected = (idx: number, product: any) => {
   if (!product) return
+  // Cache the product to ensure variants are available even if search results change
+  cachedProducts[product.id] = product
+  
   form.lines[idx].product_id = product.id
   form.lines[idx].product_name = product.name || null
   const v = product.variants || []
@@ -236,6 +240,9 @@ const onProductSelected = (idx: number, product: any) => {
 const addAllVariants = (idx: number, product: any) => {
   if (!product || !product.variants?.length) return
   
+  // Cache the product
+  cachedProducts[product.id] = product
+
   const variants = product.variants
   // Update current line
   form.lines[idx].product_id = product.id
@@ -257,10 +264,7 @@ const addAllVariants = (idx: number, product: any) => {
   form.lines.splice(idx + 1, 0, ...moreLines)
 }
 
-const formatCurrency = (val?: number) => {
-  if (val == null) return '0.00 د.ل'
-  return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(val) + ' د.ل'
-}
+// Local formatCurrency removed, using global helper
 
 const validate = () => {
   Object.keys(errors).forEach(k => delete errors[k])
@@ -308,6 +312,12 @@ onMounted(async () => {
     const [s, p] = await Promise.all([fetchSuppliers(), fetchProducts()])
     suppliers.value = s?.data || s || []
     products.value = p?.data || p || []
+    
+    // Initial cache population
+    products.value.forEach((prod: any) => {
+      cachedProducts[prod.id] = prod
+    })
+
     if (!form.lines.length) addLine()
   } catch (e) { console.error(e) }
   finally { loading.value = false }
