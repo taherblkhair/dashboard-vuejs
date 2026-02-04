@@ -138,9 +138,20 @@
                            class="bg-gray-50 rounded-xl p-3 border border-gray-100 hover:border-primary-200 transition-colors">
                         
                         <!-- Variant Info -->
-                        <div class="mb-3">
-                          <p class="text-sm font-medium text-gray-800 truncate">{{ formatAttributes(variant.attributes) || 'افتراضي' }}</p>
-                          <p class="text-[10px] text-gray-400 font-mono">{{ variant.sku_variant || variant.sku || '—' }}</p>
+                        <div class="flex justify-between items-start mb-3">
+                          <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-800 truncate">{{ formatAttributes(variant.attributes) || 'افتراضي' }}</p>
+                            <p class="text-[10px] text-gray-400 font-mono">{{ variant.sku_variant || variant.sku || '—' }}</p>
+                          </div>
+                          <button 
+                            @click="removeVariant(gIdx, vIdx)" 
+                            class="text-gray-400 hover:text-red-500 p-1 -mt-1 -ml-1 rounded transition-colors"
+                            title="حذف المتغير"
+                          >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                          </button>
                         </div>
 
                         <!-- Editable Fields -->
@@ -397,6 +408,20 @@ const addProductWithAllVariants = (product: any) => {
 // Remove product group
 const removeProductGroup = (idx: number) => {
   productGroups.value.splice(idx, 1)
+}
+
+// Remove individual variant from a group
+const removeVariant = (groupIdx: number, variantIdx: number) => {
+  const group = productGroups.value[groupIdx]
+  if (!group) return
+  
+  // If this is the last variant, remove the entire group
+  if (group.variants.length <= 1) {
+    removeProductGroup(groupIdx)
+    return
+  }
+  
+  group.variants.splice(variantIdx, 1)
 }
 
 // Apply bulk settings to group
