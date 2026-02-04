@@ -63,6 +63,9 @@ const routes = [
   { path: 'cities', name: 'Cities', component: () => import('../views/Cities/index.vue') },
   { path: 'users', name: 'Users', component: () => import('../views/Users/index.vue') },
   { path: 'profile', name: 'Profile', component: () => import('../views/Profile/index.vue') },
+  { path: 'reports/financial/profit', name: 'FinancialProfitReport', component: () => import('../views/FinancialReports/ProfitReport.vue') },
+  { path: 'reports/financial/expenses', name: 'FinancialExpensesReport', component: () => import('../views/FinancialReports/ExpensesReport.vue') },
+  { path: 'reports/financial/sales', name: 'FinancialSalesReport', component: () => import('../views/FinancialReports/SalesReport.vue') },
     ]
   },
   {

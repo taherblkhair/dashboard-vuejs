@@ -348,14 +348,27 @@ const menuItems = ref<any[]>([
       {
         name: "تقرير المبيعات",
         route: "/reports/sales",
-        icon: "M3 3v18h18V3H3zm3 14V7h12v10H6zm3-9h6v2H9V8zm0 4h6v2H9v-2z",
-      },
+       icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
+       },
+      
       {
         name: "منخفض المخزون",
         route: "/reports/stock/low-stock",
-        icon: "M12 8v4l3 3",
+        icon: "M4 4h16v16H4V4zm3 10h2v3H7v-3zm4-5h2v8h-2V9zm4-3h2v11h-2V6z"
       },
+      // { name: ' تقرير المبيعات', 
+      //   route: '/reports/financial/sales', 
+      //   icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
+      // },
+
     ],
+  },
+  {
+    name: ' التقارير المالية',
+    children: [
+      { name: ' تقرير المصروفات', route: '/reports/financial/expenses', icon: 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6' },
+      { name: ' تقرير الأرباح', route: '/reports/financial/profit', icon: 'M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' }
+    ]
   },
   {
     name: "النظام",
