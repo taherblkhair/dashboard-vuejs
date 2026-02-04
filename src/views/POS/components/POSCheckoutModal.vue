@@ -78,11 +78,11 @@
                </div>
                <div>
                  <label class="block text-[10px] font-bold text-slate-400 mb-1">المنطقة</label>
-                 <input v-model="newAddress.area" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="العليا" />
+                 <input v-model="newAddress.area" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="حي الاندلس" />
                </div>
                <div class="col-span-2">
                  <label class="block text-[10px] font-bold text-slate-400 mb-1">الشارع</label>
-                 <input v-model="newAddress.street" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="شارع الملك فهد" />
+                 <input v-model="newAddress.street" type="text" class="w-full px-2 py-1.5 text-xs font-bold border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="شارع البرج " />
                </div>
                <div>
                   <label class="block text-[10px] font-bold text-slate-400 mb-1">المبنى (اختياري)</label>

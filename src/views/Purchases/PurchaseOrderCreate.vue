@@ -276,6 +276,7 @@ const validate = () => {
   form.lines.forEach((l: any, i: number) => {
     if (!l.product_variant_id) { errors[`line_${i}`] = `البند ${i+1}: الصنف مطلوب`; ok = false }
     if (l.quantity_ordered <= 0) { errors[`line_qty_${i}`] = `البند ${i+1}: الكمية يجب أن تكون أكبر من 0`; ok = false }
+    if (l.unit_price == null || l.unit_price <= 0) { errors[`line_price_${i}`] = `البند ${i+1}: سعر الوحدة مطلوب`; ok = false }
   })
   return ok
 }
