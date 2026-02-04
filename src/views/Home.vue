@@ -95,13 +95,13 @@
                 </svg>
               </div>
 
-              <div class="mt-8 grid  gap-4">
+              <!-- <div class="mt-8 grid  gap-4">
                  <div class="bg-white/5 border border-white/10 p-5 rounded-[2rem] backdrop-blur-md">
                     <p class="text-indigo-300 text-[10px] font-bold uppercase mb-2">مبيعات اليوم</p>
                     <p class="text-2xl font-bold">{{ formatCurrency(dashboard.revenue?.today) }}</p>
                  </div>
                  
-              </div>
+              </div> -->
            </div>
         </div>
 
