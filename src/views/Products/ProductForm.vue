@@ -185,18 +185,7 @@
           <h4 class="text-xl font-black text-slate-900 tracking-tight">قائمة المتغيرات</h4>
           <p class="text-sm font-medium text-slate-400">أضف متغيرات مختلفة للصنف حسب الخصائص</p>
         </div>
-        <MButton type="button"
-                variant="secondary"
-                size="sm"
-                @click="addVariant"
-                class="!rounded-xl bg-indigo-50 !text-indigo-600 border-none hover:bg-indigo-100">
-          <template #icon>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-          </template>
-          إضافة متغير
-        </MButton>
+       
       </div>
 
       <!-- No Variants Message -->
@@ -211,6 +200,18 @@
           <p class="font-black text-slate-900">لا توجد متغيرات مضافة</p>
           <p class="text-sm text-slate-400 font-medium">ابدأ بإضافة متغيرات لتعريف خصائص الصنف</p>
         </div>
+         <MButton type="button"
+                variant="secondary"
+                size="sm"
+                @click="addVariant"
+                class="!rounded-xl bg-indigo-50 !text-indigo-600 border-none hover:bg-indigo-100">
+          <template #icon>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+          </template>
+          إضافة متغير
+        </MButton>
       </div>
 
       <!-- Variants List -->
@@ -366,6 +367,22 @@
               </label>
             </div>
           </div>
+
+          <!-- زر إضافة متغير أسفل آخر متغير فقط -->
+          <div v-if="i === form.variants.length - 1" class="flex justify-end pb-6 pr-6">
+            <MButton type="button"
+                    variant="secondary"
+                    size="sm"
+                    @click="addVariant"
+                    class="!rounded-xl bg-indigo-50 !text-indigo-600 border-none hover:bg-indigo-100">
+              <template #icon>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+              </template>
+              إضافة متغير
+            </MButton>
+          </div>
         </div>
       </div>
     </div>
@@ -433,22 +450,7 @@
             </svg>
           </template>
         </MButton>
-        <!-- <MButton v-else 
-                type="submit" 
-                variant="primary" 
-                :loading="loading"
-                class="!rounded-2xl !px-10 shadow-lg shadow-indigo-100">
-          <template #icon>
-            <svg v-if="!loading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
-            <svg v-else class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-            </svg>
-          </template>
-          {{ loading ? 'جاري الحفظ...' : 'حفظ الصنف' }}
-        </MButton> -->
+     
       </div>
     </div>
 

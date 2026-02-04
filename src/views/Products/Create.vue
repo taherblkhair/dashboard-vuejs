@@ -166,11 +166,11 @@
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                               <div>
                                 <span class="text-gray-500">سعر الشراء:</span>
-                                <span class="font-medium mr-2">{{ variant.purchase_price }} ر.س</span>
+                                <span class="font-medium mr-2">{{ variant.purchase_price }} د.ل</span>
                               </div>
                               <div>
                                 <span class="text-gray-500">سعر البيع:</span>
-                                <span class="font-medium mr-2">{{ variant.sale_price }} ر.س</span>
+                                <span class="font-medium mr-2">{{ variant.sale_price }} د.ل</span>
                               </div>
                               <div v-if="variant.attributes.color">
                                 <span class="text-gray-500">اللون:</span>
