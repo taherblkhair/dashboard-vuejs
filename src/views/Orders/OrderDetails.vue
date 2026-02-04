@@ -587,7 +587,7 @@ const changeOrderStatus = async () => {
   if (!order.value?.id || !orderStatusToSet.value) return
 
   // Check stock before processing or shipping
-  if (['processing'].includes(orderStatusToSet.value) || (orderStatusToSet.value === 'confirmed' && order.value.status === 'pending')) {
+  if (  (orderStatusToSet.value === 'confirmed' )) {
       try {
           const stockRes = await checkOrderStock(order.value.id)
           const data = stockRes?.data?.data || stockRes?.data
