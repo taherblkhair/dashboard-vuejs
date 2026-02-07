@@ -81,9 +81,9 @@ const handleClearCache = async () => {
 	isLoading.value = true
 	try {
 		await clearCache()
-		toast.success('تم مسح ذاكرة التخزين المؤقت بنجاح.')
+		toast.addToast('تم مسح ذاكرة التخزين المؤقت بنجاح.', 'success')
 	} catch (error) {
-		toast.error('فشل مسح ذاكرة التخزين المؤقت.')
+		toast.addToast('فشل مسح ذاكرة التخزين المؤقت.', 'error')
 	} finally {
 		isLoading.value = false
 	}

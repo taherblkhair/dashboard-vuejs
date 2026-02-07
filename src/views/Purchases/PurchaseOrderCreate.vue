@@ -456,8 +456,8 @@ const validate = () => {
   }
 
   let lineIdx = 0
-  productGroups.value.forEach((group, gIdx) => {
-    group.variants.forEach((v, vIdx) => {
+  productGroups.value.forEach((group) => {
+    group.variants.forEach((v) => {
       if (v.quantity_ordered <= 0) {
         errors[`line_qty_${lineIdx}`] = `${group.product_name}: الكمية يجب أن تكون أكبر من 0`
         ok = false

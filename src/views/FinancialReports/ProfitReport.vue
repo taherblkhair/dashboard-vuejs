@@ -59,8 +59,8 @@ import { ref, onMounted } from 'vue'
 import { formatCurrency } from '../../utils/helpers'
 import { getProfitReport } from '../../api/financialReports'
 
-const date_from = ref(new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0])
-const date_to = ref(new Date().toISOString().split('T')[0])
+const date_from = ref<string>(new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0] as string)
+const date_to = ref<string>(new Date().toISOString().split('T')[0] as string)
 const report = ref<any>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
