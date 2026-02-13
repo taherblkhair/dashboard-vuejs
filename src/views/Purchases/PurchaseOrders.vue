@@ -52,7 +52,7 @@
 
         <MStatsCard
           label="المبالغ المستلمة"
-          :value="formatCurrency(dashboardData.total_received_amount || 0, 2)"
+          :value="formatCurrency(dashboardData.total_received_amount || 0,0)"
           variant="emerald"
         >
           <template #icon>

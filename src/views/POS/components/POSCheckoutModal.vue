@@ -22,7 +22,16 @@
       <div class="flex-1 overflow-y-auto p-8 space-y-8">
         <!-- 1. Customer Selection -->
         <div class="space-y-3">
-          <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">العميل</h4>
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">العميل</h4>
+            <button 
+              @click="showCreateCustomerModal = true"
+              class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-colors"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              إضافة عميل جديد
+            </button>
+          </div>
           <div class="bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
             <CustomerAutocomplete 
               :model-value="customerId as any"
@@ -142,23 +151,30 @@
           :disabled="processing || !customerId || !selectedAddress "
         >
           <span v-if="processing">جاري التنفيذ...</span>
-          <span v-else>تأكيد ودفع</span>
+          <span v-else>تأكيد الطلب</span>
           <svg v-if="!processing" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
         </button>
       </div>
     </div>
+
+    <!-- Customer Create Modal -->
+    <CustomerCreateModal 
+      :is-open="showCreateCustomerModal"
+      @close="showCreateCustomerModal = false"
+      @customer-created="onCustomerCreated"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import CustomerAutocomplete from '../../../components/CustomerAutocomplete.vue'
+import CustomerCreateModal from '../../../components/CustomerCreateModal.vue'
 import { formatCurrency } from '../../../utils/helpers'
 import { createOrder } from '../../../api/orders'
 import { fetchCustomer, createCustomerAddress } from '../../../api/customers'
 import { usePosStore } from '../../../stores/pos'
 import { useToast } from '../../../composables/useToast'
-// import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   isOpen: boolean
@@ -179,6 +195,7 @@ const billingAddressId = ref<number | null>(null)
 const selectedAddress = ref<any>(null)
 const discount = ref(0)
 const processing = ref(false)
+const showCreateCustomerModal = ref(false)
 
 // Address Creation
 const showAddressForm = ref(false)
