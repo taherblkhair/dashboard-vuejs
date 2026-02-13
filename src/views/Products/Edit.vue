@@ -84,6 +84,7 @@ const onSave = async (formData: any) => {
     if (formData.description) payload.append('description', formData.description)
     if (formData.category_id) payload.append('category_id', String(formData.category_id))
     payload.append('is_active', formData.is_active ? '1' : '0')
+    payload.append('is_featured', formData.is_featured ? '1' : '0')
     
     if (formData.main_image instanceof File) {
       payload.append('main_image', formData.main_image)

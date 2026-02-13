@@ -280,6 +280,34 @@ const saveNewAddress = async () => {
   }
 }
 
+
+const onCustomerCreated = async (customer: any) => {
+  // Auto-select the newly created customer
+  if (customer && customer.id) {
+    selectedCustomer.value = customer
+    customerId.value = customer.id
+    deliveryAddressId.value = null
+    billingAddressId.value = null
+    selectedAddress.value = null
+    showAddressForm.value = false
+    showCreateCustomerModal.value = false
+
+    // Fetch full customer details including addresses
+    try {
+      const res = await fetchCustomer(customer.id)
+      const fullCustomer = res.data
+      if (fullCustomer && fullCustomer.addresses && fullCustomer.addresses.length > 0) {
+        const defaultAddr = fullCustomer.addresses.find((a: any) => a.id === fullCustomer.default_address_id) || fullCustomer.addresses[0]
+        deliveryAddressId.value = defaultAddr.id
+        billingAddressId.value = defaultAddr.id
+        selectedAddress.value = defaultAddr
+      }
+    } catch (e) {
+      console.error('Failed to fetch customer details', e)
+    }
+  }
+}
+
 const close = () => {
   emit('close')
 }

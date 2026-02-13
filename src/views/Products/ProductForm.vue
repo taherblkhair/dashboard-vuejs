@@ -149,19 +149,29 @@
           </div>
         </div>
 
-        <!-- Status -->
-        <div class="space-y-2">
-          <label class="text-sm font-black text-slate-700 block px-1">الحالة</label>
-          <div class="flex items-center h-14 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <input type="checkbox" 
-                   v-model="form.is_active" 
-                   id="active-toggle"
-                   class="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-600 transition-all cursor-pointer" />
-            <label for="active-toggle" class="mr-3 text-sm font-black text-slate-700 cursor-pointer">
-              {{ form.is_active ? 'نشط' : 'غير نشط' }}
-            </label>
-          </div>
-        </div>
+       <div class="space-y-3">
+  <!-- العنوان الرئيسي -->
+  <span class="text-sm font-bold text-slate-700 block px-1">الحالة والتميز</span>
+
+  <!-- خيارات الصف المزدوج -->
+  <div class="flex flex-wrap gap-3">
+    <!-- الخيار الأول: نشط / غير نشط -->
+    <label class="flex-1 flex items-center gap-3 p-4 min-w-[200px] bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer transition-all duration-200 hover:bg-slate-100 hover:border-slate-300 has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-300">
+      <input type="checkbox" v-model="form.is_active" class="w-5 h-5 accent-indigo-600 cursor-pointer" />
+      <span class="text-sm font-bold text-slate-700 select-none">
+        {{ form.is_active ? 'نشط' : 'غير نشط' }}
+      </span>
+    </label>
+
+    <!-- الخيار الثاني: صنف مميز -->
+    <label class="flex-1 flex items-center gap-3 p-4 min-w-[200px] bg-amber-50 border border-amber-200 rounded-2xl cursor-pointer transition-all duration-200 hover:bg-amber-100 hover:border-amber-300 has-[:checked]:bg-amber-100 has-[:checked]:border-amber-400">
+      <input type="checkbox" v-model="form.is_featured" class="w-5 h-5 accent-amber-600 cursor-pointer" />
+      <span class="text-sm font-bold text-amber-900 select-none">
+        صنف مميز
+      </span>
+    </label>
+  </div>
+</div>
       </div>
 
       <!-- Description -->
@@ -507,6 +517,7 @@ const form = reactive({
   description: '',
   category_id: '',
   is_active: true,
+  is_featured: false,
   main_image: null as File | null,
   images: [] as File[],
   variants: [] as any[]
@@ -662,6 +673,7 @@ const populateForm = () => {
   form.description = d.description || ''
   form.category_id = d.category_id || ''
   form.is_active = !!d.is_active
+  form.is_featured = !!d.is_featured
 
   if (d.images) {
     const main = d.images.find((i: any) => i.type === 'main')
@@ -755,12 +767,13 @@ const onSubmit = () => {
     return
   }
   
-  emit('save', {
+  const payload = {
     name: form.name,
     sku: form.sku,
     description: form.description,
     category_id: form.category_id || undefined,
-    is_active: form.is_active,
+    is_active: !!form.is_active,
+    is_featured: !!form.is_featured,
     main_image: form.main_image,
     images: form.images,
     variants: form.variants.map(v => ({
@@ -772,7 +785,8 @@ const onSubmit = () => {
       attributes: v.attributes,
       image: v.image
     }))
-  })
+  }
+  emit('save', payload)
 }
 
 // Expose form data for parent component
@@ -783,6 +797,7 @@ const getFormData = () => {
     description: form.description,
     category_id: form.category_id,
     is_active: form.is_active,
+    is_featured: form.is_featured,
     main_image: form.main_image,
     images: form.images,
     variants: form.variants

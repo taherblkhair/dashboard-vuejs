@@ -422,6 +422,7 @@ const sanitizePayload = (formData: any) => {
   if (formData.description) data.append('description', formData.description)
   if (formData.category_id) data.append('category_id', String(formData.category_id))
   data.append('is_active', formData.is_active ? '1' : '0')
+  data.append('is_featured', formData.is_featured ? '1' : '0')
   
   if (formData.main_image) {
     data.append('main_image', formData.main_image)
@@ -459,7 +460,8 @@ const sanitizePayload = (formData: any) => {
 }
 
 
-const onSave = async (payload: any) => {
+const onSave = async (rawPayload: any) => {
+  const payload = rawPayload instanceof FormData ? rawPayload : sanitizePayload(rawPayload)
   saving.value = true
   try {
     const res = await apiCreateProduct(payload)
