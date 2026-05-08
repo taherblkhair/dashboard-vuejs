@@ -13,6 +13,11 @@
         <div class="flex-1 pt-1">
           <h3 class="text-xl font-black text-slate-900 leading-tight mb-1">{{ product?.name }}</h3>
           <p class="text-sm font-bold text-slate-400">{{ product?.category?.name }}</p>
+          <!-- Selected count badge -->
+          <div v-if="selectedCount > 0" class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-black">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            {{ selectedCount }} متغير محدد
+          </div>
         </div>
         <button @click="close" class="p-2 text-slate-400 hover:bg-white hover:text-rose-500 rounded-xl transition-all shadow-sm">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -31,14 +36,23 @@
         <template v-else>
         <!-- Variants Selection -->
         <div v-if="variants.length > 0" class="space-y-3">
-          <label class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">اختر المتغير</label>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex items-center justify-between px-1">
+            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">اختر المتغيرات</label>
+            <!-- Select all / Deselect all -->
             <button
+              @click="toggleSelectAll"
+              class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+            >
+              {{ isAllSelected ? 'إلغاء تحديد الكل' : 'تحديد الكل' }}
+            </button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
               v-for="variant in variants"
               :key="variant.id"
-              @click="selectedVariant = variant"
-              class="relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all text-right group"
-              :class="selectedVariant?.id === variant.id ? 'border-indigo-600 bg-indigo-50/50' : 'border-slate-100 hover:border-indigo-200 bg-white'"
+              @click="toggleVariant(variant)"
+              class="relative flex items-center gap-3 p-3 rounded-2xl border-2 transition-all text-right group cursor-pointer"
+              :class="isSelected(variant.id) ? 'border-indigo-600 bg-indigo-50/50 ring-1 ring-indigo-100' : 'border-slate-100 hover:border-indigo-200 bg-white'"
             >
               <!-- Variant Image -->
               <div v-if="variant.images && variant.images.length > 0" class="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 shrink-0">
@@ -60,13 +74,32 @@
                    <span class="font-bold text-slate-700 text-sm truncate">{{ formatAttributes(variant.attributes) || variant.sku_variant }}</span>
                 </div>
                 <div class="text-lg font-black text-indigo-600">{{ formatCurrency(variant.sale_price) }}</div>
+                
+                <!-- Per-variant quantity controls (only when selected) -->
+                <div v-if="isSelected(variant.id)" class="flex items-center gap-2 mt-2" @click.stop>
+                  <button 
+                    @click.stop="decreaseVariantQty(variant.id)" 
+                    class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-500 hover:border-rose-300 hover:text-rose-500 flex items-center justify-center transition-all active:scale-95"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                  </button>
+                  <span class="text-sm font-black text-slate-800 w-8 text-center tabular-nums">{{ getVariantQty(variant.id) }}</span>
+                  <button 
+                    @click.stop="increaseVariantQty(variant.id)" 
+                    class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-sm hover:bg-indigo-700 transition-all active:scale-95"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                  </button>
+                </div>
               </div>
-              <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
-                :class="selectedVariant?.id === variant.id ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'"
+
+              <!-- Checkbox indicator -->
+              <div class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all shrink-0"
+                :class="isSelected(variant.id) ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300 group-hover:border-indigo-300'"
               >
-                <svg v-if="selectedVariant?.id === variant.id" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                <svg v-if="isSelected(variant.id)" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
               </div>
-            </button>
+            </div>
           </div>
         </div>
 
@@ -74,19 +107,6 @@
            <p class="text-slate-500 font-bold">لا توجد متغيرات لهذا الصنف</p>
         </div>
 
-        <!-- Quantity -->
-        <div class="space-y-3">
-          <label class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">الكمية</label>
-          <div class="flex items-center justify-center gap-6 p-4 bg-slate-50 rounded-3xl border border-slate-100 max-w-xs mx-auto">
-            <button @click="decreaseQty" class="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center shadow-sm transition-all active:scale-95 disabled:opacity-50">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
-            </button>
-            <span class="text-3xl font-black text-slate-900 w-16 text-center tabular-nums">{{ quantity }}</span>
-            <button @click="increaseQty" class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-            </button>
-          </div>
-        </div>
         </template>
       </div>
 
@@ -99,9 +119,9 @@
         <button 
           @click="confirmAdd"
           class="flex-1 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 flex items-center justify-center gap-3 transition-transform active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
-          :disabled="!selectedVariant"
+          :disabled="selectedCount === 0"
         >
-          <span>إضافة للسلة</span>
+          <span>إضافة للسلة ({{ selectedCount }})</span>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
         </button>
       </div>
@@ -110,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, reactive } from 'vue'
 import type { Product, Variant } from '../../../api/products'
 import { formatCurrency, formatAttributes, resolveProductImage, getImageUrl } from '../../../utils/helpers'
 
@@ -125,25 +145,72 @@ const emit = defineEmits<{
   (e: 'add-to-cart', payload: { product: Product, variant: Variant, quantity: number }): void
 }>()
 
-const quantity = ref(1)
-const selectedVariant = ref<Variant | null>(null)
+// Map of variant.id -> quantity (only selected variants are in this map)
+const selectedVariants = reactive<Map<number, number>>(new Map())
 
 // Computed
 const variants = computed(() => props.product?.variants || [])
 
+const selectedCount = computed(() => selectedVariants.size)
+
+const isAllSelected = computed(() => variants.value.length > 0 && selectedVariants.size === variants.value.length)
+
 const productImage = computed(() => {
-  return resolveProductImage(props.product, selectedVariant.value)
+  // Show the first selected variant's image, or fallback to product image
+  if (selectedVariants.size > 0) {
+    const firstSelectedId = [...selectedVariants.keys()][0]
+    const firstVariant = variants.value.find(v => v.id === firstSelectedId) || null
+    return resolveProductImage(props.product, firstVariant)
+  }
+  return resolveProductImage(props.product, null)
 })
 
 const totalPrice = computed(() => {
-  if (!selectedVariant.value) return 0
-  return parseFloat(selectedVariant.value.sale_price) * quantity.value
+  let total = 0
+  for (const [variantId, qty] of selectedVariants) {
+    const variant = variants.value.find(v => v.id === variantId)
+    if (variant) {
+      total += parseFloat(variant.sale_price) * qty
+    }
+  }
+  return total
 })
 
 // Methods
-const increaseQty = () => quantity.value++
-const decreaseQty = () => {
-  if (quantity.value > 1) quantity.value--
+const isSelected = (variantId: number) => selectedVariants.has(variantId)
+
+const getVariantQty = (variantId: number) => selectedVariants.get(variantId) || 1
+
+const toggleVariant = (variant: Variant) => {
+  if (selectedVariants.has(variant.id)) {
+    selectedVariants.delete(variant.id)
+  } else {
+    selectedVariants.set(variant.id, 1)
+  }
+}
+
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    selectedVariants.clear()
+  } else {
+    for (const variant of variants.value) {
+      if (!selectedVariants.has(variant.id)) {
+        selectedVariants.set(variant.id, 1)
+      }
+    }
+  }
+}
+
+const increaseVariantQty = (variantId: number) => {
+  const current = selectedVariants.get(variantId) || 1
+  selectedVariants.set(variantId, current + 1)
+}
+
+const decreaseVariantQty = (variantId: number) => {
+  const current = selectedVariants.get(variantId) || 1
+  if (current > 1) {
+    selectedVariants.set(variantId, current - 1)
+  }
 }
 
 const close = () => {
@@ -151,26 +218,29 @@ const close = () => {
 }
 
 const confirmAdd = () => {
-  if (props.product && selectedVariant.value) {
-    emit('add-to-cart', {
-      product: props.product,
-      variant: selectedVariant.value,
-      quantity: quantity.value
-    })
-    close()
+  if (!props.product) return
+  // Emit one add-to-cart event per selected variant (keeps store API unchanged)
+  for (const [variantId, qty] of selectedVariants) {
+    const variant = variants.value.find(v => v.id === variantId)
+    if (variant) {
+      emit('add-to-cart', {
+        product: props.product,
+        variant: variant,
+        quantity: qty
+      })
+    }
   }
+  close()
 }
 
 // Watchers
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
     // Reset state when opening
-    quantity.value = 1
+    selectedVariants.clear()
     // Auto select first variant if only one exists
     if (variants.value.length === 1 && variants.value[0]) {
-      selectedVariant.value = variants.value[0]
-    } else {
-       selectedVariant.value = null
+      selectedVariants.set(variants.value[0].id, 1)
     }
   }
 })
