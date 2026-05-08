@@ -130,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, reactive } from 'vue'
+import { computed, watch, reactive } from 'vue'
 import type { Product, Variant } from '../../../api/products'
 import { formatCurrency, formatAttributes, resolveProductImage, getImageUrl } from '../../../utils/helpers'
 

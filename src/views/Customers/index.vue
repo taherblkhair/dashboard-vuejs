@@ -62,11 +62,53 @@
           <!-- Pagination -->
           <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between" v-if="meta.last_page > 1">
             <div class="text-sm text-gray-500">
-              صفحة {{ meta.current_page }} من {{ meta.last_page }}
+              عرض {{ (meta.current_page - 1) * meta.per_page + 1 }}-{{ Math.min(meta.current_page * meta.per_page, meta.total) }} من {{ meta.total }} عميل
             </div>
-            <div class="flex gap-2">
-              <MButton variant="secondary" size="sm" :disabled="meta.current_page === 1" @click="load(meta.current_page - 1, search)">السابق</MButton>
-              <MButton variant="secondary" size="sm" :disabled="meta.current_page === meta.last_page" @click="load(meta.current_page + 1, search)">التالي</MButton>
+            <div class="flex items-center gap-1">
+              <!-- Previous -->
+              <button
+                class="px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors"
+                :class="meta.current_page === 1 ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'"
+                :disabled="meta.current_page === 1"
+                @click="load(meta.current_page - 1, search)"
+              >
+                السابق
+              </button>
+
+              <!-- First page -->
+              <button
+                v-if="meta.current_page > 3"
+                class="w-9 h-9 rounded-lg border text-sm font-bold transition-colors border-gray-200 text-gray-600 hover:bg-gray-50"
+                @click="load(1, search)"
+              >1</button>
+              <span v-if="meta.current_page > 4" class="text-gray-400 px-1">...</span>
+
+              <!-- Page numbers -->
+              <button
+                v-for="page in visiblePages"
+                :key="page"
+                class="w-9 h-9 rounded-lg border text-sm font-bold transition-colors"
+                :class="meta.current_page === page ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'border-gray-200 text-gray-600 hover:bg-gray-50'"
+                @click="load(page, search)"
+              >{{ page }}</button>
+
+              <!-- Last page -->
+              <span v-if="meta.current_page < meta.last_page - 3" class="text-gray-400 px-1">...</span>
+              <button
+                v-if="meta.current_page < meta.last_page - 2"
+                class="w-9 h-9 rounded-lg border text-sm font-bold transition-colors border-gray-200 text-gray-600 hover:bg-gray-50"
+                @click="load(meta.last_page, search)"
+              >{{ meta.last_page }}</button>
+
+              <!-- Next -->
+              <button
+                class="px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors"
+                :class="meta.current_page === meta.last_page ? 'border-gray-100 text-gray-300 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50'"
+                :disabled="meta.current_page === meta.last_page"
+                @click="load(meta.current_page + 1, search)"
+              >
+                التالي
+              </button>
             </div>
           </div>
         </MCard>
@@ -143,7 +185,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, defineComponent, h } from 'vue'
+import { ref, computed, onMounted, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCustomers, createCustomerAddress, updateCustomer } from '../../api/customers'
 import { useToast } from '../../composables/useToast'
@@ -164,7 +206,20 @@ const router = useRouter()
 const { addToast } = useToast()
 const customers = ref<any[]>([])
 const loading = ref(false)
-const meta = ref<any>({ current_page: 1, last_page: 1 })
+const meta = ref<any>({ current_page: 1, last_page: 1, per_page: 10, total: 0 })
+
+// Compute visible page numbers (window of 5 around current page)
+const visiblePages = computed(() => {
+  const current = meta.value.current_page
+  const last = meta.value.last_page
+  const pages: number[] = []
+  const start = Math.max(1, current - 2)
+  const end = Math.min(last, current + 2)
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+  return pages
+})
 
 const search = ref('')
 let searchTimer: number | undefined = undefined
