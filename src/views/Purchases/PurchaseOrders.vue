@@ -63,7 +63,7 @@
         </MStatsCard>
 
         <MStatsCard
-          label="طلبات معلقة"
+          label="طلبات قيد الإنتظار"
           :value="dashboardData.pending_orders || 0"
           variant="amber"
         >

@@ -61,7 +61,7 @@
                 </div>
 
                 <div v-else-if="currentStep === 1">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-6">المتغيرات</h3>
+                  <h3 class="text-lg font-semibold text-gray-800 mb-6">المتغيرات والتسعير</h3>
                   <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
                     <div class="flex items-start gap-3">
                       <div class="text-blue-600 mt-0.5">
@@ -70,8 +70,8 @@
                         </svg>
                       </div>
                       <div class="flex-1">
-                        <p class="text-sm text-blue-800 font-medium">إدارة المتغيرات</p>
-                        <p class="text-xs text-blue-600 mt-1">يمكنك إضافة متغيرات مختلفة للصنف حسب اللون، المقاس، الوزن، وغيرها من الخصائص</p>
+                        <p class="text-sm text-blue-800 font-medium">إدارة المتغيرات والتسعير</p>
+                        <p class="text-xs text-blue-600 mt-1">أضف متغيرات الصنف وحدد الخصائص وسعر الشراء والبيع لكل متغير</p>
                       </div>
                     </div>
                   </div>
@@ -323,7 +323,7 @@ const currentStep = ref(0)
 const showAllProducts = ref(false)
 const previewData = ref<any>({})
 
-const steps = ['البيانات الأساسية', 'المتغيرات', 'التأكيد']
+const steps = ['البيانات الأساسية', 'المتغيرات والتسعير', 'المراجعة والحفظ']
 
 // Calculate stepper progress
 const stepperProgress = computed(() => {
@@ -400,6 +400,22 @@ const goToNextStep = async () => {
     if (currentStep.value === 0 && (!formData.name || !formData.sku)) {
       alert('يرجى ملء البيانات الأساسية أولاً')
       return
+    }
+
+    // Validate variants + pricing before going to review step
+    if (currentStep.value === 1) {
+      if (!formData.variants || formData.variants.length === 0) {
+        alert('يرجى إضافة متغير واحد على الأقل')
+        return
+      }
+      // Run full validation (includes pricing)
+      if (typeof productFormRef.value.validateAll === 'function') {
+        const ok = productFormRef.value.validateAll()
+        if (!ok) {
+          alert('يرجى تصحيح بيانات المتغيرات والتسعير قبل المتابعة')
+          return
+        }
+      }
     }
   }
   

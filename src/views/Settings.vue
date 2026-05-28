@@ -104,7 +104,7 @@ const quickLinks = reactive<QuickLink[]>([
 	{ key: 'products', label: 'الآصناف', name: 'Products', sub: 'قائمة الآصناف', icon: 'M3 3v18h18V3H3zm9 14l7-4V7l-7 4-7-4v6l7 4z', exists: false },
 	{ key: 'orders', label: 'الطلبات', name: 'Orders', sub: 'قائمة الطلبات', icon: 'M3 3h18v2H3V3zm2 4h14v14H5V7z', exists: false },
 	{ key: 'customers', label: 'العملاء', name: 'Customers', sub: 'قائمة العملاء', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M7 20v-2a5 5 0 0110 0v2', exists: false },
-	{ key: 'warehouses', label: 'المستودعات', name: 'Warehouses', sub: 'المستودعات', icon: 'M3 7l9-4 9 4v10l-9 4-9-4V7z', exists: false },
+	{ key: 'warehouses', label: 'المخازن', name: 'Warehouses', sub: 'المستودعات والمخازن', icon: 'M3 7l9-4 9 4v10l-9 4-9-4V7z', exists: false },
 	{ key: 'reports', label: 'التقارير', name: 'Reports', sub: 'تقارير ومقاييس', icon: 'M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6', exists: false },
 	{ key: 'deliveries', label: 'التوصيلات', name: 'Deliveries', sub: 'إدارة التوصيل', icon: 'M3 10h18M5 6h14l1 4H4l1-4z', exists: false },
 	{ key: 'riders', label: 'دراجين', name: 'Riders', sub: 'قائمة الدراجين', icon: 'M5 12h14M12 6v6', exists: false },

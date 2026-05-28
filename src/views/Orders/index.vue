@@ -76,7 +76,7 @@
         </MStatsCard>
 
         <MStatsCard
-          label="طلبات معلقة"
+          label="طلبات قيد الإنتظار"
           :value="stats.pending_orders || 0"
           variant="rose"
         >
@@ -98,8 +98,8 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">حالة الطلب</label>
             <select v-model="filters.status" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="">كل الحالات</option>
-              <option value="pending">معلق</option>
-              <option value="confirmed">تم التأكيد</option>
+              <option value="pending">قيد الانتظار</option>
+              <option value="confirmed">معتمد</option>
               <option value="processing">قيد المعالجة</option>
               <option value="shipped">تم الشحن</option>
               <option value="delivered">تم التسليم</option>
@@ -110,7 +110,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">حالة الدفع</label>
             <select v-model="filters.payment_status" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
               <option value="">كل حالات الدفع</option>
-              <option value="pending">معلق</option>
+              <option value="pending">قيد الانتظار</option>
               <option value="partial">جزئي</option>
               <option value="paid">مدفوع</option>
             </select>

@@ -29,7 +29,7 @@
             <span v-else>{{ i }}</span>
           </div>
           <span class="text-[10px] font-black uppercase tracking-widest transition-colors duration-300" :class="currentStep >= (i-1) ? 'text-indigo-600' : 'text-slate-400'">
-            {{ i === 1 ? 'المعلومات' : i === 2 ? 'المتغيرات' : 'التسعير' }}
+            {{ i === 1 ? 'المعلومات' : i === 2 ? 'المتغيرات والتسعير' : 'المراجعة' }}
           </span>
         </div>
       </div>
@@ -367,6 +367,34 @@
                 </div>
               </div>
             </div>
+
+            <!-- Pricing Section (inline with variant) -->
+            <div class="p-5 bg-gradient-to-br from-emerald-50/60 to-teal-50/40 rounded-2xl border border-emerald-100 space-y-4">
+              <h5 class="text-xs font-black text-emerald-600 uppercase tracking-widest px-1 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                التسعير
+              </h5>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <label class="text-[11px] font-black text-slate-500 block px-1">سعر الشراء <span class="text-rose-400">*</span></label>
+                  <MInput v-model="v.purchase_price" type="number" step="0.01" placeholder="0.00" class="!h-12 !rounded-xl !bg-white" :error="variantErrors[i]?.purchase_price" />
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[11px] font-black text-slate-500 block px-1">سعر البيع <span class="text-rose-400">*</span></label>
+                  <MInput v-model="v.sale_price" type="number" step="0.01" placeholder="0.00" class="!h-12 !rounded-xl !bg-white" :error="variantErrors[i]?.sale_price" />
+                </div>
+              </div>
+              <!-- Profit margin indicator -->
+              <div v-if="Number(v.sale_price) > 0 && Number(v.purchase_price) > 0" class="flex items-center gap-2 px-1">
+                <span class="text-[11px] font-bold text-slate-400">هامش الربح:</span>
+                <span class="text-[11px] font-black" :class="Number(v.sale_price) >= Number(v.purchase_price) ? 'text-emerald-600' : 'text-rose-500'">
+                  {{ ((Number(v.sale_price) - Number(v.purchase_price)) / Number(v.purchase_price) * 100).toFixed(1) }}%
+                  ({{ (Number(v.sale_price) - Number(v.purchase_price)).toFixed(2) }} د.ل)
+                </span>
+              </div>
+            </div>
             
             <div class="flex items-center gap-4 px-1">
               <label class="flex items-center gap-3 cursor-pointer">
@@ -397,33 +425,7 @@
       </div>
     </div>
 
-    <!-- Step 3: Pricing & Review -->
-    <div v-else-if="currentStep === 2" class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div class="space-y-1">
-        <h4 class="text-xl font-black text-slate-900 tracking-tight">إعدادات التسعير</h4>
-        <p class="text-sm font-medium text-slate-400">حدد أسعار الشراء والبيع للمتغيرات</p>
-      </div>
-
-      <div class="space-y-4">
-        <div v-for="(v, i) in form.variants" :key="v.id" class="p-6 bg-slate-50/50 rounded-[2rem] border border-slate-100 flex flex-col md:flex-row items-center gap-8 group hover:bg-white hover:border-indigo-100 transition-all">
-          <div class="flex-1 space-y-1">
-            <h5 class="text-sm font-black text-slate-900">{{ v.sku_variant }}</h5>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ formatAttributes(v.attributes) }}</p>
-          </div>
-          
-          <div class="flex items-center gap-6 w-full md:w-auto">
-            <div class="space-y-2 flex-1 md:w-32">
-              <label class="text-[11px] font-black text-slate-500 block px-1 leading-none mb-1">سعر الشراء</label>
-              <MInput v-model="v.purchase_price" type="number" step="0.01" placeholder="0.00" class="!h-12 !rounded-xl" :error="variantErrors[i]?.purchase_price" />
-            </div>
-            <div class="space-y-2 flex-1 md:w-32">
-              <label class="text-[11px] font-black text-slate-500 block px-1 leading-none mb-1">سعر البيع</label>
-              <MInput v-model="v.sale_price" type="number" step="0.01" placeholder="0.00" class="!h-12 !rounded-xl" :error="variantErrors[i]?.sale_price" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Step 3 is now just Review in Create.vue, no separate pricing step here -->
 
     <!-- Navigation Buttons -->
     <div v-if="showNavigation && !hideVariants" class="flex items-center justify-between pt-10 border-t border-slate-50 mt-10">
@@ -752,6 +754,7 @@ const onSubmit = () => {
     return
   }
   
+  // Validate variants and pricing together on step 1
   if (currentStep.value === 1 && !validateVariants()) {
     const firstInvalid = variantErrors.value.findIndex(e => e.sale_price || e.purchase_price)
     if (firstInvalid >= 0 && form.variants[firstInvalid]) {
