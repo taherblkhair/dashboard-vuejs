@@ -49,43 +49,28 @@
             <td class="px-6 py-4 text-sm font-black">{{ formatCurrency(r.amount) }}</td>
             <td class="px-6 py-4 text-sm text-slate-500">{{ formatDate(r.receipt_date) }}</td>
             <td class="px-6 py-4">
-              <MButton size="sm" variant="ghost" @click="printReceipt(r)">طباعة</MButton>
+              <div class="flex flex-wrap gap-2">
+                <MButton size="sm" variant="ghost" @click="printReceipt(r)">طباعة الإيصال</MButton>
+                <MButton
+                  v-if="r.order_id"
+                  size="sm"
+                  variant="ghost"
+                  @click="printCombined(r)"
+                >
+                  فاتورة + إيصال
+                </MButton>
+              </div>
             </td>
           </tr>
         </MTable>
       </MCard>
-    </div>
-
-    <!-- Print preview -->
-    <div v-if="printing" class="fixed inset-0 z-50 flex items-center justify-center p-4 print:p-0">
-      <div class="absolute inset-0 bg-slate-900/50 print:hidden" @click="printing = null"></div>
-      <div class="relative bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 print:shadow-none print:max-w-none print:w-full" id="receipt-print">
-        <div class="text-center border-b pb-4 mb-4">
-          <h2 class="text-xl font-black">{{ printing.type_label }}</h2>
-          <p class="font-mono text-indigo-600 font-bold mt-1">{{ printing.code }}</p>
-        </div>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between"><span class="text-slate-500">العميل</span><span class="font-bold">{{ printing.customer?.name }}</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">التاريخ</span><span>{{ formatDate(printing.receipt_date) }}</span></div>
-          <div v-if="printing.order?.code" class="flex justify-between"><span class="text-slate-500">الطلب</span><span>{{ printing.order.code }}</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">طريقة الدفع</span><span>{{ printing.payment_method }}</span></div>
-          <div class="flex justify-between text-lg font-black border-t pt-3 mt-3">
-            <span>المبلغ</span><span>{{ formatCurrency(printing.amount) }}</span>
-          </div>
-          <p v-if="printing.notes" class="text-slate-500 text-xs pt-2">{{ printing.notes }}</p>
-        </div>
-        <div class="mt-6 flex gap-3 print:hidden">
-          <MButton variant="primary" class="flex-1" @click="doPrint">طباعة</MButton>
-          <MButton variant="secondary" class="flex-1" @click="printing = null">إغلاق</MButton>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { fetchFinancialReceipts, type FinancialReceipt } from '../../api/accounting'
+import { fetchFinancialReceipts, getReceiptPrintUrl, getOrderPrintUrl, type FinancialReceipt } from '../../api/accounting'
 import { formatCurrency, formatDate } from '../../utils/helpers'
 import { useToast } from '../../composables/useToast'
 import MCard from '../../components/ui/MCard.vue'
@@ -97,7 +82,6 @@ import MBadge from '../../components/ui/MBadge.vue'
 const { addToast } = useToast()
 const receipts = ref<FinancialReceipt[]>([])
 const loading = ref(false)
-const printing = ref<FinancialReceipt | null>(null)
 const filters = reactive({ search: '', type: '', date_from: '', date_to: '' })
 
 const load = async (page = 1) => {
@@ -118,16 +102,14 @@ const load = async (page = 1) => {
   }
 }
 
-const printReceipt = (r: FinancialReceipt) => { printing.value = r }
-const doPrint = () => window.print()
+const printReceipt = (r: FinancialReceipt) => {
+  window.open(getReceiptPrintUrl(r.id), '_blank')
+}
+
+const printCombined = (r: FinancialReceipt) => {
+  if (!r.order_id) return
+  window.open(getOrderPrintUrl(r.order_id, 'combined'), '_blank')
+}
 
 onMounted(() => load())
 </script>
-
-<style>
-@media print {
-  body * { visibility: hidden; }
-  #receipt-print, #receipt-print * { visibility: visible; }
-  #receipt-print { position: absolute; left: 0; top: 0; width: 100%; }
-}
-</style>

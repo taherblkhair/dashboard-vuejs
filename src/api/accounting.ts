@@ -213,3 +213,16 @@ export async function fetchFinancialReceipt(id: number): Promise<FinancialReceip
   const res = await request(`/financial/receipts/${id}`) as { data: FinancialReceipt }
   return res.data
 }
+
+export function getReceiptPrintUrl(id: number): string {
+  const route = `/accounting/receipts/${id}/print`
+  const base = import.meta.env.BASE_URL || '/'
+  return `${base.replace(/\/$/, '')}${route}`
+}
+
+export function getOrderPrintUrl(orderId: number, mode: 'invoice' | 'receipt' | 'combined' = 'invoice', receiptId?: number): string {
+  const params = new URLSearchParams({ mode })
+  if (receiptId) params.set('receipt_id', String(receiptId))
+  const base = import.meta.env.BASE_URL || '/'
+  return `${base.replace(/\/$/, '')}/orders/${orderId}/print?${params.toString()}`
+}

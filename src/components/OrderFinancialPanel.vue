@@ -45,6 +45,26 @@
       </p>
     </div>
 
+    <div v-if="financialReceipts.length" class="mt-4 space-y-2">
+      <p class="text-xs font-bold text-gray-500 uppercase">الإيصالات المالية</p>
+      <div
+        v-for="r in financialReceipts"
+        :key="r.id"
+        class="flex justify-between items-center text-xs bg-indigo-50 rounded-lg px-3 py-2"
+      >
+        <div>
+          <span class="font-mono font-bold text-indigo-700">{{ r.code }}</span>
+          <span class="text-gray-500 mr-2">· {{ formatDate(r.receipt_date) }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-bold font-mono">{{ formatCurrency(r.amount) }}</span>
+          <button type="button" class="text-indigo-600 font-bold hover:text-indigo-800" @click="printReceipt(r.id)">
+            طباعة
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="payments.length" class="mt-4 space-y-2">
       <p class="text-xs font-bold text-gray-500 uppercase">سجل الدفعات</p>
       <div
@@ -115,7 +135,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { issueCustomerReceipt } from '../api/accounting'
+import { issueCustomerReceipt, getReceiptPrintUrl } from '../api/accounting'
 import { formatCurrency, formatDate } from '../utils/helpers'
 import { useToast } from '../composables/useToast'
 import { getPaymentStatusLabel } from '../constants'
@@ -159,6 +179,12 @@ const payments = computed(() =>
   [...(props.order?.payments || [])]
     .filter((p: any) => p.status === 'completed')
     .sort((a: any, b: any) => String(b.payment_date || b.created_at).localeCompare(String(a.payment_date || a.created_at)))
+)
+
+const financialReceipts = computed(() =>
+  [...(props.order?.financial_receipts || [])].sort((a: any, b: any) =>
+    String(b.receipt_date || b.created_at).localeCompare(String(a.receipt_date || a.created_at))
+  )
 )
 
 const paymentTermsLabel = computed(() =>
@@ -207,9 +233,13 @@ const submitCollect = async () => {
     }
 
     const res = await issueCustomerReceipt(customerId.value, payload)
+    const receiptId = res?.data?.id
     addToast(`تم إصدار سند قبض ${res?.data?.code || ''}`, 'success')
     showCollect.value = false
     emit('collected')
+    if (receiptId && window.confirm('هل تريد طباعة سند القبض الآن؟')) {
+      window.open(getReceiptPrintUrl(receiptId), '_blank')
+    }
   } catch (e: any) {
     addToast(e.message || 'فشل التحصيل', 'error')
   } finally {
@@ -221,5 +251,9 @@ const goToCustomerAccount = () => {
   if (customerId.value) {
     router.push({ name: 'CustomersView', params: { id: customerId.value } })
   }
+}
+
+const printReceipt = (id: number) => {
+  window.open(getReceiptPrintUrl(id), '_blank')
 }
 </script>

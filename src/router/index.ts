@@ -63,7 +63,13 @@ const routes = [
   {
     path: '/orders/:id/print',
     name: 'OrderPrint',
-    component: () => import('../views/Orders/PrintInvoice.vue'),
+    component: () => import('../views/Orders/PrintDocuments.vue'),
+    meta: { layout: 'empty' }
+  },
+  {
+    path: '/accounting/receipts/:id/print',
+    name: 'ReceiptPrint',
+    component: () => import('../views/Accounting/PrintReceipt.vue'),
     meta: { layout: 'empty' }
   }
 ]

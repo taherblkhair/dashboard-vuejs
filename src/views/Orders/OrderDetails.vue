@@ -27,10 +27,38 @@
 
           <!-- Actions -->
           <div class="flex items-center gap-3">
-            <button @click="openInvoice" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-              <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-              طباعة الفاتورة
-            </button>
+            <div class="relative" ref="printMenuRef">
+              <button
+                @click="showPrintMenu = !showPrintMenu"
+                class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+              >
+                <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                طباعة
+                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <div
+                v-if="showPrintMenu"
+                class="absolute left-0 mt-2 w-52 rounded-xl border border-gray-100 bg-white shadow-lg z-40 py-1 text-sm"
+              >
+                <button type="button" class="w-full text-right px-4 py-2 hover:bg-gray-50" @click="openPrint('invoice')">فاتورة مبيعات</button>
+                <button
+                  v-if="hasFinancialReceipts"
+                  type="button"
+                  class="w-full text-right px-4 py-2 hover:bg-gray-50"
+                  @click="openPrint('receipt')"
+                >
+                  إيصال مالي
+                </button>
+                <button
+                  v-if="hasFinancialReceipts"
+                  type="button"
+                  class="w-full text-right px-4 py-2 hover:bg-gray-50 border-t border-gray-100"
+                  @click="openPrint('combined')"
+                >
+                  فاتورة + إيصال
+                </button>
+              </div>
+            </div>
             <button v-if="canEdit" @click="editOrder" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
               <svg class="w-4 h-4 ml-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               تعديل
@@ -462,6 +490,7 @@ import {
   getOrderStatusColor
 } from '../../constants'
 import OrderFinancialPanel from '../../components/OrderFinancialPanel.vue'
+import { getOrderPrintUrl } from '../../api/accounting'
 
 // Icons
 const IconClipboard = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' })]) })
@@ -481,6 +510,10 @@ const { addToast } = useToast()
 const order = ref<any>(null)
 const delivery = ref<any>(null)
 const activeTab = ref<'order' | 'delivery'>('order')
+const showPrintMenu = ref(false)
+const printMenuRef = ref<HTMLElement | null>(null)
+
+const hasFinancialReceipts = computed(() => (order.value?.financial_receipts?.length ?? 0) > 0)
 
 const orderStatusToSet = ref('')
 const deliveryStatusToSet = ref('')
@@ -682,7 +715,11 @@ const getStatusColor = (s?: string) => {
 }
 
 const editOrder = () => { if (order.value?.id) router.push({ name: 'OrderEdit', params: { id: order.value.id } }) }
-const openInvoice = () => { if (order.value?.id) window.open(router.resolve({ name: 'OrderPrint', params: { id: order.value.id } }).href, '_blank') }
+const openPrint = (mode: 'invoice' | 'receipt' | 'combined' = 'invoice') => {
+  if (!order.value?.id) return
+  showPrintMenu.value = false
+  window.open(getOrderPrintUrl(order.value.id, mode), '_blank')
+}
 
 // Create Delivery Modal
 const showCreateDelivery = ref(false)
