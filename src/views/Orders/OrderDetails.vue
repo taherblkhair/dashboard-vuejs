@@ -187,6 +187,8 @@
             </div>
           </div>
 
+          <OrderFinancialPanel v-if="order" :order="order" @collected="load" />
+
            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">عنوان التوصيل</h3>
             <div v-if="order?.delivery_address" class="space-y-3">
@@ -459,6 +461,7 @@ import {
   DELIVERY_STATUS_LABELS, DELIVERY_VALID_TRANSITIONS,
   getOrderStatusColor
 } from '../../constants'
+import OrderFinancialPanel from '../../components/OrderFinancialPanel.vue'
 
 // Icons
 const IconClipboard = defineComponent({ render: () => h('svg', { fill:'none', viewBox:'0 0 24 24', stroke:'currentColor', class:'w-5 h-5' }, [h('path', { 'stroke-linecap':'round', 'stroke-linejoin':'round', 'stroke-width':'2', d:'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' })]) })

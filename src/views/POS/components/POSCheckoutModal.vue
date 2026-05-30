@@ -111,6 +111,60 @@
 
         <!-- 3. Summary -->
         <div class="space-y-3">
+           <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">طريقة الدفع</h4>
+           <div class="grid grid-cols-2 gap-3">
+             <button type="button" @click="paymentTerms = 'cash'" class="p-3 rounded-xl border-2 font-bold text-sm transition-all" :class="paymentTerms === 'cash' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-100 text-slate-500'">نقدي (كاش)</button>
+             <button type="button" @click="paymentTerms = 'credit'" class="p-3 rounded-xl border-2 font-bold text-sm transition-all" :class="paymentTerms === 'credit' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 text-slate-500'">بيع آجل (مدين)</button>
+           </div>
+           <div v-if="paymentTerms === 'cash'" class="space-y-3">
+             <div class="grid grid-cols-2 gap-2">
+               <button v-for="m in paymentMethods" :key="m.value" type="button" @click="paymentMethod = m.value" class="p-2 rounded-lg border text-xs font-bold" :class="paymentMethod === m.value ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-100'">{{ m.label }}</button>
+             </div>
+             <div class="bg-white rounded-xl p-4 border border-slate-100 space-y-2">
+               <label class="block text-xs font-bold text-slate-500">المبلغ المدفوع</label>
+               <div class="flex items-center gap-2">
+                 <input
+                   v-model.number="paidAmount"
+                   type="number"
+                   min="0.01"
+                   :max="finalTotal"
+                   step="0.01"
+                   class="flex-1 px-3 py-2 text-right bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono font-bold focus:ring-2 focus:ring-indigo-500 outline-none"
+                 />
+                 <span class="text-xs font-bold text-slate-400">د.ل</span>
+               </div>
+               <p v-if="isPartialPayment" class="text-xs font-bold text-amber-600">
+                 دفع جزئي — المتبقي على العميل: {{ formatCurrency(remainingAmount) }}
+               </p>
+               <p v-else class="text-xs font-bold text-emerald-600">دفع كامل</p>
+             </div>
+           </div>
+           <div v-else-if="paymentTerms === 'credit'" class="bg-amber-50 rounded-xl p-4 border border-amber-100">
+             <p class="text-xs font-bold text-amber-700">سيتم تسجيل المبلغ كاملاً كمستحق على العميل ({{ formatCurrency(finalTotal) }})</p>
+             <div class="mt-3 pt-3 border-t border-amber-100 space-y-2">
+               <label class="flex items-center gap-2 text-xs font-bold text-amber-800 cursor-pointer">
+                 <input v-model="creditWithPartialPayment" type="checkbox" class="rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
+                 دفع جزء الآن والباقي آجل
+               </label>
+               <div v-if="creditWithPartialPayment" class="flex items-center gap-2">
+                 <input
+                   v-model.number="paidAmount"
+                   type="number"
+                   min="0.01"
+                   :max="finalTotal - 0.01"
+                   step="0.01"
+                   class="flex-1 px-3 py-2 text-right bg-white border border-amber-200 rounded-lg text-sm font-mono font-bold focus:ring-2 focus:ring-amber-500 outline-none"
+                 />
+                 <span class="text-xs font-bold text-amber-600">د.ل</span>
+               </div>
+               <p v-if="creditWithPartialPayment && paidAmount > 0" class="text-xs font-bold text-amber-700">
+                 المتبقي آجل: {{ formatCurrency(remainingAmount) }}
+               </p>
+             </div>
+           </div>
+        </div>
+
+        <div class="space-y-3">
            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest px-1">ملخص الطلب</h4>
            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-3">
              <div class="flex items-center justify-between text-sm text-slate-500 font-bold">
@@ -167,11 +221,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import CustomerAutocomplete from '../../../components/CustomerAutocomplete.vue'
 import CustomerCreateModal from '../../../components/CustomerCreateModal.vue'
 import { formatCurrency } from '../../../utils/helpers'
-import { createOrder } from '../../../api/orders'
+import { createPosSale } from '../../../api/orders'
 import { fetchCustomer, createCustomerAddress } from '../../../api/customers'
 import { usePosStore } from '../../../stores/pos'
 import { useToast } from '../../../composables/useToast'
@@ -196,6 +250,16 @@ const selectedAddress = ref<any>(null)
 const discount = ref(0)
 const processing = ref(false)
 const showCreateCustomerModal = ref(false)
+const paymentTerms = ref<'cash' | 'credit'>('cash')
+const paymentMethod = ref('cash')
+const paidAmount = ref(0)
+const creditWithPartialPayment = ref(false)
+const paymentMethods = [
+  { value: 'cash', label: 'كاش' },
+  { value: 'card', label: 'بطاقة' },
+  { value: 'bank_transfer', label: 'تحويل' },
+  { value: 'digital_wallet', label: 'محفظة' },
+]
 
 // Address Creation
 const showAddressForm = ref(false)
@@ -204,6 +268,30 @@ const newAddress = ref({ city: '', area: '', street: '', building: '', notes: ''
 
 const finalTotal = computed(() => {
   return Math.max(0, props.cartTotal - discount.value)
+})
+
+const isPartialPayment = computed(() => {
+  if (paymentTerms.value !== 'cash') return false
+  return paidAmount.value > 0 && paidAmount.value < finalTotal.value
+})
+
+const remainingAmount = computed(() => {
+  return Math.max(0, finalTotal.value - (paidAmount.value || 0))
+})
+
+watch(finalTotal, (total) => {
+  if (paymentTerms.value === 'cash') {
+    paidAmount.value = total
+  }
+}, { immediate: true })
+
+watch(paymentTerms, (terms) => {
+  creditWithPartialPayment.value = false
+  if (terms === 'cash') {
+    paidAmount.value = finalTotal.value
+  } else {
+    paidAmount.value = 0
+  }
 })
 
 const onCustomerSelect = async (customer: any) => {
@@ -320,27 +408,58 @@ const handleCheckout = async () => {
 
   processing.value = true
   try {
-    const payload = {
+    const amountToPay = paymentTerms.value === 'cash'
+      ? paidAmount.value
+      : (creditWithPartialPayment.value ? paidAmount.value : 0)
+
+    if (paymentTerms.value === 'cash') {
+      if (!amountToPay || amountToPay <= 0) {
+        addToast('يرجى إدخال مبلغ مدفوع صحيح', 'error')
+        return
+      }
+      if (amountToPay > finalTotal.value) {
+        addToast('المبلغ المدفوع لا يمكن أن يتجاوز الإجمالي', 'error')
+        return
+      }
+    }
+
+    if (paymentTerms.value === 'credit' && creditWithPartialPayment.value) {
+      if (!amountToPay || amountToPay <= 0 || amountToPay >= finalTotal.value) {
+        addToast('أدخل مبلغاً جزئياً أقل من الإجمالي', 'error')
+        return
+      }
+    }
+
+    const payload: Record<string, unknown> = {
       customer_id: customerId.value,
-      source: 'internal',
       discount_amount: discount.value,
       shipping_fee: 0,
-      delivery_date: null,
-      delivery_time_slot: null,
       delivery_address_id: deliveryAddressId.value,
       billing_address_id: billingAddressId.value,
-      notes: `POS Order`,
+      notes: paymentTerms.value === 'credit' ? 'POS - بيع آجل' : 'POS Order',
+      payment_terms: paymentTerms.value,
       lines: posStore.cart.map(item => ({
         product_variant_id: item.variant.id,
         quantity: item.quantity,
         unit_price: Number(item.variant.sale_price),
-        discount_amount: 0 // Item level discount implementation can be added later
+        discount_amount: 0
       }))
     }
 
-    // const res = await createOrder(payload)
-    await createOrder(payload)
-    addToast('تم إنشاء الطلب بنجاح', 'success')
+    if (amountToPay > 0) {
+      payload.payment = {
+        payment_method: paymentMethod.value,
+        amount: amountToPay,
+      }
+    }
+
+    await createPosSale(payload)
+    const successMsg = paymentTerms.value === 'credit' && amountToPay <= 0
+      ? 'تم إنشاء طلب آجل بنجاح'
+      : isPartialPayment.value || (paymentTerms.value === 'credit' && creditWithPartialPayment.value)
+        ? `تم البيع — مدفوع ${formatCurrency(amountToPay)} والمتبقي ${formatCurrency(remainingAmount.value)}`
+        : 'تم إنشاء الطلب وتحصيل المبلغ'
+    addToast(successMsg, 'success')
     emit('completed')
     
     // Optionally navigate to order details or just stay in POS and clear cart

@@ -53,6 +53,11 @@ const routes = [
   { path: 'reports/financial/profit', name: 'FinancialProfitReport', component: () => import('../views/FinancialReports/ProfitReport.vue') },
   { path: 'reports/financial/expenses', name: 'FinancialExpensesReport', component: () => import('../views/FinancialReports/ExpensesReport.vue') },
   { path: 'reports/financial/sales', name: 'FinancialSalesReport', component: () => import('../views/FinancialReports/SalesReport.vue') },
+  { path: 'accounting/vaults', name: 'AccountingVaults', component: () => import('../views/Accounting/Vaults.vue') },
+  { path: 'accounting/transactions', name: 'AccountingTransactions', component: () => import('../views/Accounting/Transactions.vue') },
+  { path: 'accounting/daily-report', name: 'AccountingDailyReport', component: () => import('../views/Accounting/DailyReport.vue') },
+  { path: 'accounting/customer-debts', name: 'AccountingCustomerDebts', component: () => import('../views/Accounting/CustomerDebts.vue') },
+  { path: 'accounting/receipts', name: 'AccountingReceipts', component: () => import('../views/Accounting/FinancialReceipts.vue') },
     ]
   },
   {

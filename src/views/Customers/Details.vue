@@ -82,6 +82,9 @@
           </MTable>
       </MCard>
 
+      <!-- Financial Account -->
+      <CustomerAccountPanel v-if="id" :customer-id="id" />
+
       <!-- Address Modal -->
       <div v-if="addressModal.open" class="fixed inset-0 flex items-center justify-center z-50 p-4">
         <div class="fixed inset-0 bg-black/30" @click="closeAddressModal"></div>
@@ -113,6 +116,7 @@ import MInput from '../../components/ui/MInput.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MBadge from '../../components/ui/MBadge.vue'
 import MTable from '../../components/ui/MTable.vue'
+import CustomerAccountPanel from '../../components/CustomerAccountPanel.vue'
 import { formatCurrency, formatDate } from '../../utils/helpers'
 
 const route = useRoute()

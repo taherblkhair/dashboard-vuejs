@@ -11,7 +11,9 @@ export async function fetchOrders(page = 1, params: Record<string, any> = {}) {
 	return request(`/orders?${qs.toString()}`)
 }
 
-export default { fetchOrders }
+export async function fetchOrdersDashboard() {
+	return request('/orders/dashboard')
+}
 
 export async function fetchOrder(id: number) {
 	if (!id) throw new Error('Missing order id')
@@ -33,6 +35,14 @@ export function getOrderInvoiceUrl(id: number) {
 
 export async function createOrder(payload: any) {
 	return request(`/orders`, { method: 'POST', body: JSON.stringify(payload) })
+}
+
+export async function createSalesInvoice(payload: any) {
+	return request(`/orders/sales-invoice`, { method: 'POST', body: JSON.stringify(payload) })
+}
+
+export async function createPosSale(payload: any) {
+	return request(`/orders/pos-checkout`, { method: 'POST', body: JSON.stringify(payload) })
 }
 
 export async function updateOrder(id: number, payload: any) {

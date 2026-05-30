@@ -186,7 +186,7 @@
 <script setup lang="ts">
 import { ref, onMounted, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchOrders } from '../../api/orders'
+import { fetchOrders, fetchOrdersDashboard } from '../../api/orders'
 import MButton from '../../components/ui/MButton.vue'
 import MCard from '../../components/ui/MCard.vue'
 import MTable from '../../components/ui/MTable.vue'
@@ -222,24 +222,26 @@ const loadOrders = async (page = 1) => {
     if (filters.value.status) params.status = filters.value.status
     if (filters.value.payment_status) params.payment_status = filters.value.payment_status
 
-    const res = await fetchOrders(page, params)
+    const [res, dashboardRes] = await Promise.all([
+      fetchOrders(page, params),
+      fetchOrdersDashboard().catch(() => null),
+    ])
+
     orders.value = res?.data || []
     meta.value = res?.meta || meta.value
-    calculateStats()
+
+    if (dashboardRes?.data) {
+      stats.value = {
+        total_orders: dashboardRes.data.total_orders ?? 0,
+        today_orders: dashboardRes.data.orders_today ?? 0,
+        processing_orders: dashboardRes.data.processing_orders ?? 0,
+        pending_orders: dashboardRes.data.pending_orders ?? 0,
+      }
+    }
   } catch (e) {
     addToast('فشل تحميل الطلبات', 'error')
   } finally {
     loading.value = false
-  }
-}
-
-const calculateStats = () => {
-  const today: string = new Date().toISOString().split('T')[0] || ''
-  stats.value = {
-    total_orders: meta.value.total || 0,
-    today_orders: orders.value.filter(o => o.order_date && o.order_date.startsWith(today)).length,
-    processing_orders: orders.value.filter(o => o.status === 'processing').length,
-    pending_orders: orders.value.filter(o => o.status === 'pending').length,
   }
 }
 

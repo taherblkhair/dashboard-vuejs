@@ -109,9 +109,9 @@
         </div>
       </MCard>
 
-      <!-- Summary Sidebar -->
-         <div>
-          <MCard title="ملخص الفاتورة" class="sticky top-6">
+      <!-- Summary & Payment -->
+         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MCard title="ملخص الفاتورة" class="lg:col-span-1">
             <div class="p-4 space-y-3">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">عدد الأصناف</span>
@@ -131,6 +131,40 @@
               </div>
             </div>
           </MCard>
+
+          <MCard title="الدفع والمحاسبة" class="lg:col-span-1">
+            <div class="p-4 space-y-4">
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" @click="paymentTerms = 'cash'" class="p-2.5 rounded-xl border-2 text-sm font-bold transition-all" :class="paymentTerms === 'cash' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-100 text-gray-500'">نقدي</button>
+                <button type="button" @click="paymentTerms = 'credit'" class="p-2.5 rounded-xl border-2 text-sm font-bold transition-all" :class="paymentTerms === 'credit' ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-gray-100 text-gray-500'">آجل</button>
+              </div>
+
+              <div v-if="paymentTerms === 'cash'" class="space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                  <button v-for="m in paymentMethods" :key="m.value" type="button" @click="paymentMethod = m.value" class="p-2 rounded-lg border text-xs font-bold" :class="paymentMethod === m.value ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-100'">{{ m.label }}</button>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-500 mb-1">المبلغ المدفوع</label>
+                  <input v-model.number="paidAmount" type="number" min="0.01" :max="grandTotal" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono font-bold" />
+                  <p v-if="isPartialPayment" class="text-xs font-bold text-amber-600 mt-1">دفع جزئي — المتبقي: {{ formatCurrency(remainingAfterPay) }}</p>
+                  <p v-else class="text-xs font-bold text-emerald-600 mt-1">دفع كامل</p>
+                </div>
+              </div>
+
+              <div v-else class="space-y-3">
+                <p class="text-xs text-amber-700 bg-amber-50 rounded-lg p-3">يُسجّل كامل المبلغ كمستحق على العميل</p>
+                <label class="flex items-center gap-2 text-xs font-bold text-amber-800 cursor-pointer">
+                  <input v-model="creditWithPartialPayment" type="checkbox" class="rounded" />
+                  دفع جزء الآن والباقي آجل
+                </label>
+                <div v-if="creditWithPartialPayment">
+                  <label class="block text-xs font-bold text-gray-500 mb-1">المبلغ المدفوع الآن</label>
+                  <input v-model.number="paidAmount" type="number" min="0.01" :max="grandTotal - 0.01" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono font-bold" />
+                  <p class="text-xs text-amber-600 mt-1">المتبقي آجل: {{ formatCurrency(remainingAfterPay) }}</p>
+                </div>
+              </div>
+            </div>
+          </MCard>
         </div>
 
       <!-- Actions -->
@@ -138,8 +172,11 @@
         <router-link to="/orders">
           <MButton variant="secondary">إلغاء</MButton>
         </router-link>
-        <MButton variant="primary" @click="submit" :loading="submitting" :disabled="submitting">
-          {{ submitting ? 'جاري الحفظ...' : 'إنشاء الفاتورة' }}
+        <MButton variant="ghost" @click="submitDraft" :loading="submittingDraft" :disabled="submitting || submittingDraft">
+          حفظ كمسودة
+        </MButton>
+        <MButton variant="primary" @click="submit" :loading="submitting" :disabled="submitting || submittingDraft">
+          {{ submitting ? 'جاري الحفظ...' : 'إنشاء الفاتورة وتأكيدها' }}
         </MButton>
       </div>
     </div>
@@ -177,11 +214,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCustomer, createCustomer } from '../../api/customers'
 import { fetchProducts } from '../../api/products'
-import { createOrder } from '../../api/orders'
+import { createOrder, createSalesInvoice } from '../../api/orders'
 import VariantAutocomplete from '../../components/VariantAutocomplete.vue'
 import CustomerAutocomplete from '../../components/CustomerAutocomplete.vue'
 import MButton from '../../components/ui/MButton.vue'
@@ -195,6 +232,17 @@ const customers = ref<any[]>([])
 const products = ref<any[]>([])
 const customerAddresses = ref<any[]>([])
 const submitting = ref(false)
+const submittingDraft = ref(false)
+const paymentTerms = ref<'cash' | 'credit'>('cash')
+const paymentMethod = ref('cash')
+const paidAmount = ref(0)
+const creditWithPartialPayment = ref(false)
+const paymentMethods = [
+  { value: 'cash', label: 'كاش' },
+  { value: 'card', label: 'بطاقة' },
+  { value: 'bank_transfer', label: 'تحويل' },
+  { value: 'digital_wallet', label: 'محفظة' },
+]
 
 const form = ref<any>({
   customer_id: null,
@@ -274,27 +322,120 @@ const lineTotal = (l: any) => (Number(l.quantity || 0) * Number(l.unit_price || 
 const subtotal = computed(() => form.value.lines.reduce((s: number, l: any) => s + lineTotal(l), 0))
 const grandTotal = computed(() => subtotal.value - Number(form.value.discount_amount || 0) + Number(form.value.shipping_fee || 0))
 
-const submit = async () => {
-  if (submitting.value) return
-  submitting.value = true
+const isPartialPayment = computed(() =>
+  paymentTerms.value === 'cash' && paidAmount.value > 0 && paidAmount.value < grandTotal.value
+)
 
+const remainingAfterPay = computed(() => Math.max(0, grandTotal.value - (paidAmount.value || 0)))
+
+watch(grandTotal, (total) => {
+  if (paymentTerms.value === 'cash') paidAmount.value = total
+}, { immediate: true })
+
+watch(paymentTerms, (terms) => {
+  creditWithPartialPayment.value = false
+  paidAmount.value = terms === 'cash' ? grandTotal.value : 0
+})
+
+const buildLinesPayload = () =>
+  form.value.lines.map((l: any) => ({
+    product_variant_id: l.product_variant_id,
+    quantity: l.quantity,
+    unit_price: Number(l.unit_price || 0),
+    discount_amount: Number(l.discount_amount || 0),
+    notes: l.notes || null,
+  }))
+
+const validateForm = (): boolean => {
   if (!form.value.customer_id) {
-    submitting.value = false
-    return addToast('اختر عميل', 'error')
+    addToast('اختر عميل', 'error')
+    return false
+  }
+  if (!form.value.delivery_address_id) {
+    addToast('اختر عنوان التوصيل', 'error')
+    return false
   }
   if (!form.value.lines.length) {
-    submitting.value = false
-    return addToast('أضف بند واحد على الأقل', 'error')
+    addToast('أضف بند واحد على الأقل', 'error')
+    return false
   }
   for (const l of form.value.lines) {
     if (!l.product_variant_id) {
-      submitting.value = false
-      return addToast('اختر صنف لكل بند', 'error')
+      addToast('اختر صنف لكل بند', 'error')
+      return false
+    }
+  }
+  return true
+}
+
+const buildPaymentPayload = () => {
+  const amountToPay = paymentTerms.value === 'cash'
+    ? paidAmount.value
+    : (creditWithPartialPayment.value ? paidAmount.value : 0)
+
+  if (paymentTerms.value === 'cash') {
+    if (!amountToPay || amountToPay <= 0) {
+      addToast('يرجى إدخال مبلغ مدفوع صحيح', 'error')
+      return null
+    }
+    if (amountToPay > grandTotal.value) {
+      addToast('المبلغ المدفوع يتجاوز الإجمالي', 'error')
+      return null
     }
   }
 
+  if (paymentTerms.value === 'credit' && creditWithPartialPayment.value) {
+    if (!amountToPay || amountToPay <= 0 || amountToPay >= grandTotal.value) {
+      addToast('أدخل مبلغاً جزئياً أقل من الإجمالي', 'error')
+      return null
+    }
+  }
+
+  const payload: Record<string, unknown> = {
+    customer_id: form.value.customer_id,
+    source: form.value.source,
+    payment_terms: paymentTerms.value,
+    discount_amount: Number(form.value.discount_amount || 0),
+    shipping_fee: Number(form.value.shipping_fee || 0),
+    delivery_date: form.value.delivery_date || null,
+    delivery_time_slot: form.value.delivery_time_slot || null,
+    notes: form.value.notes || null,
+    delivery_address_id: form.value.delivery_address_id,
+    billing_address_id: form.value.delivery_address_id,
+    lines: buildLinesPayload(),
+  }
+
+  if (amountToPay > 0) {
+    payload.payment = {
+      payment_method: paymentMethod.value,
+      amount: amountToPay,
+    }
+  }
+
+  return payload
+}
+
+const submit = async () => {
+  if (submitting.value || !validateForm()) return
+  const payload = buildPaymentPayload()
+  if (!payload) return
+
+  submitting.value = true
   try {
-    const payload = {
+    const res = await createSalesInvoice(payload)
+    addToast('تم إنشاء الفاتورة وتسجيل المحاسبة', 'success')
+    setTimeout(() => router.push(res?.data?.id ? { name: 'OrderDetails', params: { id: res.data.id } } : { name: 'Orders' }), 800)
+  } catch (e: any) {
+    addToast(e.message || 'فشل إنشاء الفاتورة', 'error')
+    submitting.value = false
+  }
+}
+
+const submitDraft = async () => {
+  if (submittingDraft.value || !validateForm()) return
+  submittingDraft.value = true
+  try {
+    const res = await createOrder({
       customer_id: form.value.customer_id,
       source: form.value.source,
       discount_amount: Number(form.value.discount_amount || 0),
@@ -302,22 +443,15 @@ const submit = async () => {
       delivery_date: form.value.delivery_date || null,
       delivery_time_slot: form.value.delivery_time_slot || null,
       notes: form.value.notes || null,
-      delivery_address_id: form.value.delivery_address_id || null,
-      billing_address_id: form.value.billing_address_id || null,
-      lines: form.value.lines.map((l: any) => ({
-        product_variant_id: l.product_variant_id,
-        quantity: l.quantity,
-        unit_price: Number(l.unit_price || 0),
-        discount_amount: Number(l.discount_amount || 0),
-        notes: l.notes || null
-      }))
-    }
-    const res = await createOrder(payload)
-    addToast('تم إنشاء الفاتورة', 'success')
-    setTimeout(() => router.push(res?.data?.id ? { name: 'OrderDetails', params: { id: res.data.id } } : { name: 'Orders' }), 1000)
-  } catch (e) {
-    addToast('فشل إنشاء الفاتورة', 'error')
-    submitting.value = false
+      delivery_address_id: form.value.delivery_address_id,
+      billing_address_id: form.value.delivery_address_id,
+      lines: buildLinesPayload(),
+    })
+    addToast('تم حفظ المسودة', 'success')
+    setTimeout(() => router.push(res?.data?.id ? { name: 'OrderDetails', params: { id: res.data.id } } : { name: 'Orders' }), 800)
+  } catch {
+    addToast('فشل حفظ المسودة', 'error')
+    submittingDraft.value = false
   }
 }
 
