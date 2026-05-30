@@ -77,19 +77,50 @@ export function formatNumber(val?: string | number): string {
   return new Intl.NumberFormat('en-US').format(num)
 }
 
-export function getImageUrl(url?: string): string {
+export const PLACEHOLDER_PRODUCT = '/placeholder-product.png'
+export const PLACEHOLDER_CATEGORY = '/placeholder-category.png'
+
+import { ASSET_BASE_URL } from '../api/index'
+
+export function getImageUrl(url?: string | null): string {
   if (!url) return ''
-  if (url.startsWith('http') || url.startsWith('blob:')) return url
-  
-  // Specific override for production hosting
-  if (import.meta.env.PROD) {
-    const prodBase = 'https://karamstore.ly/sales-system/public'
-    return `${prodBase}${url.startsWith('/') ? '' : '/'}${url}`
+  if (url.startsWith('blob:')) return url
+
+  const base = ASSET_BASE_URL.replace(/\/+$/, '')
+
+  // Normalize any /storage/... path through the current asset base (fixes wrong-host legacy URLs)
+  const storageMatch = url.match(/\/storage\/(.+)$/)
+  if (storageMatch) {
+    return `${base}/storage/${storageMatch[1]}`
   }
 
-  // If we have a base URL in env, use it but strip /api if present
-  const base = (import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000').replace(/\/api\/?$/, '')
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
   return `${base}${url.startsWith('/') ? '' : '/'}${url}`
+}
+
+/** Resolve a File (local preview) or server URL for display in forms. */
+export function previewImageSource(source?: File | string | null): string {
+  if (!source) return ''
+  if (source instanceof File) return URL.createObjectURL(source)
+  return getImageUrl(source)
+}
+
+export function resolveCategoryImage(category?: { images?: Array<{ url?: string; type?: string }> } | null): string {
+  if (!category?.images?.length) return PLACEHOLDER_CATEGORY
+
+  const main = category.images.find((i) => i.type === 'main')
+  const url = main?.url || category.images[0]?.url
+  return url ? getImageUrl(url) : PLACEHOLDER_CATEGORY
+}
+
+export function handleImageError(event: Event, fallback = PLACEHOLDER_PRODUCT): void {
+  const img = event.target as HTMLImageElement
+  if (!img.src.endsWith(fallback)) {
+    img.src = fallback
+  }
 }
 
 export function resolveProductImage(product: any, variant?: any): string {
@@ -112,7 +143,7 @@ export function resolveProductImage(product: any, variant?: any): string {
   }
 
   // 4. Placeholder
-  return '/placeholder-product.png'
+  return PLACEHOLDER_PRODUCT
 }
 
-export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime, formatNumber, getImageUrl, resolveProductImage }
+export default { formatAttributes, formatCurrency, formatDate, formatTime, formatDateTime, formatNumber, getImageUrl, previewImageSource, resolveCategoryImage, resolveProductImage, handleImageError, PLACEHOLDER_PRODUCT, PLACEHOLDER_CATEGORY }

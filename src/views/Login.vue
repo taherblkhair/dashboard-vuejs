@@ -29,14 +29,14 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuth } from '../store'
+import { useAuthStore } from '../stores/auth'
 
 const email = ref('admin@sales-system.com')
 const password = ref('password')
 const error = ref<string | null>(null)
 
 const router = useRouter()
-const { login } = useAuth()
+const authStore = useAuthStore()
 
 const loading = ref(false)
 
@@ -44,7 +44,7 @@ async function submit() {
   error.value = null
   loading.value = true
   try {
-    await login(email.value, password.value)
+    await authStore.login(email.value, password.value)
     // redirect to dashboard
     router.push({ name: 'Dashboard' })
   } catch (e: any) {

@@ -103,7 +103,7 @@
                           <!-- Main Image Preview -->
                           <div class="col-span-1">
                             <div v-if="previewData.main_image" class="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                              <img :src="getImageUrl(previewData.main_image)" class="w-full h-full object-cover" />
+                              <img :src="previewImageSource(previewData.main_image)" class="w-full h-full object-cover" />
                             </div>
                             <div v-else class="aspect-square rounded-xl flex items-center justify-center bg-gray-50 border border-dashed border-gray-200 text-gray-400 text-xs">
                               لا توجد صورة رئيسية
@@ -152,7 +152,7 @@
                             <div class="flex items-center justify-between mb-2">
                               <div class="flex items-center gap-3">
                                 <div v-if="variant.image" class="w-10 h-10 rounded bg-gray-100 overflow-hidden border">
-                                  <img :src="getImageUrl(variant.image)" class="w-full h-full object-cover" />
+                                  <img :src="previewImageSource(variant.image)" class="w-full h-full object-cover" />
                                 </div>
                                 <div class="font-medium text-sm">{{ variant.sku_variant }}</div>
                               </div>
@@ -311,6 +311,7 @@ import { ref, onMounted, computed } from 'vue'
 import ProductForm from './ProductForm.vue'
 import { fetchCategories, createProduct as apiCreateProduct } from '../../api/products'
 import { useToast } from '../../composables/useToast'
+import { previewImageSource } from '../../utils/helpers'
 
 const { addToast } = useToast()
 
@@ -384,13 +385,6 @@ const getColorName = (colorCode: string) => {
   return colors[colorCode] || colorCode
 }
 
-const getImageUrl = (file: File | string) => {
-  if (file instanceof File) {
-    return URL.createObjectURL(file)
-  }
-  return file // If it's already a URL
-}
-
 const goToNextStep = async () => {
   if (productFormRef.value) {
     const formData = productFormRef.value.getFormData()
@@ -458,12 +452,11 @@ const sanitizePayload = (formData: any) => {
       if (v.expiry_date) data.append(`variants[${idx}][expiry_date]`, v.expiry_date)
       data.append(`variants[${idx}][is_active]`, v.is_active ? '1' : '0')
       
-      // Attributes
-      if (v.attributes) {
-        Object.entries(v.attributes).forEach(([key, val]) => {
-          if (val) data.append(`variants[${idx}][attributes][${key}]`, String(val))
-        })
-      }
+      // Attributes — always send keys so Laravel receives a valid array
+      const attrs = v.attributes || {}
+      data.append(`variants[${idx}][attributes][color]`, String(attrs.color || ''))
+      data.append(`variants[${idx}][attributes][size]`, String(attrs.size || ''))
+      data.append(`variants[${idx}][attributes][weight]`, String(attrs.weight || ''))
       
       // Variant Image
       if (v.image) {

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '../components/layout/MainLayout.vue'
+import { erpRoutes } from './modules/erp'
 
 const routes = [
   {
@@ -12,26 +13,12 @@ const routes = [
     path: '/pos',
     name: 'POS',
     component: () => import('../views/POS/index.vue'),
-    meta: { layout: 'empty' } // Assuming MainLayout handles this or we need to ensure it's not wrapped
   },
   {
     path: '/',
     component: MainLayout,
-    // all child routes under MainLayout are protected by the global guard
     children: [
-  { path: '', name: 'Dashboard', component: () => import('../views/Home.vue') },
-  { path: 'products', name: 'Products', component: () => import('../views/Products/index.vue') },
-  { path: 'products/create', name: 'ProductCreate', component: () => import('../views/Products/Create.vue') },
-  { path: 'products/:id', name: 'ProductDetails', component: () => import('../views/Products/ProductDetails.vue') },
-  { path: 'products/:id/edit', name: 'ProductEdit', component: () => import('../views/Products/Edit.vue') },
-  { path: 'categories/:id/products', name: 'CategoryProducts', component: () => import('../views/Categories/CategoryProducts.vue') },
-  { path: 'orders', name: 'Orders', component: () => import('../views/Orders/index.vue') },
-  { path: 'orders/create', name: 'OrderCreate', component: () => import('../views/Orders/Create.vue') },
-  { path: 'orders/:id', name: 'OrderDetails', component: () => import('../views/Orders/OrderDetails.vue') },
-  { path: 'orders/:id/edit', name: 'OrderEdit', component: () => import('../views/Orders/Edit.vue') },
-  { path: 'customers', name: 'Customers', component: () => import('../views/Customers/index.vue') },
-  { path: 'customers/create', name: 'CustomersCreate', component: () => import('../views/Customers/Create.vue') },
-  { path: 'categories', name: 'Categories', component: () => import('../views/Categories/index.vue') },
+      ...erpRoutes,
   { path: 'warehouses', name: 'Warehouses', component: () => import('../views/Warehouses/index.vue') },
   { path: 'warehouses/create', name: 'WarehouseCreate', component: () => import('../views/Warehouses/Create.vue') },
   { path: 'warehouses/:id', name: 'WarehouseDetails', component: () => import('../views/Warehouses/Details.vue') },

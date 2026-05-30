@@ -170,7 +170,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { logout } from "../../api/auth";
+import { useAuthStore } from "../../stores/auth";
 
 const props = defineProps<{ isOpen: boolean }>();
 const emit = defineEmits<{
@@ -180,6 +180,7 @@ const emit = defineEmits<{
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
 // States
 const isCollapsed = ref(false);
@@ -208,7 +209,7 @@ const toggleUserMenu = () => {
 
 const handleLogout = async () => {
   try {
-    await logout();
+    await authStore.logout();
     router.push("/login");
   } catch (e) {
     console.error("Logout failed:", e);

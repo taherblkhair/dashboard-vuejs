@@ -137,7 +137,6 @@
         </div>
       </div>
 
-      <ConfirmModal :show="showConfirm" title="تأكيد الإجراء" message="هل أنت متأكد أنك تريد تنفيذ هذا الإجراء؟" @confirm="onConfirm" @cancel="showConfirm = false" />
 </template>
 
 <script setup lang="ts">
@@ -146,7 +145,7 @@ import { useRouter } from 'vue-router'
 import { fetchDeliveries, assignRiderToDelivery, updateDeliveryStatus } from '../../api/deliveries'
 import { useToast } from '../../composables/useToast'
 import AssignRiderModal from '../../components/AssignRiderModal.vue'
-import ConfirmModal from '../../components/ConfirmModal.vue'
+import { useConfirm } from '../../composables/useConfirm'
 import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MBadge from '../../components/ui/MBadge.vue'
@@ -169,6 +168,7 @@ const meta = ref<PaginationMeta | null>(null)
 const loading = ref(false)
 
 const { addToast } = useToast()
+const { confirm } = useConfirm()
 
 const statuses = Object.values(DELIVERY_STATUSES)
 
@@ -208,7 +208,6 @@ const load = async (page = 1) => {
 // modal state
 const showAssign = ref(false)
 const showStatus = ref(false)
-const showConfirm = ref(false)
 const activeDelivery = ref<any | null>(null)
 const statusToApply = ref<string>('')
 
@@ -241,31 +240,15 @@ const onAssignConfirm = async (riderId: number) => {
 
 const onStatusApply = async () => {
   if (!activeDelivery.value || !statusToApply.value) return
-  const d = activeDelivery.value
-  const prev = d.status
-  // destructive statuses require confirmation
   const destructive = ['failed', 'returned']
   if (destructive.includes(statusToApply.value)) {
-    showConfirm.value = true
-    return
+    const ok = await confirm({
+      title: 'تأكيد الإجراء',
+      message: 'هل أنت متأكد أنك تريد تنفيذ هذا الإجراء؟',
+      type: 'danger',
+    })
+    if (!ok) return
   }
-  d.status = statusToApply.value
-  showStatus.value = false
-  try {
-    const res = await updateDeliveryStatus(d.id, { status: statusToApply.value })
-    const updated = res?.data?.data ?? res?.data ?? null
-    if (updated) Object.assign(d, updated)
-    addToast('تم تحديث الحالة', 'success')
-  } catch (err) {
-    d.status = prev
-    addToast('فشل تحديث الحالة', 'error')
-  }
-}
-
-const onConfirm = async () => {
-  // user confirmed destructive status
-  showConfirm.value = false
-  if (!activeDelivery.value) return
   const d = activeDelivery.value
   const prev = d.status
   d.status = statusToApply.value

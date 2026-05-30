@@ -596,15 +596,6 @@ watch(() => form.sku, (newSku) => {
 // Helper functions
 
 
-// Helper for attributes display
-const formatAttributes = (attrs: any) => {
-  if (!attrs || Object.keys(attrs).length === 0) return 'لا توجد خصائص'
-  return Object.entries(attrs)
-    .filter(([_, val]) => !!val)
-    .map(([key, val]) => `${key}: ${val}`)
-    .join(' - ')
-}
-
 // Variant management
 const addVariant = async () => {
   const base = form.sku && form.sku.toString().trim() !== '' ? form.sku.toString().trim() : 'SKU'
@@ -820,6 +811,9 @@ defineExpose({ getFormData, validateAll })
 onMounted(() => {
   populateForm()
   normalizeVariants()
+  if (!props.initialData && form.variants.length === 0) {
+    addVariant()
+  }
 })
 </script>
 

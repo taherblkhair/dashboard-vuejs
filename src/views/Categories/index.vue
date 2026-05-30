@@ -149,7 +149,12 @@
             <div class="w-14 h-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm overflow-hidden"
               :class="cat.parent_id ? 'bg-emerald-50 text-emerald-600 shadow-emerald-50' : 'bg-indigo-50 text-indigo-600 shadow-indigo-50'"
             >
-              <img v-if="cat.images && cat.images.length > 0" :src="getImageUrl(cat.images[0]?.url || '')" class="w-full h-full object-cover" />
+              <img
+                v-if="cat.images && cat.images.length > 0"
+                :src="resolveCategoryImage(cat)"
+                class="w-full h-full object-cover"
+                @error="handleImageError($event, PLACEHOLDER_CATEGORY)"
+              />
               <svg v-else class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012 2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
@@ -314,7 +319,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchCategories, createCategory, deleteCategory, updateCategory } from '../../api/categories'
 import type { Category } from '../../api/categories'
-import { getImageUrl } from '../../utils/helpers'
+import { getImageUrl, resolveCategoryImage, handleImageError, PLACEHOLDER_CATEGORY } from '../../utils/helpers'
 import MCard from '../../components/ui/MCard.vue'
 import MButton from '../../components/ui/MButton.vue'
 import MInput from '../../components/ui/MInput.vue'

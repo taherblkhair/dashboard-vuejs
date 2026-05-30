@@ -243,7 +243,7 @@ import { ref, computed, onMounted, defineComponent, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchProducts as apiFetchProducts, fetchCategories, deleteProduct as apiDeleteProduct } from '../../api/products'
 import type { Product, Category, Variant } from '../../api/products'
-import { formatCurrency, formatAttributes, resolveProductImage } from '../../utils/helpers'
+import { formatCurrency, formatAttributes, resolveProductImage, PLACEHOLDER_PRODUCT } from '../../utils/helpers'
 import { useToast } from '../../composables/useToast'
 import { useConfirm } from '../../composables/useConfirm'
 import ActionMenu from '../../components/ui/ActionMenu.vue'
@@ -336,7 +336,7 @@ const getMinPrice = (variants: Variant[]) => {
 
 const getProductImageUrl = (product: Product): string | undefined => {
   const url = resolveProductImage(product)
-  if (url === '/placeholder-product.png') return undefined
+  if (url === PLACEHOLDER_PRODUCT) return undefined
   return url
 }
 
